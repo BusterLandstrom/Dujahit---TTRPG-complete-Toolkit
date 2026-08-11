@@ -2,7 +2,7 @@
 
 ### The complete TTRPG toolkit
 
-![](readmedocs/mapfight.png)
+![A fight on the map, a character and tokens](readmedocs/mapfight.png)
 
 I started this because I wanted one program for my table instead of five browser tabs and a pile of paper. It is beta and parts of it are rough, but it runs a game.
 
@@ -38,11 +38,11 @@ Windows will say it does not recognise the publisher, because I have not paid fo
 * Encounter building, a dm screen, handouts, a session log, a calendar and a timeline
 * Multiplayer over your own network or support for port forwarding, one host and however many players you want
 
-![](readmedocs/encounter.png)
+![Building an encounter](readmedocs/encounter.png)
 
-![](readmedocs/note.png)
+![A note](readmedocs/note.png)
 
-![](readmedocs/dashboard.png)
+![The campaign dashboard](readmedocs/dashboard.png)
 
 ### What does Dujahit mean?
 

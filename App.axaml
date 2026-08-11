@@ -54,7 +54,7 @@
     <Application.Styles>
         <FluentTheme />
 
-        <Style Selector="Window">
+        <Style Selector=":is(Window)">
             <Setter Property="Background" Value="{DynamicResource Background}" />
             <Setter Property="Foreground" Value="{DynamicResource Foreground}" />
             <Setter Property="FontFamily" Value="{DynamicResource MainFont}" />
