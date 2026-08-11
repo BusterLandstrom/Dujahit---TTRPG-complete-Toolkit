@@ -1094,6 +1094,31 @@ namespace Dujahit.Models
             return results;
         }
 
+        // Monsters carry a size, characters do not.
+        public async Task<CreatureSize> ResolveCharacterSizeAsync(string characterId)
+        {
+            if (string.IsNullOrEmpty(characterId)) return CreatureSize.Medium;
+            try
+            {
+                await using var conn = await _dbManager.OpenAsync();
+                await using var cmd = conn.CreateCommand();
+                cmd.CommandText = """
+                    SELECT r.Size FROM Characters c
+                    JOIN Races r ON r.Id = c.RaceId
+                    WHERE c.Id = $id
+                    LIMIT 1
+                """;
+                cmd.Parameters.AddWithValue("$id", characterId);
+                var raw = await cmd.ExecuteScalarAsync() as string;
+                return Enum.TryParse<CreatureSize>(raw, true, out var size) ? size : CreatureSize.Medium;
+            }
+            catch (Exception ex)
+            {
+                ErrorLog.Log("[Size] race lookup failed for " + characterId, ex);
+                return CreatureSize.Medium;
+            }
+        }
+
         public async Task<List<(string Id, string Name)>> LoadClassOptionsAsync()
         {
             var result = new List<(string, string)>();
@@ -6349,7 +6374,7 @@ namespace Dujahit.Models
     }
     public class VersionManager // This "version management system" is basically created from a SharePoint update system I made at my previous job lol (I was not a dev at that job I just made internal software for the IT team as a side gig lol)
     {
-        public string Version { get; set; } = "0.7";
+        public string Version { get; set; } = "0.8";
         public bool IsBeta { get; set; } = true;
         public bool IsUrgent { get; set; } = false;
         public string? InstallPath { get; set; }

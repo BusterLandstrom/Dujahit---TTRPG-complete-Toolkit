@@ -124,6 +124,9 @@ namespace Dujahit.ViewModels
         public async Task AddMapFromImage(string name, Bitmap thumbnail, string sourcePath, int width, int height, GridKind gridKind, double scale)
         {
             var mapId = Guid.NewGuid().ToString("N");
+            var across = scale > 0 ? width / (GridOverlay.BaseCellPx * scale) : 0;
+            ErrorLog.Log($"[map] new '{name}' {width}x{height} scale={scale} cell={GridOverlay.BaseCellPx * scale} squaresAcross={across:0.#}");
+            if (across < 4) ErrorLog.Log($"[map] '{name}' is only {across:0.#} squares across, that cell size is almost certainly wrong");
             var ext = Path.GetExtension(sourcePath);
 
             var campaignId = App.PM.GetCampaignId();
@@ -2687,6 +2690,7 @@ namespace Dujahit.ViewModels
             };
             token.FeetAnchorX = x;
             token.FeetAnchorY = y;
+            token.Size = await App.PM.ResolveCharacterSizeAsync(characterId);
             Tokens.Add(token);
 
             if (IsHost)

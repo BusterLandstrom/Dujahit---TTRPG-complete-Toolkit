@@ -24,7 +24,7 @@ namespace Dujahit
 
         // Off, the published version.json is stale. Flip it when that is current.
         public const bool UpdateCheckEnabled = false;
-        public const string CurrentVersion = "0.7";
+        public const string CurrentVersion = "0.8";
 
         public static readonly Stopwatch BootClock = Stopwatch.StartNew();
         public static void BootLog(string stage) => ErrorLog.Log($"[boot +{BootClock.ElapsedMilliseconds}ms] {stage}");

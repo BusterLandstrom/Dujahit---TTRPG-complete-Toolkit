@@ -2,6 +2,8 @@
 
 ### The complete TTRPG toolkit
 
+![](readmedocs/mapfight.png)
+
 I started this because I wanted one program for my table instead of five browser tabs and a pile of paper. It is beta and parts of it are rough, but it runs a game.
 
 The rules are not written into the code. They sit in a json template you can open and edit, so the numbers, the conditions, the classes, the spells and the items are all yours to change. Nothing stops you writing a ruleset that has nothing to do with 5e, the core roll can be 2d6 or a dice pool or roll under if that is your game.
@@ -35,6 +37,12 @@ Windows will say it does not recognise the publisher, because I have not paid fo
 * Every bit of the loaded ruleset in one searchable compendium
 * Encounter building, a dm screen, handouts, a session log, a calendar and a timeline
 * Multiplayer over your own network or support for port forwarding, one host and however many players you want
+
+![](readmedocs/encounter.png)
+
+![](readmedocs/note.png)
+
+![](readmedocs/dashboard.png)
 
 ### What does Dujahit mean?
 
