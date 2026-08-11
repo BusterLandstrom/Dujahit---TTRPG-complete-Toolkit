@@ -1,0 +1,83 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Dujahit.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+             x:Class="Dujahit.Views.CalendarView"
+             x:DataType="vm:CalendarViewModel"
+             FontFamily="{DynamicResource MainFont}"
+             Background="Transparent">
+
+    <Grid RowDefinitions="Auto,Auto,*" Margin="28,24">
+        <StackPanel Grid.Row="0" Spacing="2">
+            <TextBlock Text="Calendar" Classes="header"/>
+            <TextBlock Text="Schedule sessions and track in-world dates" Classes="subtitle"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Classes="divider" Margin="0,16"/>
+
+        <Grid Grid.Row="2" ColumnDefinitions="1.2*,1.4*">
+            <Border Grid.Column="0" Classes="panel" Margin="0,0,10,0">
+                <Grid RowDefinitions="Auto,*">
+                    <Button Grid.Row="0" Classes="primary" Content="Add event"
+                            HorizontalAlignment="Left" Margin="0,0,0,12"
+                            Command="{Binding AddCommand}"/>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <ListBox ItemsSource="{Binding Events}"
+                                     SelectedItem="{Binding Selected}"
+                                     Background="Transparent">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:CalendarEventViewModel">
+                                        <Grid ColumnDefinitions="Auto,*">
+                                            <Border Grid.Column="0" Classes="sticky" Padding="8,3" Margin="0,0,10,0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Kind}" FontSize="11"/>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Title}" Classes="tileName"/>
+                                                <TextBlock Text="{Binding DateLabel}" Classes="muted" FontSize="12"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <TextBlock Text="No events yet. Add one to start a schedule."
+                                       Classes="muted" FontSize="13" Margin="2,8"
+                                       IsVisible="{Binding !HasEvents}"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Classes="panel" Margin="10,0,0,0" IsVisible="{Binding HasSelected}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="EVENT" Classes="sectionLabel"/>
+                        <TextBox AutomationProperties.Name="Title" Watermark="Title" Text="{Binding Selected.Title}"/>
+                        <ComboBox AutomationProperties.Name="Event kind" ItemsSource="{Binding KindOptions}"
+                                  SelectedItem="{Binding Selected.Kind}"
+                                  HorizontalAlignment="Stretch"/>
+                        <TextBox AutomationProperties.Name="Real date (yyyy-mm-dd)" Watermark="Real date (yyyy-mm-dd)" Text="{Binding Selected.EventDate}"/>
+                        <TextBox AutomationProperties.Name="In-world date (optional)" Watermark="In-world date (optional)" Text="{Binding Selected.InWorldDate}"/>
+                        <TextBox AutomationProperties.Name="Notes" Watermark="Notes"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Height="140"
+                                 Text="{Binding Selected.Notes}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Classes="primary" Content="Save" Command="{Binding SaveSelectedCommand}"/>
+                            <Button Classes="danger" Content="Delete"
+                                    Command="{Binding ArmDeleteCommand}"
+                                    IsVisible="{Binding !ConfirmingDelete}"/>
+                            <Button Classes="danger" Content="Confirm delete"
+                                    Command="{Binding DeleteSelectedCommand}"
+                                    IsVisible="{Binding ConfirmingDelete}"/>
+                            <Button Classes="ghost" Content="Cancel"
+                                    Command="{Binding CancelDeleteCommand}"
+                                    IsVisible="{Binding ConfirmingDelete}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

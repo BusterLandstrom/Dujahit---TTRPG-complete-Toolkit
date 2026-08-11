@@ -1,0 +1,169 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Dujahit.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="820"
+             x:Class="Dujahit.Views.EncounterRunnerView"
+             x:DataType="vm:EncounterRunnerViewModel"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}"
+             Background="Transparent">
+
+    <UserControl.Styles>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="28,24" MaxWidth="900" HorizontalAlignment="Stretch">
+
+        <StackPanel Grid.Row="0" Spacing="2">
+            <TextBlock Text="Run Encounter" Classes="header"/>
+            <TextBlock Text="Drop a saved fight, pull in players, run initiative. No map needed." Classes="subtitle"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Classes="card" Margin="0,16,0,0" Padding="14,12">
+            <StackPanel Spacing="10">
+                <Grid ColumnDefinitions="*,Auto">
+                    <ComboBox AutomationProperties.Name="Pick a saved encounter" Grid.Column="0"
+                              HorizontalAlignment="Stretch"
+                              PlaceholderText="Pick a saved encounter"
+                              ItemsSource="{Binding Presets}"
+                              SelectedItem="{Binding SelectedPreset}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:EncounterPresetRowViewModel">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Summary}" Classes="muted" FontSize="12" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Grid.Column="1"
+                            Classes="accent"
+                            Content="Drop encounter"
+                            Margin="10,0,0,0"
+                            Command="{Binding DropEncounterCommand}"/>
+                </Grid>
+
+                <TextBlock Text="No saved encounters yet, build one in the Encounters page first."
+                           Classes="muted"
+                           FontSize="13"
+                           IsVisible="{Binding !HasPresets}"/>
+
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Classes="ghost" Content="Add Player" Command="{Binding Combat.AddPlayerCommand}"/>
+                    <Button Classes="ghost" Content="Add NPC" Command="{Binding Combat.AddNpcCommand}"/>
+                    <Button Classes="ghost" Content="Roll initiative" Command="{Binding RollInitiativeCommand}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="2" Classes="card" Margin="0,12,0,0" Padding="14,12">
+            <Grid ColumnDefinitions="Auto,*">
+                <Border Grid.Column="0"
+                        Classes="badge"
+                        Background="{DynamicResource Background}"
+                        VerticalAlignment="Center"
+                        IsVisible="{Binding Tracker.CombatActive}">
+                    <TextBlock Text="{Binding Tracker.Round, StringFormat='Round {0}'}"/>
+                </Border>
+                <UniformGrid Grid.Column="1" Columns="5" Margin="10,0,0,0">
+                    <Button Classes="accent" Content="Start" Padding="12,6" Margin="0,0,3,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding Tracker.StartCombatCommand}"/>
+                    <Button Classes="ghost" Content="Prev" Padding="12,6" Margin="3,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding Tracker.PrevTurnCommand}"/>
+                    <Button Classes="ghost" Content="Next" Padding="12,6" Margin="3,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding Tracker.NextTurnCommand}"/>
+                    <Button Classes="ghost" Content="End" Padding="12,6" Margin="3,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding Tracker.EndCombatCommand}"/>
+                    <Button Content="Clear" Padding="12,6" Margin="3,0,0,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Background="{DynamicResource Danger}" Foreground="White" Command="{Binding Tracker.ClearCombatCommand}"/>
+                </UniformGrid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="3" Classes="card" Margin="0,12,0,0" Padding="14,12">
+            <Grid RowDefinitions="*,Auto">
+                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <ItemsControl ItemsSource="{Binding Tracker.Combatants}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CombatantViewModel">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,3,0,0">
+                                        <Button AutomationProperties.Name="{Binding Name}" Grid.Column="0"
+                                                Classes="combatantRow"
+                                                Classes.selected="{Binding IsSelected}"
+                                                Classes.active="{Binding IsActive}"
+                                                Command="{Binding $parent[ItemsControl].((vm:EncounterRunnerViewModel)DataContext).Tracker.SelectCombatantCommand}"
+                                                CommandParameter="{Binding}">
+                                            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                                <TextBlock Grid.Column="0"
+                                                           Text="{Binding Initiative}"
+                                                           Foreground="{DynamicResource AccentColor}"
+                                                           FontWeight="SemiBold"
+                                                           Width="30"
+                                                           VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding Name}"
+                                                           Foreground="{DynamicResource WidgetForeground}"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="2"
+                                                           Classes="fieldLabel"
+                                                           Margin="0,0,14,0"
+                                                           VerticalAlignment="Center"
+                                                           Text="{Binding ArmorClass, StringFormat='AC {0}'}"/>
+                                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding CurrentHp}" Foreground="{DynamicResource WidgetForeground}"/>
+                                                    <TextBlock Text="/"/>
+                                                    <TextBlock Text="{Binding MaxHp}"/>
+                                                    <TextBlock Text=" HP" Margin="2,0,0,0" Classes="fieldLabel"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Button>
+                                        <Button Grid.Column="1"
+                                                Classes="ghost"
+                                                Content="x"
+                                                Width="34"
+                                                Margin="6,0,0,0"
+                                                VerticalAlignment="Stretch"
+                                                Command="{Binding $parent[ItemsControl].((vm:EncounterRunnerViewModel)DataContext).RemoveCombatantCommand}"
+                                                CommandParameter="{Binding}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <TextBlock Text="Nothing in the fight yet, drop an encounter or add a player to start."
+                                   Classes="muted"
+                                   FontSize="13"
+                                   Margin="2,10"
+                                   IsVisible="{Binding IsEmpty}"/>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <Border Grid.Row="1"
+                        Classes="sticky"
+                        Margin="0,10,0,0"
+                        IsVisible="{Binding Combat.HasSelection}">
+                    <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                        <TextBlock Grid.Column="0"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding Combat.SelectedCombatant.Name}"
+                                   FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <NumericUpDown AutomationProperties.Name="{Binding Combat.SelectedCombatant.Name}" Grid.Column="1"
+                                       MinWidth="120"
+                                       Value="{Binding Combat.QuickAdjustAmount}"
+                                       Minimum="0"
+                                       ShowButtonSpinner="False"/>
+                        <Button Grid.Column="2"
+                                Classes="danger"
+                                Content="Damage"
+                                Margin="6,0,0,0"
+                                Command="{Binding Combat.ApplyDamageCommand}"/>
+                        <Button Grid.Column="3"
+                                Classes="card"
+                                Content="Heal"
+                                Margin="6,0,0,0"
+                                Command="{Binding Combat.ApplyHealCommand}"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

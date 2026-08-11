@@ -1,0 +1,100 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="820"
+             xmlns:vms="clr-namespace:Dujahit.ViewModels"
+             x:DataType="vms:CharacterDashboardViewModel"
+             Background="Transparent"
+             Foreground="{DynamicResource Foreground}"
+             FontFamily="{DynamicResource MainFont}"
+             x:Class="Dujahit.Views.CharacterDashboardView">
+
+  <Grid RowDefinitions="Auto,Auto,*">
+
+    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="28,24,28,0">
+      <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+        <TextBlock Text="Characters" Classes="header"/>
+        <TextBlock Text="{Binding CharacterCountLabel}" Classes="subtitle"/>
+      </StackPanel>
+
+      <Button Grid.Column="1"
+              Classes="primary"
+              Content="{Binding CreateButtonLabel}"
+              VerticalAlignment="Center"
+              Command="{Binding CreateUnassignedCharacterCommand}"/>
+    </Grid>
+
+    <Border Grid.Row="1" Classes="divider" Margin="28,16"/>
+
+    <ScrollViewer Grid.Row="2" Padding="28,0,28,24" VerticalScrollBarVisibility="Auto">
+      <Panel>
+
+        <TextBlock Text="No characters yet. Create one to get started."
+                   Classes="muted"
+                   FontSize="14"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Margin="0,80,0,0"
+                   IsVisible="{Binding IsEmpty}"/>
+
+        <ItemsControl ItemsSource="{Binding Characters}"
+                      IsVisible="{Binding !IsEmpty}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel Orientation="Horizontal"/>
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vms:CharacterCardViewModel">
+              <Border Classes="card maptile"
+                      Width="260"
+                      Height="180"
+                      Margin="0,0,18,18"
+                      Padding="18,16">
+                <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+                  <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding Name}"
+                               Classes="tileName"
+                               FontWeight="SemiBold"/>
+                    <Border Grid.Column="1"
+                            Classes="badge"
+                            Background="{DynamicResource Divider}"
+                            VerticalAlignment="Center"
+                            IsVisible="{Binding IsUnassigned}">
+                      <TextBlock Text="UNASSIGNED"
+                                 Foreground="{DynamicResource WidgetForeground}"/>
+                    </Border>
+                  </Grid>
+
+                  <TextBlock Grid.Row="1"
+                             Text="{Binding RaceAndClassLine}"
+                             FontSize="13"
+                             Foreground="{DynamicResource AccentHover}"
+                             Margin="0,8,0,0"/>
+
+                  <TextBlock Grid.Row="2"
+                             Text="{Binding LevelLine}"
+                             Classes="muted"
+                             FontSize="12"
+                             VerticalAlignment="Top"
+                             Margin="0,6,0,0"/>
+
+                  <Button Grid.Row="3"
+                          Classes="primary"
+                          Content="Open Sheet"
+                          HorizontalAlignment="Stretch"
+                          Command="{Binding $parent[ItemsControl].((vms:CharacterDashboardViewModel)DataContext).OpenSheetCommand}"
+                          CommandParameter="{Binding}"/>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </Panel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

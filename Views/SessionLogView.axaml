@@ -1,0 +1,97 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Dujahit.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+             x:Class="Dujahit.Views.SessionLogView"
+             x:DataType="vm:SessionLogViewModel"
+             FontFamily="{DynamicResource MainFont}"
+             Background="Transparent">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="28,24">
+
+        <StackPanel Grid.Row="0" Spacing="2">
+            <TextBlock Text="Session log" Classes="header"/>
+            <TextBlock Text="Every roll and audited action for this campaign, newest first" Classes="subtitle"/>
+            <TextBlock Text="{Binding ExportStatus}" Classes="muted" FontSize="12" IsVisible="{Binding ExportStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Classes="divider" Margin="0,16"/>
+
+        <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,*,Auto,Auto" Margin="0,0,0,12">
+            <ComboBox AutomationProperties.Name="Event type filter" Grid.Column="0"
+                      MinWidth="150"
+                      ItemsSource="{Binding EventTypes}"
+                      SelectedItem="{Binding SelectedEventType}"/>
+            <ComboBox AutomationProperties.Name="Actor filter" Grid.Column="1"
+                      MinWidth="150"
+                      Margin="8,0,0,0"
+                      ItemsSource="{Binding Actors}"
+                      SelectedItem="{Binding SelectedActor}"/>
+            <TextBox AutomationProperties.Name="Search summaries" Grid.Column="2"
+                     Margin="8,0"
+                     Watermark="Search summaries"
+                     Text="{Binding SearchText}"/>
+            <TextBlock Grid.Column="3"
+                       Text="{Binding CountLabel}"
+                       Classes="muted"
+                       VerticalAlignment="Center"
+                       Margin="0,0,10,0"/>
+            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8">
+                <Button Classes="ghost"
+                        Content="Export"
+                        Command="{Binding ExportCommand}"/>
+                <Button Classes="ghost"
+                        Content="Refresh"
+                        Command="{Binding RefreshCommand}"/>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="3" Classes="panel">
+            <Grid RowDefinitions="*">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <ItemsControl ItemsSource="{Binding Visible}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:SessionLogRowViewModel">
+                                    <Border Classes="row" Margin="0,0,0,8">
+                                        <Grid ColumnDefinitions="150,140,Auto,*">
+                                            <TextBlock Grid.Column="0"
+                                                       Text="{Binding TimeText}"
+                                                       Classes="muted"
+                                                       FontSize="12"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding ActorName}"
+                                                       Classes="tileName"
+                                                       VerticalAlignment="Center"/>
+                                            <Border Grid.Column="2"
+                                                    Classes="sticky"
+                                                    Padding="8,3"
+                                                    Margin="0,0,12,0"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding EventType}" FontSize="12"/>
+                                            </Border>
+                                            <TextBlock Grid.Column="3"
+                                                       Text="{Binding Summary}"
+                                                       Classes="body"
+                                                       TextWrapping="Wrap"
+                                                       VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <TextBlock Text="Nothing logged yet. Dice rolls show up here as they happen."
+                                   Classes="muted"
+                                   FontSize="13"
+                                   Margin="2,8"
+                                   IsVisible="{Binding !HasRows}"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

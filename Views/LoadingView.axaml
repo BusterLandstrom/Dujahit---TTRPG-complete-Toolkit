@@ -1,0 +1,69 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Dujahit.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="820"
+             x:Class="Dujahit.Views.LoadingView"
+             x:DataType="vm:LoadingViewModel"
+             Background="{DynamicResource Background}"
+             Foreground="{DynamicResource Foreground}"
+             FontFamily="{DynamicResource MainFont}">
+
+    <Border Classes="card"
+            Width="540"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+        <StackPanel Spacing="18">
+
+            <StackPanel Spacing="4">
+                <TextBlock Classes="sectionLabel" Text="LOADING"/>
+                <TextBlock Text="{Binding Title}" Classes="header" FontSize="26"/>
+            </StackPanel>
+
+            <Border Classes="divider"/>
+
+            <StackPanel Spacing="10" IsVisible="{Binding !HasFailed}">
+                <TextBlock Text="{Binding Status}"
+                           Classes="muted"
+                           FontSize="15"
+                           TextWrapping="Wrap"/>
+
+                <ProgressBar Minimum="0" Maximum="100"
+                             Height="8" CornerRadius="4"
+                             Value="{Binding Progress}"
+                             IsIndeterminate="{Binding IsIndeterminate}"
+                             Foreground="{DynamicResource AccentColor}"
+                             Background="{DynamicResource Divider}"/>
+            </StackPanel>
+
+            <StackPanel Spacing="12" IsVisible="{Binding HasFailed}">
+                <TextBlock Text="{Binding Status}"
+                           Foreground="{DynamicResource Danger}"
+                           FontSize="15"
+                           TextWrapping="Wrap"/>
+                <Button Classes="primary"
+                        Content="Back to campaigns"
+                        HorizontalAlignment="Left"
+                        Command="{Binding BackCommand}"/>
+            </StackPanel>
+
+            <Border Classes="row" Height="150" Padding="14,10">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Log}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <TextBlock Text="{Binding}"
+                                           FontSize="12"
+                                           Opacity="0.7"
+                                           Foreground="{DynamicResource WidgetForeground}"
+                                           Margin="0,1"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+
+        </StackPanel>
+    </Border>
+</UserControl>

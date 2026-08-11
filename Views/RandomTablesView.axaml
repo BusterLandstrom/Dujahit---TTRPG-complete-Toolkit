@@ -1,0 +1,100 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Dujahit.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+             x:Class="Dujahit.Views.RandomTablesView"
+             x:DataType="vm:RandomTablesViewModel"
+             FontFamily="{DynamicResource MainFont}"
+             Background="Transparent">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" Margin="28,24">
+
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <StackPanel Grid.Column="0" Spacing="2">
+                <TextBlock Text="Random tables" Classes="header"/>
+                <TextBlock Text="Loot, names, weather, whatever you want to roll on, from here or with /table in chat" Classes="subtitle"/>
+            </StackPanel>
+            <Button Grid.Column="1"
+                    Classes="primary"
+                    Content="+ New table"
+                    VerticalAlignment="Top"
+                    Command="{Binding NewTableCommand}"/>
+        </Grid>
+
+        <Border Grid.Row="1" Classes="divider" Margin="0,16"/>
+
+        <Border Grid.Row="2" Classes="row" Margin="0,0,0,12" IsVisible="{Binding HasResult}">
+            <TextBlock Text="{Binding LastResult}" Classes="body" TextWrapping="Wrap"/>
+        </Border>
+
+        <Border Grid.Row="3" Classes="panel" Margin="0,0,0,12" IsVisible="{Binding EditorOpen}">
+            <StackPanel Spacing="8">
+                <Grid ColumnDefinitions="*,160">
+                    <TextBox Grid.Column="0"
+                             Watermark="Table name"
+                             Text="{Binding EditorName}"/>
+                    <TextBox Grid.Column="1"
+                             Margin="8,0,0,0"
+                             Watermark="Dice, e.g. 1d20"
+                             Text="{Binding EditorDice}"/>
+                </Grid>
+                <TextBox AutomationProperties.Name="Table entries"
+                         Text="{Binding EditorEntries}"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         MinHeight="180"
+                         Watermark="One entry per line. Plain lines take the next number, or pin a range like 1-3: goblins."/>
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                    <Button Classes="ghost" Content="Cancel" Command="{Binding CancelEditCommand}"/>
+                    <Button Classes="primary" Content="Save table" Command="{Binding SaveTableCommand}"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="4" Classes="panel">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <ItemsControl ItemsSource="{Binding Tables}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:RandomTableRowViewModel">
+                                <Border Classes="row" Margin="0,0,0,8">
+                                    <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Name}" Classes="tileName"/>
+                                            <TextBlock Text="{Binding Subtitle}" Classes="muted" FontSize="12"/>
+                                        </StackPanel>
+                                        <Button Grid.Column="1"
+                                                Classes="primary"
+                                                Content="Roll"
+                                                Margin="8,0,0,0"
+                                                Command="{Binding RollCommand}"/>
+                                        <Button Grid.Column="2"
+                                                Classes="ghost"
+                                                Content="Edit"
+                                                Margin="8,0,0,0"
+                                                IsVisible="{Binding IsCustom}"
+                                                Command="{Binding EditCommand}"/>
+                                        <Button Grid.Column="3"
+                                                Classes="danger"
+                                                Content="{Binding DeleteLabel}"
+                                                Margin="8,0,0,0"
+                                                IsVisible="{Binding IsCustom}"
+                                                Command="{Binding DeleteCommand}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Text="No tables yet. The rulebook ships a few, and + New table makes your own."
+                               Classes="muted"
+                               FontSize="13"
+                               Margin="2,8"
+                               IsVisible="{Binding !Tables.Count}"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>

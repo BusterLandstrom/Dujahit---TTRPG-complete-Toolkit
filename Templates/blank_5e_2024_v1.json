@@ -1,0 +1,1959 @@
+{
+  "TemplateId": "blank-5e-2024-v1",
+  "Name": "Blank 5e (2024)",
+  "Description": "An empty 2024 rulebook. The rules chassis is filled in, abilities, skills, conditions, damage types, weapon masteries, currencies, proficiencies and every combat setting, but there is no content at all so you can build your own classes, races, items and spells on top of it.",
+  "SystemId": "dnd5e",
+  "DefaultRulesVersion": "2024",
+  "CombatSettings": {
+    "FallbackAttackDamage": "1d8",
+    "BaseActions": 1,
+    "LairActionInitiativeCount": 20,
+    "BaseBonusActions": 1,
+    "LongRestHitDiceDivisor": 2,
+    "ShortRestHitDieAverage": true,
+    "AbilityModBaseline": 10,
+    "AbilityModDivisor": 2,
+    "PointBuyBudget": 27,
+    "PointBuyMinScore": 8,
+    "PointBuyMaxScore": 15,
+    "ManualMinScore": 3,
+    "ManualMaxScore": 20,
+    "PointBuyCosts": {
+      "8": 0,
+      "9": 1,
+      "10": 2,
+      "11": 3,
+      "12": 4,
+      "13": 5,
+      "14": 7,
+      "15": 9
+    },
+    "StandardArray": [
+      15,
+      14,
+      13,
+      12,
+      10,
+      8
+    ],
+    "AbilityRollDice": "4d6kh3",
+    "SpellLevelNames": {
+      "0": "Cantrip",
+      "1": "1st Level",
+      "2": "2nd Level",
+      "3": "3rd Level",
+      "4": "4th Level",
+      "5": "5th Level",
+      "6": "6th Level",
+      "7": "7th Level",
+      "8": "8th Level",
+      "9": "9th Level"
+    },
+    "DeathSaveSuccessesToStabilize": 3,
+    "DeathSaveFailuresToDie": 3,
+    "DeathSaveThreshold": 10,
+    "DeathSaveCritHeal": 1,
+    "DeathSaveFumbleFailures": 2,
+    "ConcentrationDcFloor": 10,
+    "ConcentrationDcDivisor": 2,
+    "SpellSaveDcBase": 8,
+    "PassiveScoreBase": 10,
+    "PerceptionSkill": "Perception",
+    "DefaultSpeed": 30,
+    "DifficultTerrainMultiplier": 2,
+    "DashMultiplier": 2,
+    "JumpAbility": "str",
+    "JumpScoreMultiplier": 1,
+    "CoverHalfBonus": 2,
+    "CoverThreeQuartersBonus": 5,
+    "ExpertiseMultiplier": 2,
+    "CritNaturalRoll": 20,
+    "FumbleRoll": 1,
+    "CritDamageDiceMultiplier": 2,
+    "InitiativeDie": 20,
+    "DefaultHitDie": 8,
+    "AttackDie": 20,
+    "AbilityScoreCap": 20,
+    "ArmorClassBase": 10,
+    "AttunementLimit": 3,
+    "Exhaustion": {
+      "MaxLevel": 6,
+      "ReducePerLongRest": 1,
+      "DeathAtMax": true,
+      "Levels": {
+        "1": {
+          "Text": "Disadvantage on ability checks",
+          "AbilityCheckRoll": "disadvantage"
+        },
+        "2": {
+          "Text": "Speed halved",
+          "SpeedMultiplier": 0.5
+        },
+        "3": {
+          "Text": "Disadvantage on attack rolls and saving throws",
+          "AttackRoll": "disadvantage",
+          "SaveRoll": "disadvantage"
+        },
+        "4": {
+          "Text": "Hit point maximum halved",
+          "MaxHpMultiplier": 0.5
+        },
+        "5": {
+          "Text": "Speed reduced to 0",
+          "SpeedMultiplier": 0
+        },
+        "6": {
+          "Text": "Death"
+        }
+      }
+    },
+    "RestoreFullHpOnLongRest": true,
+    "FeetPerSquare": 5,
+    "DiagonalCostSquares": 1,
+    "MovedThresholdFeet": 2.5,
+    "EnforceMovementBudget": true,
+    "DmIgnoresMovementBudget": false,
+    "RulerIgnoresWalls": true,
+    "RulerIgnoresOccupied": true,
+    "ConfineToMapBounds": true,
+    "WallsSnapToGrid": true,
+    "BlankMapWidthPx": 2560,
+    "BlankMapHeightPx": 1600,
+    "BlankMapPresets": [
+      {
+        "Name": "Small room",
+        "Cols": 20,
+        "Rows": 14
+      },
+      {
+        "Name": "Medium",
+        "Cols": 32,
+        "Rows": 20
+      },
+      {
+        "Name": "Large",
+        "Cols": 51,
+        "Rows": 32
+      },
+      {
+        "Name": "Huge",
+        "Cols": 80,
+        "Rows": 50
+      }
+    ],
+    "ConeWidthRatio": 0.5,
+    "DefaultAoeSizeFeet": 15,
+    "DefaultAoeWidthFeet": 5,
+    "DefaultSaveDc": 10,
+    "CubeOriginOnFace": true,
+    "AoeShapes": [
+      {
+        "Id": "cone",
+        "Name": "Cone"
+      },
+      {
+        "Id": "circle",
+        "Name": "Circle"
+      },
+      {
+        "Id": "line",
+        "Name": "Line",
+        "UsesWidth": true
+      },
+      {
+        "Id": "cube",
+        "Name": "Cube"
+      }
+    ],
+    "MinDieSides": 2,
+    "MaxDieSides": 1000,
+    "MaxDiceCount": 100,
+    "ActionCosts": {
+      "attack": "action",
+      "offhand-attack": "bonus",
+      "save": "none",
+      "dash": "action",
+      "ready": "action"
+    },
+    "CarryCapacityPerStrength": 15,
+    "EncumberedPerStrength": 5,
+    "HeavilyEncumberedPerStrength": 10,
+    "HpFirstLevelMax": true,
+    "HpPerLevelMode": "average",
+    "HpPerLevelMaxMode": "max",
+    "HitDicePerLevel": 1,
+    "AbilityScoreIncrementPerAsi": 1,
+    "AttunementFlagValue": "Attunement",
+    "DamageTypeIdPrefix": "dmg-",
+    "ScaleByCharacterToken": "char",
+    "SenseRangeUnit": "ft",
+    "ShortRestSlotCasterTypes": [
+      "pact"
+    ],
+    "SkillStoreKey": "proficientSkill",
+    "ExpertiseStoreKey": "expertiseSkill",
+    "FeatStoreKey": "feat",
+    "SubclassStoreKey": "subclass",
+    "AsiTokenPrefix": "asi:",
+    "ToolProficiencyIdPrefix": "prof-tool-",
+    "GrantedSpellIdPrefix": "spell-",
+    "FeatFeaturePrefix": "Feat:",
+    "SubclassFeaturePrefix": "Subclass:",
+    "Senses": [
+      {
+        "MatchId": "darkvision",
+        "Name": "Darkvision",
+        "RangeFeet": 60,
+        "UpgradeMatches": [
+          "120",
+          "superior"
+        ],
+        "UpgradeRangeFeet": 120
+      },
+      {
+        "MatchId": "blindsight",
+        "Name": "Blindsight",
+        "RangeFeet": 0
+      },
+      {
+        "MatchId": "tremorsense",
+        "Name": "Tremorsense",
+        "RangeFeet": 0
+      },
+      {
+        "MatchId": "truesight",
+        "Name": "Truesight",
+        "RangeFeet": 0
+      }
+    ],
+    "UnknownHpLabel": "Unknown",
+    "DownHpLabel": "Down",
+    "HealthyHpLabel": "Healthy",
+    "HealthStates": [
+      {
+        "Label": "Near Death",
+        "Below": 0.25
+      },
+      {
+        "Label": "Bloodied",
+        "Below": 0.5
+      },
+      {
+        "Label": "Wounded",
+        "Below": 1
+      }
+    ],
+    "DefaultLineWidthFeet": 5,
+    "CreatureSizeSquares": {
+      "tiny": 0.5,
+      "small": 1,
+      "medium": 1,
+      "large": 2,
+      "huge": 3,
+      "gargantuan": 4
+    },
+    "AutoFlanking": true,
+    "MeleeReachCells": 1.5,
+    "FlankAngleDegrees": 120,
+    "BaseSpeedFeet": 30,
+    "BaseReactions": 1,
+    "FriendRingColor": "#4C8DFF",
+    "EnemyRingColor": "#D9534F",
+    "MoveHighlightColor": "#FFD700",
+    "ContestDcBase": 8,
+    "CritNaturalRolls": [
+      20
+    ],
+    "FumbleRolls": [
+      1
+    ],
+    "CritDamageMode": "dice",
+    "CritAlwaysHits": true,
+    "FumbleAlwaysMisses": true,
+    "OutcomeBands": [
+      {
+        "Id": "hit",
+        "MarginAtLeast": 0,
+        "Hits": true,
+        "CritDamage": false
+      }
+    ],
+    "AutoHitToHit": 99,
+    "InitiativeTieBreakByModifier": true,
+    "ResistanceDivisor": 2,
+    "VulnerabilityMultiplier": 2,
+    "HalfOnSaveDivisor": 2,
+    "Variables": {
+      "rageDamage": 2
+    },
+    "AbilityScoreHardCap": 30,
+    "InitiativeAbility": "dex",
+    "ConcentrationAbility": "con",
+    "ArmorClassAbility": "dex",
+    "HitPointAbility": "con",
+    "DefaultSaveAbility": "dex",
+    "MeleeAttackAbility": "str",
+    "RangedAttackAbility": "dex",
+    "OffHandSlotId": "slot-offhand",
+    "OffHandWeaponProperty": "wp-light",
+    "FeatSpellListClassIds": [
+      "class-bard",
+      "class-cleric",
+      "class-druid",
+      "class-sorcerer",
+      "class-warlock",
+      "class-wizard"
+    ],
+    "CastingTimeKinds": {
+      "bonus": "bonus",
+      "reaction": "reaction",
+      "action": "action"
+    },
+    "ContestAbilities": [
+      "str",
+      "dex"
+    ],
+    "FallbackAttackAbilities": [
+      "str",
+      "dex"
+    ],
+    "BothRulesVersion": "both",
+    "MassiveDamageKills": true,
+    "MassiveDamageMaxHpMultiple": 1,
+    "InspirationGrantsAdvantage": true,
+    "PlayerRollsOwnSaves": false,
+    "RoundSeconds": 6,
+    "ShortRestMinutes": 60,
+    "LongRestMinutes": 480,
+    "MinutesPerDay": 1440,
+    "DefaultLegendaryActionsPerRound": 3,
+    "CheckDifficulties": [
+      {
+        "Id": "very-easy",
+        "Name": "very easy",
+        "Dc": 5
+      },
+      {
+        "Id": "easy",
+        "Name": "easy",
+        "Dc": 10
+      },
+      {
+        "Id": "medium",
+        "Name": "medium",
+        "Dc": 15
+      },
+      {
+        "Id": "hard",
+        "Name": "hard",
+        "Dc": 20
+      },
+      {
+        "Id": "very-hard",
+        "Name": "very hard",
+        "Dc": 25
+      },
+      {
+        "Id": "nearly-impossible",
+        "Name": "nearly impossible",
+        "Dc": 30
+      }
+    ],
+    "TacticalActions": {
+      "dodge": {
+        "Name": "Dodge",
+        "Effect": "dodge",
+        "Cost": "action"
+      },
+      "disengage": {
+        "Name": "Disengage",
+        "Effect": "disengage",
+        "Cost": "action"
+      },
+      "hide": {
+        "Name": "Hide",
+        "Effect": "hide",
+        "Cost": "action"
+      },
+      "help": {
+        "Name": "Help",
+        "Effect": "help",
+        "Cost": "action"
+      },
+      "grapple": {
+        "Name": "Grapple",
+        "Effect": "contest",
+        "Cost": "action",
+        "Condition": "Grappled",
+        "DefenderSaves": [
+          "str",
+          "dex"
+        ]
+      },
+      "shove": {
+        "Name": "Shove",
+        "Effect": "contest",
+        "Cost": "action",
+        "Condition": "Prone",
+        "DefenderSaves": [
+          "str",
+          "dex"
+        ]
+      },
+      "shove-away": {
+        "Name": "Shove away",
+        "Effect": "contest",
+        "Cost": "action",
+        "PushFeet": 5,
+        "DefenderSaves": [
+          "str",
+          "dex"
+        ]
+      },
+      "search": {
+        "Name": "Search",
+        "Effect": "check",
+        "Cost": "action",
+        "CheckAbility": "wis",
+        "CheckSkill": "Perception",
+        "CheckDifficulty": "medium"
+      },
+      "study": {
+        "Name": "Study",
+        "Effect": "check",
+        "Cost": "action",
+        "CheckAbility": "int",
+        "CheckSkill": "Arcana",
+        "CheckDifficulty": "medium"
+      },
+      "influence": {
+        "Name": "Influence",
+        "Effect": "check",
+        "Cost": "action",
+        "CheckAbility": "cha",
+        "CheckSkill": "Persuasion",
+        "CheckDifficulty": "medium"
+      },
+      "utilize": {
+        "Name": "Utilize",
+        "Effect": "check",
+        "Cost": "action",
+        "CheckAbility": "dex",
+        "CheckSkill": "Sleight of Hand",
+        "CheckDifficulty": "easy"
+      },
+      "dispel": {
+        "Name": "Dispel magic",
+        "Effect": "dispel",
+        "Cost": "action",
+        "CheckAbility": "int",
+        "CheckSkill": "Arcana",
+        "CheckDifficulty": "medium"
+      }
+    },
+    "CrXp": {
+      "0": 10,
+      "1": 200,
+      "2": 450,
+      "3": 700,
+      "4": 1100,
+      "5": 1800,
+      "6": 2300,
+      "7": 2900,
+      "8": 3900,
+      "9": 5000,
+      "10": 5900,
+      "11": 7200,
+      "12": 8400,
+      "13": 10000,
+      "14": 11500,
+      "15": 13000,
+      "16": 15000,
+      "17": 18000,
+      "18": 20000,
+      "19": 22000,
+      "20": 25000,
+      "21": 33000,
+      "22": 41000,
+      "23": 50000,
+      "24": 62000,
+      "25": 75000,
+      "26": 90000,
+      "27": 105000,
+      "28": 120000,
+      "29": 135000,
+      "30": 155000,
+      "1/8": 25,
+      "0.125": 25,
+      "1/4": 50,
+      "0.25": 50,
+      "1/2": 100,
+      "0.5": 100
+    },
+    "EncounterBudgets": {
+      "1": [
+        50,
+        75,
+        100
+      ],
+      "2": [
+        100,
+        150,
+        200
+      ],
+      "3": [
+        150,
+        225,
+        400
+      ],
+      "4": [
+        250,
+        375,
+        500
+      ],
+      "5": [
+        500,
+        750,
+        1100
+      ],
+      "6": [
+        600,
+        1000,
+        1400
+      ],
+      "7": [
+        750,
+        1300,
+        1700
+      ],
+      "8": [
+        1000,
+        1700,
+        2100
+      ],
+      "9": [
+        1300,
+        2000,
+        2600
+      ],
+      "10": [
+        1600,
+        2300,
+        3100
+      ],
+      "11": [
+        1900,
+        2900,
+        4100
+      ],
+      "12": [
+        2200,
+        3700,
+        4700
+      ],
+      "13": [
+        2600,
+        4200,
+        5400
+      ],
+      "14": [
+        2900,
+        4900,
+        6200
+      ],
+      "15": [
+        3300,
+        5400,
+        7800
+      ],
+      "16": [
+        3800,
+        6100,
+        9800
+      ],
+      "17": [
+        4500,
+        7200,
+        11700
+      ],
+      "18": [
+        5000,
+        8700,
+        14200
+      ],
+      "19": [
+        5500,
+        10700,
+        17200
+      ],
+      "20": [
+        6400,
+        13200,
+        22000
+      ]
+    },
+    "_Note": "Per-turn action economy baseline read at runtime. Features and items add to these via Bonuses entries with TargetId 'action' or 'bonus-action'. A feature may also carry an ActionEconomy block { GrantActions, GrantBonusActions, Activated, Uses } for activated grants such as Action Surge. LongRestHitDiceDivisor sets how many spent hit dice return on a long rest (Level divided by it, minimum 1, so 2 is the 5e half). ShortRestHitDieAverage true heals a spent hit die's average plus CON, false heals the full die. AbilityModBaseline and AbilityModDivisor define the ability modifier (score minus baseline, divided by divisor, floored). DeathSave keys set the success and failure pip counts. SpellSaveDcBase is the 8 in 8 plus prof plus mod. PassiveScoreBase is the 10 in passive scores. ExpertiseMultiplier doubles proficiency on expertise skills. Crit and Fumble keys set the natural rolls and the damage dice multiplier. InitiativeDie is the die rolled for initiative. FeetPerSquare converts grid squares to feet, MovedThresholdFeet is how far a token has to travel before it counts as having moved, and ConeWidthRatio is how wide the mouth of a cone is as a fraction of its length, so the 5e cone that is as wide as it is long sits at a half. CubeOriginOnFace true puts the cube's point of origin on one of its faces the way 5e does, so a 15 ft cube reaches 15 ft away from you, and false centres it on you instead. AoeShapes names the area shapes, the Id has to be one of cone, circle, line or cube because the hit test lives in code, but the Name is yours and UsesWidth says whether the width box shows for it, so a shape can be renamed or dropped from the picker. DefaultAoeSizeFeet and DefaultAoeWidthFeet seed the area template boxes and DefaultSaveDc seeds the dm save box. MinDieSides, MaxDieSides and MaxDiceCount bound what a dice expression is allowed to ask for. CarryCapacity and Encumbered keys multiply Strength for load limits. HpFirstLevelMax and HpPerLevelMode (average or max) control level-up hit points, HpPerLevelMaxMode is the word that means max so even that is not baked in, and HitDicePerLevel is how many hit dice a level is worth, which is the 1 in one per level. AbilityScoreIncrementPerAsi is how much one ability score improvement moves a score. AttunementFlagValue is the word an item's Attunement field has to say for the item to need attuning, and DamageTypeIdPrefix is the prefix stripped off a damage type id to show it on screen. ScaleByCharacterToken is the word in a spell effect's ScaleBy that means scale off the character level rather than the slot level. SkillStoreKey and FeatStoreKey and SubclassStoreKey are the StoreAs values a class choice uses, the code compares a choice against these rather than sniffing its key for a substring. AsiTokenPrefix, ToolProficiencyIdPrefix and GrantedSpellIdPrefix say how an option id is spelled, and FeatFeaturePrefix and SubclassFeaturePrefix are the prefixes a saved character's Features lines carry. Rename any of them and new saves use the new spelling while old saves keep reading, because the reader always accepts the original wording too. Senses is the table that turns a race's trait ids into the senses line on the sheet, each entry matches a substring of the trait id and carries a Name and a RangeFeet, and UpgradeMatches plus UpgradeRangeFeet are how a superior darkvision trait reads 120 instead of 60, with SenseRangeUnit as the unit printed after the number. HealthStates is the ladder a player sees instead of a monster's real hit points, each entry is a Label and a Below, and the first band the hp fraction falls under wins, so Bloodied at 0.5 is the 5e half. UnknownHpLabel, DownHpLabel and HealthyHpLabel are the three ends of that ladder. JumpAbility and JumpScoreMultiplier give the long jump, which in 5e is the strength score straight across at a multiplier of 1. DefaultLineWidthFeet is the fallback width of a line area template. CreatureSizeSquares maps each size to how many grid squares wide its token is. Conditions now carry their own mechanics in an Effects block, AttackRoll bends the afflicted creature's own attack, IncomingAttack bends attacks made against it, BlocksActions gates actions and bonus actions and reactions, StopsMovement zeroes the reachable overlay, and Trackable false keeps a condition off the dm chip row (exhaustion is a level track, not a toggle). The six old CombatSettings condition lists are gone because the code derives them from Effects, and an older template that still names them keeps overriding, so nothing breaks. Write a condition once, give it effects, and it shows up as a chip and applies itself. A condition can also carry Resistances and a DamageBonus, which is how Raging halves the physical damage a barbarian takes and adds to the damage it deals without a line of C# knowing what a barbarian is. A ClassResources entry can carry Effects too, Heal is a dice expression rolled when the resource is spent (@level substitutes the character level) and HealPerPoint heals that much per point spent, which is Second Wind and Lay on Hands respectively. Numbers are nameable now. Variables is a free dictionary, put anything in it, and anywhere the template wants a number you can write the number itself or write an at sign followed by the variable name instead, which is how Raging takes its DamageBonus from rageDamage. A dice expression can name them too, at-level and at-prof and any ability short like at-str all resolve, so Second Wind reads 1d10+@level and a homebrew could write 1d8+@con+@myBonus. CritNaturalRolls and FumbleRolls are lists, so a crit on 19 and 20 is one edit. CritDamageMode is dice (double the dice, the 5e way) or total (double the whole roll including the flat modifier, which is what a lot of other systems do). CritAlwaysHits is the 5e rule that a natural crit lands whatever the armour class is, turn it off and a crit still has to beat the ac to do anything, and FumbleAlwaysMisses is the same idea for a natural 1. AutoHitToHit is the to hit number at or above which an attack skips the roll entirely, it is a sentinel and not a bonus anybody should really have. InitiativeTieBreakByModifier breaks an initiative tie on the initiative modifier, which is the 5e dexterity tie break, turn it off and ties keep the order they were added in. ResistanceDivisor and VulnerabilityMultiplier retune how far resistance and vulnerability move damage, and HalfOnSaveDivisor is what a successful save against a half on save spell divides the damage by, so it is the 2 in half, and a resistance or an immunity or a vulnerability entry can be written as a bare damage type or as the type, a colon and a number, where the number turns it into a flat reduction or a flat extra instead of halving or doubling. CrXp maps a monster challenge rating to its xp and EncounterBudgets gives the 2024 per character low/moderate/high xp budget per level for the encounter planner. Proficiency bonus and XP per level come from the top-level Level array (Bonus and XP), and the max level is its length. TargetAdvantage and TargetDisadvantage condition lists name the conditions on a target that bend an attacker's roll against it, the Attack lists above are the ones on the attacker itself. IncapacitatingConditions block actions, bonus actions and reactions, MovementStoppingConditions zero the reachable overlay. AutoFlanking turns the automatic flanking check on or off, MeleeReachCells is the reach in grid cells used for flanking and opportunity attacks, FlankAngleDegrees is how opposed two flankers must be. BaseSpeedFeet is the fallback walking speed and BaseReactions the per-turn reaction slots. FriendRingColor, EnemyRingColor and MoveHighlightColor tint the token rings and the movement overlay. ContestDcBase is the 8 in a grapple or shove or topple DC, the rest of that DC is the actor's proficiency plus its best of strength and dexterity. TacticalActions names what each contested action does, Condition is the condition pinned on a loser and DefenderSaves is the list of saves the defender picks its best from, so a homebrew can rename grappled or let shove be resisted by constitution. ContestAbilities is the set an actor picks its best modifier from when it grapples or shoves. Every tactical action is listed in TacticalActions now, Name is the button label, Effect is the behaviour the code switches on (dodge, disengage, hide, help, contest), Cost is action or bonus or reaction or none, and a contest also needs a Condition it pins and DefenderSaves the defender picks its best from. Add an entry and a button appears on both panels, drop one and it disappears, so a homebrew can rename Shove or make it cost a bonus action or add its own contest without touching code. WeaponMasteries entries name their own Condition too, which is what topple pins on a failed save. ShortRestSlotCasterTypes names the caster types whose spell slots come back on a short rest, which is what pact magic is. An entry anywhere tagged Version both, or tagged nothing, shows up in a campaign of either edition, so the twelve classes carry both until the 2024 class layer is authored. A monster carries AttacksPerAction, the number of swings one Attack action buys, so a multiattack is one number and not a special case. Which ability drives what is data now too, InitiativeAbility, ConcentrationAbility, ArmorClassAbility, HitPointAbility, DefaultSaveAbility, MeleeAttackAbility and RangedAttackAbility name an ability Short, AbilityScoreHardCap is the ceiling the dm editor allows, OffHandSlotId is the EqSlotId that marks a piece of armor as a shield rather than body armor, and CastingTimeKinds maps a substring of a spell casting time onto action or bonus or reaction. A WeaponTypes entry can carry Effects.AttackAbilities to say which abilities that property lets you attack with, which is how finesse becomes the better of strength and dexterity instead of a rule baked in C#. Which abilities a slotless caster like Magic Initiate uses for its DC is read off the Spellcasting block, and FeatSpellListClassIds names the class spell lists a feat like Magic Initiate may draw from, which is a feat rule and not the same thing as being a caster class, paladins and rangers cast but are not on that list. OffHandWeaponProperty is the weapon property a weapon has to carry before the sheet lets it sit in the off hand, and the offhand-attack entry in ActionCosts is what that swing costs, so two weapon fighting ships as a light weapon on a bonus action and a homebrew can loosen either. The off hand damage drops the ability modifier unless a Bonuses entry with the offhand-ability-mod grant says otherwise, which is what the Two-Weapon Fighting style feats now carry. AbilityRollDice is what the roll option in the character creator throws per score, 4d6 keep the highest 3 out of the box, change it and every roll button in the creator follows along.",
+    "LongRangeDisadvantage": true,
+    "CoreRollExpression": "",
+    "RollDirection": "high",
+    "ExplodingDiceLimit": 20,
+    "ConcentrationDcCap": 30,
+    "StandFromProneSpeedFraction": 0.5
+  },
+  "_SpellsNote": "Full 2024 spell list not enumerated here. Import from your PHB via the catalog importer. You already carry 315 spells from the prior template.",
+  "_SchemaNotes": {
+    "Monsters": "Each entry is a placeable creature read straight out of JsonContent (no app-side hardcoding): {TemplateId, Name, Description, Size (Tiny|Small|Medium|Large|Huge|Gargantuan), Type, ChallengeRating, ArmorClass, HitPoints, HitDice, Speed, Abilities{ability-*}, Alignment, DefaultTokenColor}. Adding a monster here makes it appear in the map monster picker and bindable to a campaign token.",
+    "ItemBonusIds": "Each entry links to a record in Bonuses[] and repeats the value inline for redundancy: {BonusId, TargetId, Modifier}. TargetId is one of attack-roll, damage-roll, armor-class, saving-throw (or an ability id for feat/race bonuses).",
+    "ItemMechanicalProperties": {
+      "Category": "weapon | armor | shield | ammunition | potion | throwable | gear | wondrous",
+      "IsMagic": "bool",
+      "AttackBonus/DamageBonus/ACBonus/SaveBonus": "flat numeric bonus (null if none); mirrors the linked BonusIds",
+      "BaseWeapon": "For weapons. {AppliesToAnyWeapon, Die, DieCount, DamageTypeId, AbilityModifierNote, VerifyAgainstSRD}. When AppliesToAnyWeapon is true the Die/DamageType are null because the wielder picks the base weapon at runtime.",
+      "AbilityModifierNote": "IMPORTANT FOR RUNTIME: which ability modifier applies to attack/damage. STR for normal melee; DEX for ranged; finesse weapons may use STR or DEX (wielder's choice). Resolve from the chosen weapon's WeaponCategory (look for 'wp-finesse') and IsRanged flag.",
+      "BonusDamage": "list of {DiceId, DiceCount, DamageTypeId, AppliesWhen}. DiceCount 0 with DiceId 'd0' means a FLAT amount described in Notes (no die).",
+      "Healing": "{DiceId, DiceCount, Flat} e.g. 2d4+2 -> {d4,2,2}",
+      "Damage": "list of {DiceId, DiceCount, DamageTypeId, Save, AppliesWhen} for throwables/consumables that deal damage",
+      "AbilitySet": "{ability-id: value} = the item SETS the score to that value (not additive). e.g. Amulet of Health -> {ability-con:19}",
+      "VerifyAgainstSRD": "true = I flagged this entry for you to double-check against SRD 5.2 before relying on it in the dissertation",
+      "Notes": "plain-language clarifications and ambiguity flags"
+    },
+    "FinesseWeapons": "Base weapons with the 'wp-finesse' tag in WeaponCategory can use STR or DEX. In this dataset: dagger, dart, rapier, scimitar, shortsword, whip. Ranged weapons (IsRanged=true) use DEX. Everything else uses STR. Magic weapons with AppliesToAnyWeapon inherit this from the chosen base weapon.",
+    "StillEmptyByDesign_or_TODO": "SpellListIds are fully populated for every caster (all 356 spells castable, no orphans or broken refs). Subclass FeatsIds are now populated too: all 41 subclasses carry their PHB features, which live as 201 new entries in the Features array keyed by ClassId and Level. Nothing tracked here is outstanding.",
+    "MonsterAttacks": "Each Monsters[] entry may carry an Attacks[] of {Name, ToHit, Damage, DamageType}. ToHit is the attack bonus; ToHit=99 means auto-hit (no roll). Damage is a dice expression with the ability mod baked in."
+  },
+  "_SpellEffectSchema": "Each Spell may carry one Effect in Effects[]. Shape: Roll = attack | save | none. attack -> Attack = ranged | melee, caster rolls d20 + prof + spellcasting mod. save -> Save = str|dex|con|int|wis|cha plus HalfOnSave true|false, target rolls vs DC 8 + prof + spellcasting mod. DamageType is a damage type id, Scale maps level to a dice expression with ScaleBy = char (cantrip, key is character level) or slot (leveled, key is the slot level cast at). HealScale maps slot level to dice and AddModToHeal true adds the spellcasting mod. Spells outside the open SRD were left with empty Effects, fill them with this same shape.",
+  "TerrainCosts": [
+    {
+      "TemplateId": "difficult",
+      "Name": "Difficult terrain",
+      "Multiplier": 2
+    },
+    {
+      "TemplateId": "slippery",
+      "Name": "Slippery ground",
+      "Multiplier": 2
+    },
+    {
+      "TemplateId": "climb",
+      "Name": "Climbing",
+      "Multiplier": 2
+    },
+    {
+      "TemplateId": "swim",
+      "Name": "Water",
+      "Multiplier": 2
+    },
+    {
+      "TemplateId": "crawl",
+      "Name": "Crawling",
+      "Multiplier": 2
+    },
+    {
+      "TemplateId": "rubble",
+      "Name": "Rubble",
+      "Multiplier": 2
+    }
+  ],
+  "Hazards": [
+    {
+      "TemplateId": "falling",
+      "Name": "A fall",
+      "Die": "d6",
+      "PerFeet": 10,
+      "MaxDice": 20,
+      "DamageType": "bludgeoning",
+      "Condition": "Prone"
+    },
+    {
+      "TemplateId": "suffocating",
+      "Name": "Suffocating",
+      "Die": "d6",
+      "PerFeet": 0,
+      "MaxDice": 0,
+      "DamageType": "necrotic"
+    },
+    {
+      "TemplateId": "drowning",
+      "Name": "Drowning",
+      "Die": "d6",
+      "PerFeet": 0,
+      "MaxDice": 0,
+      "DamageType": "necrotic"
+    },
+    {
+      "TemplateId": "burning-ground",
+      "Name": "Standing in fire",
+      "Die": "2d6",
+      "PerFeet": 0,
+      "MaxDice": 0,
+      "DamageType": "fire",
+      "Save": "dex",
+      "SaveDc": 13,
+      "HalfOnSave": true
+    },
+    {
+      "TemplateId": "lava",
+      "Name": "Lava",
+      "Die": "10d10",
+      "PerFeet": 0,
+      "MaxDice": 0,
+      "DamageType": "fire"
+    },
+    {
+      "TemplateId": "acid-pool",
+      "Name": "Acid",
+      "Die": "4d6",
+      "PerFeet": 0,
+      "MaxDice": 0,
+      "DamageType": "acid",
+      "Save": "dex",
+      "SaveDc": 13,
+      "HalfOnSave": true
+    },
+    {
+      "TemplateId": "extreme-cold",
+      "Name": "Extreme cold",
+      "Die": "1d6",
+      "PerFeet": 0,
+      "MaxDice": 0,
+      "DamageType": "cold",
+      "Save": "con",
+      "SaveDc": 10
+    },
+    {
+      "TemplateId": "starving",
+      "Name": "Starving",
+      "Die": "1d6",
+      "PerFeet": 0,
+      "MaxDice": 0,
+      "DamageType": "necrotic"
+    }
+  ],
+  "Abilities": [
+    {
+      "TemplateId": "ability-str",
+      "Short": "STR",
+      "Name": "Strength",
+      "Description": ""
+    },
+    {
+      "TemplateId": "ability-dex",
+      "Short": "DEX",
+      "Name": "Dexterity",
+      "Description": ""
+    },
+    {
+      "TemplateId": "ability-con",
+      "Short": "CON",
+      "Name": "Constitution",
+      "Description": ""
+    },
+    {
+      "TemplateId": "ability-int",
+      "Short": "INT",
+      "Name": "Intelligence",
+      "Description": ""
+    },
+    {
+      "TemplateId": "ability-wis",
+      "Short": "WIS",
+      "Name": "Wisdom",
+      "Description": ""
+    },
+    {
+      "TemplateId": "ability-cha",
+      "Short": "CHA",
+      "Name": "Charisma",
+      "Description": ""
+    }
+  ],
+  "Alignments": [
+    {
+      "TemplateId": "align-lawful-good",
+      "Name": "Lawful Good",
+      "Description": ""
+    },
+    {
+      "TemplateId": "align-neutral-good",
+      "Name": "Neutral Good",
+      "Description": ""
+    },
+    {
+      "TemplateId": "align-chaotic-good",
+      "Name": "Chaotic Good",
+      "Description": ""
+    },
+    {
+      "TemplateId": "align-lawful-neutral",
+      "Name": "Lawful Neutral",
+      "Description": ""
+    },
+    {
+      "TemplateId": "align-neutral",
+      "Name": "Neutral",
+      "Description": ""
+    },
+    {
+      "TemplateId": "align-chaotic-neutral",
+      "Name": "Chaotic Neutral",
+      "Description": ""
+    },
+    {
+      "TemplateId": "align-lawful-evil",
+      "Name": "Lawful Evil",
+      "Description": ""
+    },
+    {
+      "TemplateId": "align-neutral-evil",
+      "Name": "Neutral Evil",
+      "Description": ""
+    },
+    {
+      "TemplateId": "align-chaotic-evil",
+      "Name": "Chaotic Evil",
+      "Description": ""
+    },
+    {
+      "TemplateId": "align-unaligned",
+      "Name": "Unaligned",
+      "Description": ""
+    }
+  ],
+  "ArmorTypes": [
+    {
+      "TemplateId": "armor-light",
+      "Name": "Light armor",
+      "Description": "",
+      "ProfRequiredId": "prof-light-armor",
+      "EqSlotId": "armor"
+    },
+    {
+      "TemplateId": "armor-medium",
+      "Name": "Medium armor",
+      "Description": "",
+      "ProfRequiredId": "prof-medium-armor",
+      "EqSlotId": "armor"
+    },
+    {
+      "TemplateId": "armor-heavy",
+      "Name": "Heavy armor",
+      "Description": "",
+      "ProfRequiredId": "prof-heavy-armor",
+      "EqSlotId": "armor"
+    },
+    {
+      "TemplateId": "armor-shield",
+      "Name": "Shield",
+      "Description": "",
+      "ProfRequiredId": "prof-shields",
+      "EqSlotId": "offhand"
+    }
+  ],
+  "WeaponTypes": [
+    {
+      "TemplateId": "wp-ammunition",
+      "Name": "Ammunition",
+      "Description": ""
+    },
+    {
+      "TemplateId": "wp-finesse",
+      "Name": "Finesse",
+      "Description": ""
+    },
+    {
+      "TemplateId": "wp-heavy",
+      "Name": "Heavy",
+      "Description": ""
+    },
+    {
+      "TemplateId": "wp-light",
+      "Name": "Light",
+      "Description": ""
+    },
+    {
+      "TemplateId": "wp-loading",
+      "Name": "Loading",
+      "Description": ""
+    },
+    {
+      "TemplateId": "wp-range",
+      "Name": "Range",
+      "Description": ""
+    },
+    {
+      "TemplateId": "wp-reach",
+      "Name": "Reach",
+      "Description": ""
+    },
+    {
+      "TemplateId": "wp-thrown",
+      "Name": "Thrown",
+      "Description": ""
+    },
+    {
+      "TemplateId": "wp-two-handed",
+      "Name": "Two-Handed",
+      "Description": ""
+    },
+    {
+      "TemplateId": "wp-versatile",
+      "Name": "Versatile",
+      "Description": ""
+    }
+  ],
+  "WeaponMasteries": [
+    {
+      "TemplateId": "mast-cleave",
+      "Name": "Cleave",
+      "Description": "",
+      "Version": "2024",
+      "Effect": "cleave"
+    },
+    {
+      "TemplateId": "mast-graze",
+      "Name": "Graze",
+      "Description": "",
+      "Version": "2024",
+      "Effect": "graze"
+    },
+    {
+      "TemplateId": "mast-nick",
+      "Name": "Nick",
+      "Description": "",
+      "Version": "2024",
+      "Effect": "nick"
+    },
+    {
+      "TemplateId": "mast-push",
+      "Name": "Push",
+      "Description": "",
+      "Version": "2024",
+      "Effect": "push"
+    },
+    {
+      "TemplateId": "mast-sap",
+      "Name": "Sap",
+      "Description": "",
+      "Version": "2024",
+      "Effect": "sap"
+    },
+    {
+      "TemplateId": "mast-slow",
+      "Name": "Slow",
+      "Description": "",
+      "Version": "2024",
+      "Effect": "slow"
+    },
+    {
+      "TemplateId": "mast-topple",
+      "Name": "Topple",
+      "Description": "",
+      "Version": "2024",
+      "Effect": "topple"
+    },
+    {
+      "TemplateId": "mast-vex",
+      "Name": "Vex",
+      "Description": "",
+      "Version": "2024",
+      "Effect": "vex"
+    }
+  ],
+  "Conditions": [
+    {
+      "TemplateId": "cond-blinded",
+      "Name": "Blinded",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {
+        "AttackRoll": "disadvantage",
+        "IncomingAttack": "advantage"
+      }
+    },
+    {
+      "TemplateId": "cond-charmed",
+      "Name": "Charmed",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {}
+    },
+    {
+      "TemplateId": "cond-deafened",
+      "Name": "Deafened",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {}
+    },
+    {
+      "TemplateId": "cond-exhaustion",
+      "Name": "Exhaustion",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {}
+    },
+    {
+      "TemplateId": "cond-frightened",
+      "Name": "Frightened",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {
+        "AttackRoll": "disadvantage",
+        "AbilityCheckRoll": "disadvantage"
+      }
+    },
+    {
+      "TemplateId": "cond-grappled",
+      "Name": "Grappled",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {
+        "StopsMovement": true
+      }
+    },
+    {
+      "TemplateId": "cond-incapacitated",
+      "Name": "Incapacitated",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {
+        "BlocksActions": true,
+        "BlocksReactions": true
+      }
+    },
+    {
+      "TemplateId": "cond-invisible",
+      "Name": "Invisible",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {
+        "AttackRoll": "advantage",
+        "IncomingAttack": "disadvantage"
+      }
+    },
+    {
+      "TemplateId": "cond-paralyzed",
+      "Name": "Paralyzed",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {
+        "BlocksActions": true,
+        "BlocksReactions": true,
+        "StopsMovement": true,
+        "IncomingAttack": "advantage"
+      }
+    },
+    {
+      "TemplateId": "cond-petrified",
+      "Name": "Petrified",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {
+        "BlocksActions": true,
+        "BlocksReactions": true,
+        "StopsMovement": true,
+        "IncomingAttack": "advantage"
+      }
+    },
+    {
+      "TemplateId": "cond-poisoned",
+      "Name": "Poisoned",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {
+        "AttackRoll": "disadvantage",
+        "AbilityCheckRoll": "disadvantage"
+      }
+    },
+    {
+      "TemplateId": "cond-prone",
+      "Name": "Prone",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {
+        "AttackRoll": "disadvantage",
+        "IncomingAttack": "advantage",
+        "IncomingAttackBeyond": "disadvantage",
+        "IncomingAttackWithinFeet": 5
+      }
+    },
+    {
+      "TemplateId": "cond-restrained",
+      "Name": "Restrained",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {
+        "AttackRoll": "disadvantage",
+        "IncomingAttack": "advantage",
+        "StopsMovement": true,
+        "SaveRoll": "disadvantage"
+      }
+    },
+    {
+      "TemplateId": "cond-stunned",
+      "Name": "Stunned",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {
+        "BlocksActions": true,
+        "BlocksReactions": true,
+        "StopsMovement": true,
+        "IncomingAttack": "advantage"
+      }
+    },
+    {
+      "TemplateId": "cond-unconscious",
+      "Name": "Unconscious",
+      "Description": "",
+      "Version": "both",
+      "Trackable": true,
+      "Effects": {
+        "BlocksActions": true,
+        "BlocksReactions": true,
+        "StopsMovement": true,
+        "IncomingAttack": "advantage"
+      }
+    }
+  ],
+  "DamageTypes": [
+    {
+      "TemplateId": "dmg-acid",
+      "Name": "Acid",
+      "Description": ""
+    },
+    {
+      "TemplateId": "dmg-bludgeoning",
+      "Name": "Bludgeoning",
+      "Description": ""
+    },
+    {
+      "TemplateId": "dmg-cold",
+      "Name": "Cold",
+      "Description": ""
+    },
+    {
+      "TemplateId": "dmg-fire",
+      "Name": "Fire",
+      "Description": ""
+    },
+    {
+      "TemplateId": "dmg-force",
+      "Name": "Force",
+      "Description": ""
+    },
+    {
+      "TemplateId": "dmg-lightning",
+      "Name": "Lightning",
+      "Description": ""
+    },
+    {
+      "TemplateId": "dmg-necrotic",
+      "Name": "Necrotic",
+      "Description": ""
+    },
+    {
+      "TemplateId": "dmg-piercing",
+      "Name": "Piercing",
+      "Description": ""
+    },
+    {
+      "TemplateId": "dmg-poison",
+      "Name": "Poison",
+      "Description": ""
+    },
+    {
+      "TemplateId": "dmg-psychic",
+      "Name": "Psychic",
+      "Description": ""
+    },
+    {
+      "TemplateId": "dmg-radiant",
+      "Name": "Radiant",
+      "Description": ""
+    },
+    {
+      "TemplateId": "dmg-slashing",
+      "Name": "Slashing",
+      "Description": ""
+    },
+    {
+      "TemplateId": "dmg-thunder",
+      "Name": "Thunder",
+      "Description": ""
+    }
+  ],
+  "Currencies": [
+    {
+      "TemplateId": "cur-cp",
+      "Name": "Copper piece",
+      "Abbreviation": "cp",
+      "IsBase": true,
+      "EqualToBase": 1,
+      "SortOrder": 1
+    },
+    {
+      "TemplateId": "cur-sp",
+      "Name": "Silver piece",
+      "Abbreviation": "sp",
+      "IsBase": false,
+      "EqualToBase": 10,
+      "SortOrder": 2
+    },
+    {
+      "TemplateId": "cur-ep",
+      "Name": "Electrum piece",
+      "Abbreviation": "ep",
+      "IsBase": false,
+      "EqualToBase": 50,
+      "SortOrder": 3
+    },
+    {
+      "TemplateId": "cur-gp",
+      "Name": "Gold piece",
+      "Abbreviation": "gp",
+      "IsBase": false,
+      "EqualToBase": 100,
+      "SortOrder": 4
+    },
+    {
+      "TemplateId": "cur-pp",
+      "Name": "Platinum piece",
+      "Abbreviation": "pp",
+      "IsBase": false,
+      "EqualToBase": 1000,
+      "SortOrder": 5
+    }
+  ],
+  "Dices": [
+    {
+      "TemplateId": "d4",
+      "Dice": "d4"
+    },
+    {
+      "TemplateId": "d6",
+      "Dice": "d6"
+    },
+    {
+      "TemplateId": "d8",
+      "Dice": "d8"
+    },
+    {
+      "TemplateId": "d10",
+      "Dice": "d10"
+    },
+    {
+      "TemplateId": "d12",
+      "Dice": "d12"
+    },
+    {
+      "TemplateId": "d20",
+      "Dice": "d20"
+    },
+    {
+      "TemplateId": "d100",
+      "Dice": "d100"
+    }
+  ],
+  "Languages": [
+    {
+      "TemplateId": "lang-common",
+      "Name": "Common",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-common-sign-language",
+      "Name": "Common Sign Language",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-draconic",
+      "Name": "Draconic",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-dwarvish",
+      "Name": "Dwarvish",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-elvish",
+      "Name": "Elvish",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-giant",
+      "Name": "Giant",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-gnomish",
+      "Name": "Gnomish",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-goblin",
+      "Name": "Goblin",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-halfling",
+      "Name": "Halfling",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-orc",
+      "Name": "Orc",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-abyssal",
+      "Name": "Abyssal",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-celestial",
+      "Name": "Celestial",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-deep-speech",
+      "Name": "Deep Speech",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-druidic",
+      "Name": "Druidic",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-infernal",
+      "Name": "Infernal",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-primordial",
+      "Name": "Primordial",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-sylvan",
+      "Name": "Sylvan",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-thieves-cant",
+      "Name": "Thieves' Cant",
+      "Script": "",
+      "Description": ""
+    },
+    {
+      "TemplateId": "lang-undercommon",
+      "Name": "Undercommon",
+      "Script": "",
+      "Description": ""
+    }
+  ],
+  "Level": [
+    {
+      "Level": 1,
+      "XP": 0,
+      "Bonus": 2
+    },
+    {
+      "Level": 2,
+      "XP": 300,
+      "Bonus": 2
+    },
+    {
+      "Level": 3,
+      "XP": 900,
+      "Bonus": 2
+    },
+    {
+      "Level": 4,
+      "XP": 2700,
+      "Bonus": 2
+    },
+    {
+      "Level": 5,
+      "XP": 6500,
+      "Bonus": 3
+    },
+    {
+      "Level": 6,
+      "XP": 14000,
+      "Bonus": 3
+    },
+    {
+      "Level": 7,
+      "XP": 23000,
+      "Bonus": 3
+    },
+    {
+      "Level": 8,
+      "XP": 34000,
+      "Bonus": 3
+    },
+    {
+      "Level": 9,
+      "XP": 48000,
+      "Bonus": 4
+    },
+    {
+      "Level": 10,
+      "XP": 64000,
+      "Bonus": 4
+    },
+    {
+      "Level": 11,
+      "XP": 85000,
+      "Bonus": 4
+    },
+    {
+      "Level": 12,
+      "XP": 100000,
+      "Bonus": 4
+    },
+    {
+      "Level": 13,
+      "XP": 120000,
+      "Bonus": 5
+    },
+    {
+      "Level": 14,
+      "XP": 140000,
+      "Bonus": 5
+    },
+    {
+      "Level": 15,
+      "XP": 165000,
+      "Bonus": 5
+    },
+    {
+      "Level": 16,
+      "XP": 195000,
+      "Bonus": 5
+    },
+    {
+      "Level": 17,
+      "XP": 225000,
+      "Bonus": 6
+    },
+    {
+      "Level": 18,
+      "XP": 265000,
+      "Bonus": 6
+    },
+    {
+      "Level": 19,
+      "XP": 305000,
+      "Bonus": 6
+    },
+    {
+      "Level": 20,
+      "XP": 355000,
+      "Bonus": 6
+    }
+  ],
+  "Multiclassing": {},
+  "SpellPreparation": {},
+  "SpellSlotTables": {},
+  "Spellcasting": {},
+  "Proficiencies": [
+    {
+      "TemplateId": "prof-light-armor",
+      "Name": "Light Armor",
+      "Type": "Armor",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-medium-armor",
+      "Name": "Medium Armor",
+      "Type": "Armor",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-heavy-armor",
+      "Name": "Heavy Armor",
+      "Type": "Armor",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-all-armor",
+      "Name": "All armor",
+      "Type": "Armor",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-shields",
+      "Name": "Shields",
+      "Type": "Armor",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-simple-weapons",
+      "Name": "Simple Weapons",
+      "Type": "Weapons",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-martial-weapons",
+      "Name": "Martial Weapons",
+      "Type": "Weapons",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-longswords",
+      "Name": "Longswords",
+      "Type": "Weapons",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-rapiers",
+      "Name": "Rapiers",
+      "Type": "Weapons",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-scimitars",
+      "Name": "Scimitars",
+      "Type": "Weapons",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-shortswords",
+      "Name": "Shortswords",
+      "Type": "Weapons",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-whips",
+      "Name": "Whips",
+      "Type": "Weapons",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-hand-crossbows",
+      "Name": "Hand crossbows",
+      "Type": "Weapons",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-skill-acrobatics",
+      "Name": "Skill: Acrobatics",
+      "Type": "Skills",
+      "Ability": "DEX"
+    },
+    {
+      "TemplateId": "prof-skill-animal-handling",
+      "Name": "Skill: Animal Handling",
+      "Type": "Skills",
+      "Ability": "WIS"
+    },
+    {
+      "TemplateId": "prof-skill-arcana",
+      "Name": "Skill: Arcana",
+      "Type": "Skills",
+      "Ability": "INT"
+    },
+    {
+      "TemplateId": "prof-skill-athletics",
+      "Name": "Skill: Athletics",
+      "Type": "Skills",
+      "Ability": "STR"
+    },
+    {
+      "TemplateId": "prof-skill-deception",
+      "Name": "Skill: Deception",
+      "Type": "Skills",
+      "Ability": "CHA"
+    },
+    {
+      "TemplateId": "prof-skill-history",
+      "Name": "Skill: History",
+      "Type": "Skills",
+      "Ability": "INT"
+    },
+    {
+      "TemplateId": "prof-skill-insight",
+      "Name": "Skill: Insight",
+      "Type": "Skills",
+      "Ability": "WIS"
+    },
+    {
+      "TemplateId": "prof-skill-intimidation",
+      "Name": "Skill: Intimidation",
+      "Type": "Skills",
+      "Ability": "CHA"
+    },
+    {
+      "TemplateId": "prof-skill-investigation",
+      "Name": "Skill: Investigation",
+      "Type": "Skills",
+      "Ability": "INT"
+    },
+    {
+      "TemplateId": "prof-skill-medicine",
+      "Name": "Skill: Medicine",
+      "Type": "Skills",
+      "Ability": "WIS"
+    },
+    {
+      "TemplateId": "prof-skill-nature",
+      "Name": "Skill: Nature",
+      "Type": "Skills",
+      "Ability": "INT"
+    },
+    {
+      "TemplateId": "prof-skill-perception",
+      "Name": "Skill: Perception",
+      "Type": "Skills",
+      "Ability": "WIS"
+    },
+    {
+      "TemplateId": "prof-skill-performance",
+      "Name": "Skill: Performance",
+      "Type": "Skills",
+      "Ability": "CHA"
+    },
+    {
+      "TemplateId": "prof-skill-persuasion",
+      "Name": "Skill: Persuasion",
+      "Type": "Skills",
+      "Ability": "CHA"
+    },
+    {
+      "TemplateId": "prof-skill-religion",
+      "Name": "Skill: Religion",
+      "Type": "Skills",
+      "Ability": "INT"
+    },
+    {
+      "TemplateId": "prof-skill-sleight-of-hand",
+      "Name": "Skill: Sleight of Hand",
+      "Type": "Skills",
+      "Ability": "DEX"
+    },
+    {
+      "TemplateId": "prof-skill-stealth",
+      "Name": "Skill: Stealth",
+      "Type": "Skills",
+      "Ability": "DEX"
+    },
+    {
+      "TemplateId": "prof-skill-survival",
+      "Name": "Skill: Survival",
+      "Type": "Skills",
+      "Ability": "WIS"
+    },
+    {
+      "TemplateId": "prof-alchemists-supplies",
+      "Name": "Alchemist's Supplies",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-brewers-supplies",
+      "Name": "Brewer's Supplies",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-tool-calligraphers-supplies",
+      "Name": "Tool: Calligrapher's Supplies",
+      "Type": "Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-carpenters-tools",
+      "Name": "Carpenter's Tools",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-cartographers-tools",
+      "Name": "Cartographer's Tools",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-cobblers-tools",
+      "Name": "Cobbler's Tools",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-cooks-utensils",
+      "Name": "Cook's Utensils",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-glassblowers-tools",
+      "Name": "Glassblower's Tools",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-jewelers-tools",
+      "Name": "Jeweler's Tools",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-leatherworkers-tools",
+      "Name": "Leatherworker's Tools",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-masons-tools",
+      "Name": "Mason's Tools",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-painters-supplies",
+      "Name": "Painter's Supplies",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-potters-tools",
+      "Name": "Potter's Tools",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-smiths-tools",
+      "Name": "Smith's Tools",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-tinkers-tools",
+      "Name": "Tinker's Tools",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-weavers-tools",
+      "Name": "Weaver's Tools",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-woodcarvers-tools",
+      "Name": "Woodcarver's Tools",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-disguise-kit",
+      "Name": "Disguise Kit",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-forgery-kit",
+      "Name": "Forgery Kit",
+      "Type": "Artisan's Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-tool-dice",
+      "Name": "Tool: Dice",
+      "Type": "Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-tool-dragonchess",
+      "Name": "Tool: Dragonchess",
+      "Type": "Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-tool-playing-cards",
+      "Name": "Tool: Playing Cards",
+      "Type": "Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-tool-navigators-tools",
+      "Name": "Tool: Navigator's Tools",
+      "Type": "Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-tool-poisoners-kit",
+      "Name": "Tool: Poisoner's Kit",
+      "Type": "Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-tool-thieves-tools",
+      "Name": "Tool: Thieves' Tools",
+      "Type": "Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-tool-three-dragon-ante",
+      "Name": "Tool: Three-Dragon Ante",
+      "Type": "Tools",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-saving-throw-str",
+      "Name": "Saving Throw: STR",
+      "Type": "Saving Throws",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-saving-throw-dex",
+      "Name": "Saving Throw: DEX",
+      "Type": "Saving Throws",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-saving-throw-con",
+      "Name": "Saving Throw: CON",
+      "Type": "Saving Throws",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-saving-throw-int",
+      "Name": "Saving Throw: INT",
+      "Type": "Saving Throws",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-saving-throw-wis",
+      "Name": "Saving Throw: WIS",
+      "Type": "Saving Throws",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-saving-throw-cha",
+      "Name": "Saving Throw: CHA",
+      "Type": "Saving Throws",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-bagpipes",
+      "Name": "Bagpipes",
+      "Type": "Musical Instruments",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-drum",
+      "Name": "Drum",
+      "Type": "Musical Instruments",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-dulcimer",
+      "Name": "Dulcimer",
+      "Type": "Musical Instruments",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-flute",
+      "Name": "Flute",
+      "Type": "Musical Instruments",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-lute",
+      "Name": "Lute",
+      "Type": "Musical Instruments",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-lyre",
+      "Name": "Lyre",
+      "Type": "Musical Instruments",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-horn",
+      "Name": "Horn",
+      "Type": "Musical Instruments",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-pan-flute",
+      "Name": "Pan flute",
+      "Type": "Musical Instruments",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-shawm",
+      "Name": "Shawm",
+      "Type": "Musical Instruments",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-viol",
+      "Name": "Viol",
+      "Type": "Musical Instruments",
+      "Ability": ""
+    },
+    {
+      "TemplateId": "prof-herbalism-kit",
+      "Name": "Herbalism Kit",
+      "Type": "Other",
+      "Ability": ""
+    }
+  ],
+  "Attribution": "This work includes material from the System Reference Document 5.2.1 (\"SRD 5.2.1\") by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode.",
+  "Items": [],
+  "Spells": [],
+  "Classes": [],
+  "Subclasses": [],
+  "Races": [],
+  "Subraces": [],
+  "Traits": [],
+  "Feats": [],
+  "Features": [],
+  "Monsters": [],
+  "Backgrounds": [],
+  "Backstories": [],
+  "Deities": [],
+  "RandomTables": [],
+  "Summons": [],
+  "GridItems": [],
+  "ClassChoices": [],
+  "ClassResources": [],
+  "DmScreenPanels": [],
+  "Bonuses": []
+}

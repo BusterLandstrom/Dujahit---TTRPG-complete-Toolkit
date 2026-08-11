@@ -1,0 +1,407 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Dujahit.ViewModels"
+             xmlns:ui="clr-namespace:Dujahit.Models.UI"
+             xmlns:models="clr-namespace:Dujahit.Models"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="600"
+             x:Class="Dujahit.Views.Map.Panels.CharacterQuickPanelView"
+             x:DataType="vm:CharacterQuickPanelViewModel"
+             Background="Transparent"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">
+
+    <UserControl.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{DynamicResource Widget}"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource CornerRadiusStandard}"/>
+            <Setter Property="Padding" Value="12"/>
+        </Style>
+        <Style Selector="TextBlock.label">
+            <Setter Property="Foreground" Value="{DynamicResource Divider}"/>
+            <Setter Property="FontSize" Value="{DynamicResource FontSizeSmall}"/>
+            <Setter Property="LetterSpacing" Value="2"/>
+        </Style>
+        <Style Selector="TextBlock.h1">
+            <Setter Property="FontSize" Value="{DynamicResource FontSizeHeader}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.action">
+            <Setter Property="Background" Value="{DynamicResource Widget}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="8,4"/>
+        </Style>
+        <Style Selector="Button.action:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentHover}"/>
+            <Setter Property="Foreground" Value="{DynamicResource Background}"/>
+        </Style>
+    </UserControl.Styles>
+
+    <ScrollViewer>
+        <StackPanel Spacing="8" Margin="0,0,0,64">
+
+            <Border Classes="card">
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="h1" Text="{Binding Name}"/>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="label" Text="HIT POINTS"/>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <NumericUpDown AutomationProperties.Name="Current hit points" Value="{Binding CurrentHp}"
+                                           Minimum="0"
+                                           Width="70"
+                                           ShowButtonSpinner="False"/>
+                            <TextBlock Text="/"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Muted}"/>
+                            <NumericUpDown AutomationProperties.Name="Max hit points" Value="{Binding MaxHp}"
+                                           Minimum="0"
+                                           Width="70"
+                                           ShowButtonSpinner="False"/>
+                        </StackPanel>
+                        <ProgressBar Minimum="0"
+                                     Maximum="{Binding MaxHp}"
+                                     Value="{Binding CurrentHp}"
+                                     Height="6"
+                                     Foreground="{DynamicResource AccentColor}"
+                                     Background="{DynamicResource Background}"
+                                     CornerRadius="3"/>
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="*,*">
+                        <StackPanel Grid.Column="0" Spacing="2">
+                            <TextBlock Classes="label" Text="TEMP HP"/>
+                            <NumericUpDown AutomationProperties.Name="TEMP HP" Value="{Binding TempHp}"
+                                           Minimum="0"
+                                           Width="70"
+                                           ShowButtonSpinner="False"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Spacing="2">
+                            <TextBlock Classes="label" Text="AC"/>
+                            <TextBlock Text="{Binding ArmorClass}"
+                                       FontSize="22"
+                                       Foreground="{DynamicResource WidgetForeground}"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card" IsVisible="{Binding HasCombatLine}">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="label" Text="COMBAT"/>
+                    <TextBlock Foreground="{DynamicResource AccentColor}"
+                               FontWeight="SemiBold"
+                               IsVisible="{Binding IsMyTurn}"
+                               Text="Your turn"/>
+                    <TextBlock Foreground="{DynamicResource Muted}"
+                               IsVisible="{Binding !IsMyTurn}"
+                               Text="Waiting for your turn"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Foreground="{DynamicResource WidgetForeground}"
+                                   Text="Actions"/>
+                        <TextBlock Grid.Column="1"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource WidgetForeground}"
+                                   Text="{Binding OwnCombatant.ActionsRemaining, StringFormat='{}{0} left'}"/>
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Foreground="{DynamicResource WidgetForeground}"
+                                   Text="Bonus actions"/>
+                        <TextBlock Grid.Column="1"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource WidgetForeground}"
+                                   Text="{Binding OwnCombatant.BonusActionsRemaining, StringFormat='{}{0} left'}"/>
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Foreground="{DynamicResource WidgetForeground}"
+                                   Text="Reactions"/>
+                        <TextBlock Grid.Column="1"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource WidgetForeground}"
+                                   Text="{Binding OwnCombatant.ReactionsRemaining, StringFormat='{}{0} left'}"/>
+                    </Grid>
+                    <WrapPanel Orientation="Horizontal">
+                        <Button Classes="ghost" Margin="0,4,4,0" Content="Action"
+                                IsEnabled="{Binding CanSpendActionNow}"
+                                Command="{Binding SpendActionCommand}"/>
+                        <Button Classes="ghost" Margin="0,4,4,0" Content="Bonus"
+                                IsEnabled="{Binding CanSpendBonusNow}"
+                                Command="{Binding SpendBonusActionCommand}"/>
+                        <Button Classes="ghost" Margin="0,4,4,0" Content="Reaction"
+                                IsEnabled="{Binding CanSpendReactionNow}"
+                                Command="{Binding SpendReactionCommand}"/>
+                        <Button Classes="accent" Margin="0,4,4,0"
+                                Content="{Binding OwnCombatant.SurgeLabel}"
+                                IsVisible="{Binding OwnCombatant.HasSurge}"
+                                IsEnabled="{Binding CanSurgeNow}"
+                                Command="{Binding ActionSurgeCommand}"/>
+                        <Button Classes="ghost" Margin="0,4,4,0" Content="Dash"
+                                IsEnabled="{Binding CanDashNow}"
+                                Command="{Binding DashCommand}"/>
+                        <Button Classes="ghost" Margin="0,4,4,0" Content="Ready"
+                                IsEnabled="{Binding CanReadyNow}"
+                                Command="{Binding ReadyActionCommand}"/>
+                        <Button Classes="ghost" Margin="0,4,0,0" Content="Delay"
+                                IsEnabled="{Binding CanDelayNow}"
+                                Command="{Binding DelayTurnCommand}"/>
+                    </WrapPanel>
+                    <StackPanel Spacing="2" IsVisible="{Binding OwnCombatant.IsDowned}">
+                        <TextBlock Text="{Binding OwnCombatant.DeathSaveStatus}"
+                                   Foreground="{DynamicResource Danger}"
+                                   FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding OwnCombatant.DeathSaveTally}"
+                                   Foreground="{DynamicResource WidgetForeground}"
+                                   FontSize="{DynamicResource FontSizeSmall}"/>
+                        <Button Classes="ghost" Margin="0,4,0,0" Content="Roll death save"
+                                HorizontalAlignment="Stretch"
+                                IsEnabled="{Binding CanRollDeathSaveNow}"
+                                Command="{Binding RollDeathSaveCommand}"/>
+                    </StackPanel>
+                    <Border Classes="row" Padding="8" Margin="0,4,0,0"
+                            IsVisible="{Binding OwnCombatant.HasPendingSave, FallbackValue=False}">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding OwnCombatant.PendingSaveLabel}"
+                                       Foreground="{DynamicResource WidgetForeground}"
+                                       TextWrapping="Wrap"/>
+                            <Button Classes="primary" Content="Roll it"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{Binding RollOwedSaveCommand}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Classes="label" Text="TARGET"/>
+                    <ComboBox AutomationProperties.Name="Pick a target" ItemsSource="{Binding Targets}"
+                              SelectedItem="{Binding AttackTarget}"
+                              PlaceholderText="Pick a target"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:CombatantViewModel">
+                                <TextBlock Text="{Binding Name}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <ComboBox AutomationProperties.Name="Ally to help, for Help only" ItemsSource="{Binding Targets}"
+                              SelectedItem="{Binding HelpAlly}"
+                              PlaceholderText="Ally to help, for Help only"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:CombatantViewModel">
+                                <TextBlock Text="{Binding Name}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <ItemsControl ItemsSource="{Binding TacticalActions}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:TacticalActionRule">
+                                <Button Classes="ghost" Margin="0,4,4,0"
+                                        MaxWidth="240"
+                                        AutomationProperties.Name="{Binding Name}"
+                                        ToolTip.Tip="{Binding Name}"
+                                        CommandParameter="{Binding Id}"
+                                        IsEnabled="{Binding $parent[ItemsControl].((vm:CharacterQuickPanelViewModel)DataContext).IsMyTurn}"
+                                        Command="{Binding $parent[ItemsControl].((vm:CharacterQuickPanelViewModel)DataContext).TacticalCommand}">
+                                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="label" Text="WEAPONS"/>
+                    <ItemsControl ItemsSource="{Binding Weapons}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:InventoryItemViewModel">
+                                <Border Background="{DynamicResource Background}"
+                                        CornerRadius="{DynamicResource CornerRadiusStandard}"
+                                        Padding="8"
+                                        Margin="0,3">
+                                    <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{Binding Name}"
+                                                       Foreground="{DynamicResource AccentColor}"/>
+                                            <TextBlock Text="{Binding DamageSummary}"
+                                                       Foreground="{DynamicResource Muted}"
+                                                       FontSize="11"/>
+                                        </StackPanel>
+                                        <Button Grid.Column="1"
+                                                Classes="action"
+                                                Content="Attack"
+                                                Margin="0,0,4,0"
+                                                IsEnabled="{Binding $parent[ItemsControl].((vm:CharacterQuickPanelViewModel)DataContext).CanAttackNow}"
+                                                Command="{Binding AttackCommand}"/>
+                                        <Button Grid.Column="2"
+                                                Classes="action"
+                                                Content="Dmg"
+                                                Command="{Binding RollDamageCommand}"/>
+                                        <Button Grid.Column="3"
+                                                Classes="action"
+                                                Content="Crit"
+                                                Margin="4,0,0,0"
+                                                Command="{Binding RollCritCommand}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card" IsVisible="{Binding OwnCombatant.HasSpellSlots}">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="label" Text="SPELL SLOTS"/>
+                    <ItemsControl ItemsSource="{Binding OwnCombatant.SpellSlots}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:SpellSlotRowViewModel">
+                                <Border Background="{DynamicResource Background}"
+                                        CornerRadius="{DynamicResource CornerRadiusStandard}"
+                                        Padding="8"
+                                        Margin="0,3">
+                                    <Grid ColumnDefinitions="*,Auto,Auto">
+                                        <TextBlock Grid.Column="0"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource AccentColor}"
+                                                   Text="{Binding Label}"/>
+                                        <Button Grid.Column="1"
+                                                Classes="action"
+                                                Content="Cast"
+                                                Margin="0,0,4,0"
+                                                IsEnabled="{Binding CanSpend}"
+                                                Command="{Binding $parent[ItemsControl].((vm:CharacterQuickPanelViewModel)DataContext).SpendSlotCommand}"
+                                                CommandParameter="{Binding Level}"/>
+                                        <Button Grid.Column="2"
+                                                Classes="action"
+                                                Content="+"
+                                                IsEnabled="{Binding CanRestore}"
+                                                Command="{Binding $parent[ItemsControl].((vm:CharacterQuickPanelViewModel)DataContext).RestoreSlotCommand}"
+                                                CommandParameter="{Binding Level}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Classes="action"
+                            HorizontalAlignment="Stretch"
+                            Content="Long Rest"
+                            Command="{Binding LongRestCommand}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card" IsVisible="{Binding HasSpellcasting}">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="label" Text="SPELLS"/>
+                    <ComboBox AutomationProperties.Name="Pick a spell" ItemsSource="{Binding CastableSpells}"
+                              SelectedItem="{Binding SelectedCastSpell}"
+                              PlaceholderText="Pick a spell"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="ui:CastableSpell">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <TextBlock Text="{Binding Name}"/>
+                                    <TextBlock Text="{Binding Level, StringFormat='L{0}'}"
+                                               Foreground="{DynamicResource Muted}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBlock Text="{Binding SelectedCastSpell.CastNote}"
+                               AutomationProperties.Name="What this spell needs"
+                               Foreground="{DynamicResource Muted}" TextWrapping="Wrap"
+                               IsVisible="{Binding SelectedCastSpell, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                    <TextBlock Classes="label" Text="CAST AT LEVEL" IsVisible="{Binding HasUpcastChoice}"/>
+                    <ComboBox AutomationProperties.Name="CAST AT LEVEL" ItemsSource="{Binding UpcastLevels}"
+                              SelectedItem="{Binding SelectedCastLevel}"
+                              IsVisible="{Binding HasUpcastChoice}"
+                              HorizontalAlignment="Stretch"/>
+                    <CheckBox AutomationProperties.Name="Cast as ritual"
+                              Content="Cast as ritual"
+                              IsChecked="{Binding CastAsRitual}"
+                              IsVisible="{Binding CanCastAsRitual}"/>
+                    <Button Classes="action"
+                            HorizontalAlignment="Stretch"
+                            Content="Cast"
+                            Command="{Binding CastSpellCommand}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="label" Text="QUICK ROLLS"/>
+                    <UniformGrid Columns="2">
+                        <Button Classes="action"
+                                Content="Initiative"
+                                Margin="2"
+                                Command="{Binding RollInitiativeCommand}"/>
+                        <Button Classes="action"
+                                Content="Perception"
+                                Margin="2"
+                                Command="{Binding RollPerceptionCommand}"/>
+                    </UniformGrid>
+
+                    <Grid ColumnDefinitions="*,Auto" Margin="2,2,2,0">
+                        <ComboBox AutomationProperties.Name="Saving throw" Grid.Column="0"
+                                  ItemsSource="{Binding SaveOptions}"
+                                  SelectedItem="{Binding SelectedSave}"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:QuickRollOption">
+                                    <TextBlock Text="{Binding Label}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Button Grid.Column="1" Classes="action" Content="Save"
+                                Margin="4,0,0,0" Command="{Binding RollSaveCommand}"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto" Margin="2,2,2,0">
+                        <ComboBox AutomationProperties.Name="Skill" Grid.Column="0"
+                                  ItemsSource="{Binding SkillOptions}"
+                                  SelectedItem="{Binding SelectedSkill}"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:QuickRollOption">
+                                    <TextBlock Text="{Binding Label}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Button Grid.Column="1" Classes="action" Content="Roll"
+                                Margin="4,0,0,0" Command="{Binding RollSkillCommand}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card" IsVisible="{Binding HasShortcuts}">
+                <StackPanel Spacing="6">
+                    <TextBlock Classes="label" Text="SHORTCUTS"/>
+                    <ItemsControl ItemsSource="{Binding Shortcuts}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Classes="action"
+                                        Content="{Binding Label}"
+                                        Margin="0,3"
+                                        HorizontalAlignment="Stretch"
+                                        Command="{Binding ActivateCommand}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

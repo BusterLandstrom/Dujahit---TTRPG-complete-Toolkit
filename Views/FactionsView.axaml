@@ -1,0 +1,115 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Dujahit.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+             x:Class="Dujahit.Views.FactionsView"
+             x:DataType="vm:FactionsViewModel"
+             FontFamily="{DynamicResource MainFont}"
+             Background="Transparent">
+
+    <Grid ColumnDefinitions="340,*">
+
+        <Border Grid.Column="0" Classes="panel" Margin="28,24,10,24">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Factions" Classes="header"/>
+                    <TextBlock Text="Track factions and how they relate" Classes="subtitle"/>
+
+                    <Border Classes="divider"/>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Classes="primary" Content="Add faction" Command="{Binding AddFactionCommand}"/>
+                        <ToggleButton Content="Link mode" IsChecked="{Binding LinkMode}"/>
+                    </StackPanel>
+
+                    <TextBlock Classes="muted"
+                               FontSize="12"
+                               TextWrapping="Wrap"
+                               Text="Drag a node to move it. Turn on Link mode, then drag from one faction onto another to relate them. Scroll to zoom, drag empty space to pan. Click a line to edit it."/>
+
+                    <StackPanel Spacing="8" IsVisible="{Binding HasSelectedNode}">
+                        <Border Classes="divider"/>
+                        <TextBlock Text="FACTION" Classes="sectionLabel"/>
+                        <TextBox AutomationProperties.Name="Name" Watermark="Name" Text="{Binding SelectedNode.Name}"/>
+                        <TextBox AutomationProperties.Name="Description" Watermark="Description"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 Height="90"
+                                 Text="{Binding SelectedNode.Description}"/>
+                        <TextBox AutomationProperties.Name="Color hex" Watermark="Color hex" Text="{Binding SelectedNode.ColorHex}"/>
+                        <ItemsControl ItemsSource="{Binding ColorSwatches}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:FactionSwatch">
+                                    <Button AutomationProperties.Name="{Binding Hex}" Width="26"
+                                            Height="26"
+                                            Margin="0,0,6,6"
+                                            Padding="0"
+                                            Background="{Binding Brush}"
+                                            Command="{Binding $parent[ItemsControl].((vm:FactionsViewModel)DataContext).SetNodeColorCommand}"
+                                            CommandParameter="{Binding Hex}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Classes="primary" Content="Save" Command="{Binding SaveSelectedFactionCommand}"/>
+                            <Button Classes="danger" Content="Delete"
+                                    Command="{Binding ArmDeleteFactionCommand}"
+                                    IsVisible="{Binding !ConfirmingDelete}"/>
+                            <Button Classes="danger" Content="Confirm delete"
+                                    Command="{Binding DeleteSelectedFactionCommand}"
+                                    IsVisible="{Binding ConfirmingDelete}"/>
+                            <Button Classes="ghost" Content="Cancel"
+                                    Command="{Binding CancelDeleteFactionCommand}"
+                                    IsVisible="{Binding ConfirmingDelete}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Spacing="8" IsVisible="{Binding HasSelectedRelation}">
+                        <Border Classes="divider"/>
+                        <TextBlock Text="RELATION" Classes="sectionLabel"/>
+                        <TextBlock Text="{Binding SelectedRelationEndpoints}" Classes="body"/>
+                        <TextBox AutomationProperties.Name="Relation type" Watermark="Relation type" Text="{Binding SelectedRelation.RelationType}"/>
+                        <ItemsControl ItemsSource="{Binding RelationSuggestions}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <Button Classes="card"
+                                            Margin="0,0,6,6"
+                                            Content="{Binding}"
+                                            Command="{Binding $parent[ItemsControl].((vm:FactionsViewModel)DataContext).SetRelationTypeCommand}"
+                                            CommandParameter="{Binding}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBox AutomationProperties.Name="Notes" Watermark="Notes"
+                                 AcceptsReturn="True"
+                                 TextWrapping="Wrap"
+                                 Height="70"
+                                 Text="{Binding SelectedRelation.Notes}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Classes="primary" Content="Save" Command="{Binding SaveSelectedRelationCommand}"/>
+                            <Button Classes="danger" Content="Delete" Command="{Binding DeleteSelectedRelationCommand}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <Border Grid.Column="1" Classes="panel" Margin="0,24,28,24" ClipToBounds="True">
+            <Canvas x:Name="GraphCanvas" Background="Transparent" IsHitTestVisible="True">
+                <Canvas x:Name="WorldCanvas" IsHitTestVisible="False"/>
+            </Canvas>
+        </Border>
+    </Grid>
+</UserControl>

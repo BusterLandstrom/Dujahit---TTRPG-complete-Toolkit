@@ -1,0 +1,66 @@
+﻿<views:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:Dujahit.Views"
+        xmlns:vm="clr-namespace:Dujahit.ViewModels"
+        x:Class="Dujahit.Views.Map.Dialogs.AddEncounterDialog"
+        Title="Drop Encounter onto Map"
+        Background="{DynamicResource Background}"
+        FontFamily="{DynamicResource MainFont}"
+        Foreground="{DynamicResource Foreground}">
+
+    <views:DialogWindow.Styles>
+        <Style Selector="Border.encounterCard">
+            <Setter Property="Background" Value="{DynamicResource Background}"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource CornerRadiusStandard}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Divider}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Border.encounterCard.selected">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+    </views:DialogWindow.Styles>
+
+    <Border Classes="panel" Margin="16">
+        <Grid RowDefinitions="Auto,Auto,Auto">
+            <StackPanel Grid.Row="0" Spacing="2" Margin="0,0,0,12">
+                <TextBlock Text="Drop encounter" Classes="header"/>
+                <TextBlock Text="Pick a saved encounter to place on the map" Classes="subtitle" FontSize="13"/>
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="1" MaxHeight="320" VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="EncounterList">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:EncounterPresetRowViewModel">
+                            <Border Classes="encounterCard"
+                                    PointerPressed="OnCardClicked"
+                                    Tag="{Binding}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="{Binding Name}"
+                                               Foreground="{DynamicResource AccentColor}"
+                                               FontSize="16"/>
+                                    <TextBlock Text="{Binding Summary}"
+                                               Foreground="{DynamicResource WidgetForeground}"
+                                               Opacity="0.75"
+                                               FontSize="12"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                        HorizontalAlignment="Right"
+                        Margin="0,12,0,0">
+                <Button Classes="ghost" Content="Cancel" Click="OnCancel" IsCancel="True"/>
+                <Button Classes="primary" Content="Drop" Click="OnAdd" IsDefault="True"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</views:DialogWindow>

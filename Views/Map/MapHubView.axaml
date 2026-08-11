@@ -1,0 +1,125 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Dujahit.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+             x:Class="Dujahit.Views.Map.MapHubView"
+             x:DataType="vm:MapHubViewModel"
+             FontFamily="{DynamicResource MainFont}"
+             Background="Transparent">
+
+    <Grid RowDefinitions="Auto,Auto,*" Margin="28,24">
+
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <StackPanel Grid.Column="0" Spacing="2">
+                <TextBlock Text="Maps" Classes="header"/>
+                <TextBlock Text="{Binding HubSubtitle}" Classes="subtitle"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center"
+                        IsVisible="{Binding IsDmView}">
+                <Button Classes="ghost"
+                        Content="+ Blank map"
+                        Command="{Binding CreateBlankMapCommand}"/>
+                <Button Classes="primary"
+                        Content="+ New Map"
+                        Command="{Binding CreateMapCommand}"/>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Classes="divider" Margin="0,16"/>
+
+        <StackPanel Grid.Row="2" Spacing="6" VerticalAlignment="Top" Margin="0,40,0,0"
+                    IsVisible="{Binding ShowEmptyState}">
+            <TextBlock Text="No maps yet." Classes="header" HorizontalAlignment="Center"/>
+            <TextBlock Text="New Map builds one from an image, or Blank map gives you a grid to fight on with no art."
+                       Classes="subtitle" HorizontalAlignment="Center" TextWrapping="Wrap" MaxWidth="440" TextAlignment="Center"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Maps}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:MapSummaryViewModel">
+                        <Border Classes="card maptile"
+                                Width="300"
+                                Margin="0,0,18,18"
+                                Padding="0">
+                            <StackPanel>
+                                <Border CornerRadius="20,20,0,0"
+                                        ClipToBounds="True"
+                                        Height="170"
+                                        Background="{DynamicResource Background}">
+                                    <Panel>
+                                        <Image Source="{Binding Thumbnail}" Stretch="UniformToFill"/>
+                                        <Border Classes="badge"
+                                                Background="{DynamicResource AccentColor}"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Top"
+                                                Margin="10"
+                                                IsVisible="{Binding IsActive}">
+                                            <TextBlock Text="LIVE"
+                                                       Foreground="{DynamicResource Background}"/>
+                                        </Border>
+                                        <Border Classes="badge"
+                                                Background="#AA0F0F1A"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Top"
+                                                Margin="10">
+                                            <TextBlock Text="{Binding GridLabel}"
+                                                       Foreground="{DynamicResource WidgetForeground}"/>
+                                        </Border>
+                                    </Panel>
+                                </Border>
+
+                                <StackPanel Margin="16,14,16,16" Spacing="12">
+                                    <TextBlock Text="{Binding Name}" Classes="tileName"/>
+
+                                    <StackPanel Spacing="12"
+                                                IsVisible="{Binding $parent[ItemsControl].((vm:MapHubViewModel)DataContext).IsDmView}">
+                                        <Button Classes="primary"
+                                                Content="Activate"
+                                                HorizontalAlignment="Stretch"
+                                                Command="{Binding $parent[ItemsControl].((vm:MapHubViewModel)DataContext).ActivateMapCommand}"
+                                                CommandParameter="{Binding}"/>
+
+                                        <Button Classes="ghost"
+                                                Content="{Binding VisibilityLabel}"
+                                                HorizontalAlignment="Stretch"
+                                                Command="{Binding $parent[ItemsControl].((vm:MapHubViewModel)DataContext).ToggleVisibilityCommand}"
+                                                CommandParameter="{Binding}"/>
+
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Button Grid.Column="0"
+                                                    Classes="ghost"
+                                                    Content="Edit"
+                                                    HorizontalAlignment="Left"
+                                                    Command="{Binding $parent[ItemsControl].((vm:MapHubViewModel)DataContext).EditMapCommand}"
+                                                    CommandParameter="{Binding}"/>
+                                            <Button Grid.Column="1"
+                                                    Classes="danger"
+                                                    Content="Delete"
+                                                    Command="{Binding $parent[ItemsControl].((vm:MapHubViewModel)DataContext).DeleteMapCommand}"
+                                                    CommandParameter="{Binding}"/>
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <Button Classes="primary"
+                                            Content="Open"
+                                            HorizontalAlignment="Stretch"
+                                            IsVisible="{Binding $parent[ItemsControl].((vm:MapHubViewModel)DataContext).IsSharedView}"
+                                            Command="{Binding $parent[ItemsControl].((vm:MapHubViewModel)DataContext).OpenSharedMapCommand}"
+                                            CommandParameter="{Binding}"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

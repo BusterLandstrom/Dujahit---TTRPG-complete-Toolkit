@@ -1,0 +1,67 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:gv="clr-namespace:Dujahit.Models.Database"
+             xmlns:vms="clr-namespace:Dujahit.ViewModels"
+             xmlns:views="clr-namespace:Dujahit.Views"
+             x:DataType="vms:QuickNotesWidgetViewModel"
+             x:Class="Dujahit.Views.QuickNotesWidgetView"
+             Background="Transparent"
+             FontFamily="{DynamicResource MainFont}">
+
+    <UserControl.Styles>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <Button Grid.Row="0"
+                AutomationProperties.Name="Quick notes" Classes="widgetBar"
+                Command="{Binding ToggleCommand}"
+                BorderThickness="1,1,1,0"
+                CornerRadius="10,10,0,0"
+                Height="30"
+                IsVisible="{Binding !IsOpen}">
+            <Grid ColumnDefinitions="*,Auto" Margin="12,0,12,0">
+                <TextBlock Grid.Column="0"
+                           Text="Quick notes"
+                           Classes="widgetTitle"
+                           VerticalAlignment="Center"/>
+                <PathIcon Grid.Column="1"
+                          Data="{x:Static gv:GlobalVariables.IconChevronUp}"
+                          Width="11" Height="11"
+                          VerticalAlignment="Center"
+                          Foreground="{DynamicResource WidgetForeground}"/>
+            </Grid>
+        </Button>
+
+        <Border Grid.Row="1"
+                Classes="widget"
+                BorderThickness="1,1,1,0"
+                CornerRadius="10,10,0,0"
+                IsVisible="{Binding IsOpen}">
+            <Grid Margin="10" RowDefinitions="Auto,*">
+
+                <Grid Grid.Row="0" Margin="0,0,0,6"
+                      ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0"
+                               Text="Quick notes"
+                               Classes="widgetTitle"
+                               VerticalAlignment="Center"/>
+                    <Button Grid.Column="1"
+                            AutomationProperties.Name="Minimize quick notes"
+                            Classes="iconBtn"
+                            Command="{Binding ToggleCommand}">
+                        <PathIcon Data="{x:Static gv:GlobalVariables.IconChevronDown}" Width="12" Height="12"/>
+                    </Button>
+                </Grid>
+
+                <ContentControl Grid.Row="1" Content="{Binding Panel}">
+                    <ContentControl.ContentTemplate>
+                        <DataTemplate DataType="vms:QuickNotesPanelViewModel">
+                            <views:QuickNotesPanelView/>
+                        </DataTemplate>
+                    </ContentControl.ContentTemplate>
+                </ContentControl>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

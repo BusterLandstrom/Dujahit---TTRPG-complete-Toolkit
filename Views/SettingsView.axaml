@@ -1,0 +1,256 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             xmlns:vms="clr-namespace:Dujahit.ViewModels"
+             xmlns:settings="clr-namespace:Dujahit.Models.Settings"
+             x:Class="Dujahit.Views.SettingsView"
+             x:DataType="vms:SettingsViewModel"
+             Background="Transparent"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">
+
+    <Border Background="{DynamicResource Widget}"
+            CornerRadius="{DynamicResource CornerRadiusStandard}"
+            Margin="12">
+        <TabControl>
+            <TabItem Header="Theme">
+                <ScrollViewer Padding="20,20,20,0">
+                    <StackPanel Spacing="16" MaxWidth="560" HorizontalAlignment="Stretch" Margin="0,0,0,64">
+
+                        <TextBlock Classes="header" Text="Theme" />
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Classes="fieldLabel" Text="UI scale" />
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Slider AutomationProperties.Name="Interface scale percent" Grid.Column="0" Minimum="50" Maximum="200"
+                                        Value="{Binding UiScalePercent}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="{Binding UiScaleLabel}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                            </Grid>
+                            <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                                       Text="The app auto-sizes to your screen. Drag this if it looks too big or too small."/>
+                        </StackPanel>
+
+                        <Border Height="1" Background="{DynamicResource Divider}" Margin="0,4" />
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Classes="fieldLabel" Text="Load a saved theme" />
+                            <ComboBox AutomationProperties.Name="Select a theme" ItemsSource="{Binding Themes}"
+                                      SelectedItem="{Binding SelectedTheme}"
+                                      PlaceholderText="Select a theme"
+                                      HorizontalAlignment="Stretch">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="settings:Theme">
+                                        <TextBlock Text="{Binding Name}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                <Button Classes="choose" Content="Import" Command="{Binding ImportTheme}" />
+                                <Button Classes="choose" Content="Export" Command="{Binding ExportTheme}" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Border Height="1" Background="{DynamicResource Divider}" Margin="0,4" />
+
+                        <Grid ColumnDefinitions="160,*">
+                            <Grid.Styles>
+                                <Style Selector="TextBox">
+                                    <Setter Property="Margin" Value="0,0,0,10" />
+                                </Style>
+                                <Style Selector="TextBlock">
+                                    <Setter Property="Margin" Value="0,0,12,10" />
+                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                </Style>
+                            </Grid.Styles>
+
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Text="Background" />
+                            <TextBox AutomationProperties.Name="#0F0F1A"   Grid.Row="0" Grid.Column="1" Text="{Binding BackgroundHex}" Watermark="#0F0F1A" />
+
+                            <TextBlock Grid.Row="1" Text="Foreground" />
+                            <TextBox AutomationProperties.Name="#F5F0E1"   Grid.Row="1" Grid.Column="1" Text="{Binding ForegroundHex}" Watermark="#F5F0E1" />
+
+                            <TextBlock Grid.Row="2" Text="Widget" />
+                            <TextBox AutomationProperties.Name="#1A1A2A"   Grid.Row="2" Grid.Column="1" Text="{Binding WidgetHex}" Watermark="#1A1A2A" />
+
+                            <TextBlock Grid.Row="3" Text="Widget Foreground" />
+                            <TextBox AutomationProperties.Name="#ECEAF0"   Grid.Row="3" Grid.Column="1" Text="{Binding WidgetForegroundHex}" Watermark="#ECEAF0" />
+
+                            <TextBlock Grid.Row="4" Text="Accent Color" />
+                            <TextBox AutomationProperties.Name="#FFD700"   Grid.Row="4" Grid.Column="1" Text="{Binding AccentColorHex}" Watermark="#FFD700" />
+
+                            <TextBlock Grid.Row="5" Text="Accent Hover" />
+                            <TextBox AutomationProperties.Name="#BFA050"   Grid.Row="5" Grid.Column="1" Text="{Binding AccentHoverHex}" Watermark="#BFA050" />
+
+                            <TextBlock Grid.Row="6" Text="Divider" />
+                            <TextBox AutomationProperties.Name="#3A3A4D"   Grid.Row="6" Grid.Column="1" Text="{Binding DividerHex}" Watermark="#3A3A4D" />
+
+                            <TextBlock Grid.Row="7" Text="Danger" />
+                            <TextBox AutomationProperties.Name="#BB4444"   Grid.Row="7" Grid.Column="1" Text="{Binding DangerHex}" Watermark="#BB4444" />
+
+                            <TextBlock Grid.Row="8" Text="Muted text" />
+                            <TextBox AutomationProperties.Name="#9A96A8"   Grid.Row="8" Grid.Column="1" Text="{Binding MutedHex}" Watermark="#9A96A8" />
+                        </Grid>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock Classes="fieldLabel" Text="Save as" />
+                            <TextBox AutomationProperties.Name="Theme name" Text="{Binding NewThemeName}" Watermark="Theme name" />
+                        </StackPanel>
+
+                        <Button Classes="accent"
+                                Content="Save"
+                                Command="{Binding SaveTheme}"
+                                HorizontalAlignment="Right" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="DM Settings" IsVisible="{Binding IsDm}">
+                <ScrollViewer Padding="20,16,20,0">
+                    <StackPanel Spacing="16" MaxWidth="560" HorizontalAlignment="Left" Margin="0,0,0,64">
+                        <TextBlock Classes="header" Text="Dungeon Master" />
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <ToggleSwitch AutomationProperties.Name="Hide rolls from players" IsChecked="{Binding HideRolls}" />
+                            <StackPanel Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Text="Hide Rolls (DM Only)" />
+                                <TextBlock Text="When on, NPC and DM rolls stay hidden from players."
+                                           FontSize="{DynamicResource FontSizeSmall}" Opacity="0.6" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Presence color" />
+                            <TextBox AutomationProperties.Name="Presence color hex" Text="{Binding PresenceColorHex}" Watermark="#FFD700" MaxWidth="160" HorizontalAlignment="Left" />
+                            <TextBlock Text="The color your cursor marker wears when you write in a shared note. Players wear their character's color."
+                                       FontSize="{DynamicResource FontSizeSmall}" Opacity="0.6" TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <TextBlock Classes="header" Text="Combat" />
+                        <TextBlock Text="Base actions every combatant gets at the start of their turn. Feats, items and features stack on top of this at combat time."
+                                   FontSize="{DynamicResource FontSizeSmall}" Opacity="0.6" />
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Base actions" VerticalAlignment="Center" />
+                            <NumericUpDown AutomationProperties.Name="Base actions" Grid.Row="0" Grid.Column="1"
+                                           Minimum="0" Maximum="10" Increment="1"
+                                           Width="130"
+                                           Value="{Binding BaseActions}" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Base bonus actions" VerticalAlignment="Center" Margin="0,8,0,0" />
+                            <NumericUpDown AutomationProperties.Name="Base bonus actions" Grid.Row="1" Grid.Column="1"
+                                           Minimum="0" Maximum="10" Increment="1"
+                                           Width="130" Margin="0,8,0,0"
+                                           Value="{Binding BaseBonusActions}" />
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
+                            <ToggleSwitch AutomationProperties.Name="Automatic flanking" IsChecked="{Binding AutoFlanking}" />
+                            <StackPanel Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Text="Auto flanking" />
+                                <TextBlock Text="When on, an attacker gets advantage if an ally flanks the target from the opposite side. Turn off for homebrew without flanking."
+                                           FontSize="{DynamicResource FontSizeSmall}" Opacity="0.6" TextWrapping="Wrap" MaxWidth="480" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
+                            <ToggleSwitch AutomationProperties.Name="Allow multiclassing" IsChecked="{Binding MulticlassingAllowed}" />
+                            <StackPanel Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Text="Allow multiclassing" />
+                                <TextBlock Text="When off, characters keep to one class even if the ruleset supports splitting levels."
+                                           FontSize="{DynamicResource FontSizeSmall}" Opacity="0.6" TextWrapping="Wrap" MaxWidth="480" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
+                            <ToggleSwitch AutomationProperties.Name="Hold tokens to their speed and their turn" IsChecked="{Binding EnforceMovementBudget}" />
+                            <StackPanel Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Text="Hold tokens to their speed and their turn" />
+                                <TextBlock Classes="hint" Text="Off lets anyone be dragged anywhere at any point, on stops a creature moving further than its speed or on somebody else's turn." TextWrapping="Wrap" MaxWidth="480"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
+                            <ToggleSwitch AutomationProperties.Name="Players roll their own saves" IsChecked="{Binding PlayerRollsOwnSaves}" />
+                            <StackPanel Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Text="Players roll their own saves" />
+                                <TextBlock Classes="hint" Text="When a spell or an area catches a player character they are left owing the save and roll it themselves, npcs are still rolled by me." TextWrapping="Wrap" MaxWidth="480"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
+                            <ToggleSwitch AutomationProperties.Name="I can move tokens past their speed" IsChecked="{Binding DmIgnoresMovementBudget}" />
+                            <StackPanel Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Text="I can move tokens past their speed" />
+                                <TextBlock Text="Everyone is held to their movement on their own turn. Turn this on and your own dragging stops being checked, for a teleport or a shove you are adjudicating yourself. Players stay held either way."
+                                           FontSize="{DynamicResource FontSizeSmall}" Opacity="0.6" TextWrapping="Wrap" MaxWidth="480" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <TextBlock Classes="header" Text="Sharing" Margin="0,16,0,0" />
+                        <TextBlock Text="Send your players the invite, one paste into the join screen and they are in. It carries the address, the port, the join code and the trust tail after the #, so share the whole string and nothing else."
+                                   FontSize="{DynamicResource FontSizeSmall}" Opacity="0.6" TextWrapping="Wrap" />
+                        <Button Classes="link" Content="{Binding LocalAddressHint}" Command="{Binding CopyLanInvite}"
+                                IsVisible="{Binding LocalAddressHint, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                                HorizontalAlignment="Left" Margin="0,2,0,0"
+                                AutomationProperties.Name="Copy the invite for players on this same network"
+                                ToolTip.Tip="Copy the invite for players on this same network" />
+                        <Grid ColumnDefinitions="90,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,4,0,0">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Invite" Classes="fieldLabel" VerticalAlignment="Center" />
+                            <Grid Grid.Row="0" Grid.Column="1" ColumnDefinitions="*,Auto">
+                                <TextBox AutomationProperties.Name="Invite" Grid.Column="0" Text="{Binding InviteAddress}" IsReadOnly="True" FontSize="18" />
+                                <Button Grid.Column="1" Classes="choose" Content="Copy" Margin="8,0,0,0" Command="{Binding CopyInvite}" />
+                            </Grid>
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Address" Classes="fieldLabel" VerticalAlignment="Center" Margin="0,6,0,0" />
+                            <TextBox AutomationProperties.Name="Address" Grid.Row="1" Grid.Column="1" Text="{Binding HostAddress}" IsReadOnly="True" FontSize="18" Margin="0,6,0,0" />
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Port" Classes="fieldLabel" VerticalAlignment="Center" Margin="0,6,0,0" />
+                            <TextBox AutomationProperties.Name="Port" Grid.Row="2" Grid.Column="1" Text="{Binding HostPort}" IsReadOnly="True" FontSize="18" Margin="0,6,0,0" />
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Join code" Classes="fieldLabel" VerticalAlignment="Center" Margin="0,6,0,0" />
+                            <Grid Grid.Row="3" Grid.Column="1" ColumnDefinitions="*,Auto" Margin="0,6,0,0">
+                                <TextBox AutomationProperties.Name="Join code" Grid.Column="0" Text="{Binding JoinCode}" IsReadOnly="True" FontSize="18" VerticalAlignment="Center" />
+                                <Button Grid.Column="1" Classes="choose" Content="Regenerate" Margin="8,0,0,0" Command="{Binding RegenerateJoinCode}" />
+                            </Grid>
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
+                            <ToggleSwitch AutomationProperties.Name="Encrypt connections" IsChecked="{Binding EncryptTransport}" />
+                            <StackPanel Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Text="Encrypt connections" />
+                                <TextBlock Text="On by default and nothing to install for anyone, the invite carries the trust. Turn off only if a network refuses the handshake. Takes effect the next time you host."
+                                           FontSize="{DynamicResource FontSizeSmall}" Opacity="0.6" TextWrapping="Wrap" MaxWidth="480" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <TextBlock Classes="header" Text="Data and backup" Margin="0,16,0,0" />
+                        <TextBlock Text="Back up the whole campaign to a file you can move to another PC, or import a character someone sent you."
+                                   FontSize="{DynamicResource FontSizeSmall}" Opacity="0.6" TextWrapping="Wrap" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Classes="choose" Content="Back up everything" Command="{Binding BackupDatabase}" />
+                            <Button Classes="choose" Content="Restore from backup" Command="{Binding RestoreDatabase}" />
+                            <Button Classes="choose" Content="Import character" Command="{Binding ImportCharacter}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Classes="choose" Content="Export campaign" Command="{Binding ExportCampaign}" />
+                            <Button Classes="choose" Content="Import campaign" Command="{Binding ImportCampaign}" />
+                        </StackPanel>
+                        <TextBlock Text="A snapshot is also taken automatically before any database upgrade. Open the folder to find those."
+                                   FontSize="{DynamicResource FontSizeSmall}" Opacity="0.6" TextWrapping="Wrap" />
+                        <Button Classes="choose" Content="Open backups folder" HorizontalAlignment="Left" Command="{Binding OpenBackupsFolder}" />
+                        <TextBlock Text="{Binding DataStatus}"
+                                   FontSize="{DynamicResource FontSizeSmall}"
+                                   Opacity="0.75" TextWrapping="Wrap" />
+
+                        <TextBlock Classes="header" Text="Delete this campaign" Margin="0,16,0,0" />
+                        <TextBlock Text="Removes the campaign and everything in it, the characters, maps, notes, handouts, chat and rolls. The rulebook stays and your other campaigns are not touched. There is no undo."
+                                   FontSize="{DynamicResource FontSizeSmall}" Opacity="0.6" TextWrapping="Wrap" MaxWidth="480" />
+                        <Button Classes="danger" Content="Delete campaign" HorizontalAlignment="Left" Command="{Binding DeleteCampaign}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </Border>
+</UserControl>

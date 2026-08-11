@@ -1,0 +1,75 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:md="https://github.com/whistyun/Markdown.Avalonia"
+             xmlns:models="clr-namespace:Dujahit.Models.DmScreen"
+             x:DataType="models:DmScreenPanel"
+             x:Class="Dujahit.Views.DmScreenPanelView"
+             FontFamily="{DynamicResource MainFont}">
+
+    <Border Width="300" MinHeight="120" Margin="8"
+            Background="{DynamicResource Widget}"
+            CornerRadius="{DynamicResource CornerRadiusStandard}"
+            Padding="14">
+        <Grid>
+
+            <StackPanel Spacing="8" IsVisible="{Binding !IsEditing}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" Text="{Binding Title}"
+                               Foreground="{DynamicResource AccentColor}"
+                               FontSize="{DynamicResource FontSizeNormal}"
+                               FontWeight="Bold" TextWrapping="Wrap"/>
+                    <Border Grid.Column="1" IsVisible="{Binding IsTemplate}"
+                            Background="{DynamicResource Divider}"
+                            CornerRadius="6" Padding="6,2" VerticalAlignment="Top">
+                        <TextBlock Text="ref"
+                                   Foreground="{DynamicResource WidgetForeground}"
+                                   FontSize="{DynamicResource FontSizeSmall}"/>
+                    </Border>
+                </Grid>
+
+                <md:MarkdownScrollViewer Name="MdViewer" MaxHeight="240" SelectionEnabled="False"/>
+
+                <ItemsControl ItemsSource="{Binding RollChips}" IsVisible="{Binding HasRollChips}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="x:String">
+                            <Button Classes="choose"
+                                    Content="{Binding}"
+                                    Margin="0,0,6,6"
+                                    Padding="8,3"
+                                    FontSize="12"
+                                    AutomationProperties.Name="{Binding}"
+                                    Command="{Binding $parent[ItemsControl].((models:DmScreenPanel)DataContext).RollChipCommand}"
+                                    CommandParameter="{Binding}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                    <Button Classes="card" Content="Open" Click="OnOpen"
+                            AutomationProperties.Name="Open this panel in a window" ToolTip.Tip="Open this panel in a window"/>
+                    <Button Classes="card" Content="Edit" Command="{Binding EditCommand}" IsVisible="{Binding !IsTemplate}"/>
+                    <Button Classes="danger" Content="Delete" Command="{Binding DeleteCommand}" IsVisible="{Binding !IsTemplate}"/>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Spacing="8" IsVisible="{Binding IsEditing}">
+                <TextBox AutomationProperties.Name="Title" Text="{Binding Title}" Watermark="Title" FontWeight="Bold"
+                         Background="{DynamicResource Background}"
+                         Foreground="{DynamicResource Foreground}" CornerRadius="6"/>
+                <TextBox AutomationProperties.Name="Panel text, markdown supported" Name="ContentBox" Text="{Binding Content}" Watermark="Write your reference text, markdown works"
+                         AcceptsReturn="True" TextWrapping="Wrap" MinHeight="110"
+                         Background="{DynamicResource Background}"
+                         Foreground="{DynamicResource Foreground}" CornerRadius="6"/>
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                    <Button Classes="card" Content="Cancel" Command="{Binding CancelCommand}"/>
+                    <Button Classes="accent" Content="Save" Command="{Binding SaveCommand}"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

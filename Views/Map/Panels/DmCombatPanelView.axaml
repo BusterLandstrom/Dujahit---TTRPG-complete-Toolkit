@@ -1,0 +1,769 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:gv="clr-namespace:Dujahit.Models.Database"
+             xmlns:vm="clr-namespace:Dujahit.ViewModels"
+             xmlns:ui="clr-namespace:Dujahit.Models.UI"
+             xmlns:models="clr-namespace:Dujahit.Models"
+             xmlns:sys="using:System"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="600"
+             x:Class="Dujahit.Views.Map.Panels.DmCombatPanelView"
+             x:DataType="vm:DmCombatPanelViewModel"
+             Background="Transparent"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">
+
+    <ScrollViewer>
+        <StackPanel Spacing="8" Margin="0,0,0,64">
+
+            <Border Classes="card" Padding="14,12"
+                    IsVisible="{Binding HasSelection}">
+                <StackPanel Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Classes="header"
+                                   TextTrimming="CharacterEllipsis"
+                                   VerticalAlignment="Center"
+                                   Text="{Binding SelectedCombatant.Name}"/>
+                        <Button Grid.Column="1"
+                                Classes="ghost"
+                                Content="Dismiss summons"
+                                VerticalAlignment="Center"
+                                Margin="0,0,6,0"
+                                IsVisible="{Binding HasDismissableSummons}"
+                                Command="{Binding DismissSummonsCommand}"/>
+                        <Button Grid.Column="2"
+                                Classes="danger"
+                                Content="Remove"
+                                VerticalAlignment="Center"
+                                Command="{Binding RemoveSelectedCommand}"/>
+                    </Grid>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Classes="sectionLabel" Text="HP"/>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <NumericUpDown AutomationProperties.Name="Current hit points" Value="{Binding SelectedCombatant.CurrentHp}"
+                                           Minimum="0"
+                                           Width="70"
+                                           ShowButtonSpinner="False"/>
+                            <TextBlock Text="/"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Muted}"/>
+                            <NumericUpDown AutomationProperties.Name="Max hit points" Value="{Binding SelectedCombatant.MaxHp}"
+                                           Minimum="0"
+                                           Width="70"
+                                           ShowButtonSpinner="False"/>
+                        </StackPanel>
+                        <ProgressBar Minimum="0"
+                                     Maximum="{Binding SelectedCombatant.MaxHp}"
+                                     Value="{Binding SelectedCombatant.CurrentHp}"
+                                     Height="6"
+                                     Foreground="{DynamicResource AccentColor}"
+                                     Background="{DynamicResource Background}"
+                                     CornerRadius="3"/>
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                        <TextBlock Grid.Column="0" Classes="sectionLabel" Text="INIT" VerticalAlignment="Center"/>
+                        <NumericUpDown AutomationProperties.Name="INIT" Grid.Column="1"
+                                       Value="{Binding SelectedCombatant.Initiative}"
+                                       Margin="6,0,0,0"
+                                       ShowButtonSpinner="False"/>
+                        <Button Grid.Column="2"
+                                Classes="card"
+                                Content="Roll"
+                                Margin="4,0,0,0"
+                                AutomationProperties.Name="Reroll 1d20 + Dex" ToolTip.Tip="Reroll 1d20 + Dex"
+                                Command="{Binding RerollInitiativeCommand}"/>
+                        <TextBlock Grid.Column="3"
+                                   Classes="fieldLabel"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0,0,0"
+                                   Text="{Binding SelectedCombatant.ArmorClass, StringFormat='AC {0}'}"/>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto,Auto">
+                        <NumericUpDown Grid.Column="0"
+                                       AutomationProperties.Name="Damage or heal amount"
+                                       Value="{Binding QuickAdjustAmount}"
+                                       Minimum="0"
+                                       ShowButtonSpinner="False"/>
+                        <Button Grid.Column="1"
+                                Classes="danger"
+                                Content="Damage"
+                                Margin="4,0,0,0"
+                                Command="{Binding ApplyDamageCommand}"/>
+                        <Button Grid.Column="2"
+                                Classes="card"
+                                Content="Heal"
+                                Margin="4,0,0,0"
+                                Command="{Binding ApplyHealCommand}"/>
+                    </Grid>
+
+                    <StackPanel Spacing="4" IsVisible="{Binding SelectedCombatant.IsDowned}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding SelectedCombatant.DeathSaveStatus}"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Danger}"
+                                       FontWeight="SemiBold"/>
+                            <Button Grid.Column="1"
+                                    Classes="card"
+                                    Content="Roll save"
+                                    Command="{Binding RollCombatantDeathSaveCommand}"
+                                    IsEnabled="{Binding SelectedCombatant.CanRollDeathSave}"/>
+                        </Grid>
+                        <TextBlock Text="{Binding SelectedCombatant.DeathSaveTally}"
+                                   Foreground="{DynamicResource WidgetForeground}"
+                                   FontSize="{DynamicResource FontSizeSmall}"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <Border Classes="divider"/>
+                        <TextBlock Classes="sectionLabel" Text="ACTION ECONOMY"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0"
+                                       Foreground="{DynamicResource WidgetForeground}"
+                                       Text="Actions"/>
+                            <TextBlock Grid.Column="1"
+                                       Foreground="{DynamicResource WidgetForeground}"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding SelectedCombatant.ActionsRemaining, StringFormat='{}{0} left'}"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0"
+                                       Foreground="{DynamicResource WidgetForeground}"
+                                       Text="Bonus actions"/>
+                            <TextBlock Grid.Column="1"
+                                       Foreground="{DynamicResource WidgetForeground}"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding SelectedCombatant.BonusActionsRemaining, StringFormat='{}{0} left'}"/>
+                        </Grid>
+                        <TextBlock Classes="fieldLabel"
+                                   Text="{Binding SelectedCombatant.EconomyLabel}"/>
+                        <Grid ColumnDefinitions="*,*,Auto">
+                            <Button Grid.Column="0"
+                                    Classes="card"
+                                    Content="Use Action"
+                                    Margin="0,0,4,0"
+                                    IsEnabled="{Binding SelectedCombatant.CanSpendAction}"
+                                    Command="{Binding SpendActionCommand}"/>
+                            <Button Grid.Column="1"
+                                    Classes="card"
+                                    Content="Use Bonus"
+                                    Margin="4,0,0,0"
+                                    IsEnabled="{Binding SelectedCombatant.CanSpendBonusAction}"
+                                    Command="{Binding SpendBonusActionCommand}"/>
+                            <Button Grid.Column="2"
+                                    Classes="card"
+                                    Content="Reset"
+                                    Margin="4,0,0,0"
+                                    Command="{Binding ResetEconomyCommand}"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Button Grid.Column="0"
+                                    Classes="card"
+                                    HorizontalAlignment="Stretch"
+                                    Content="Use Reaction"
+                                    Margin="0,0,4,0"
+                                    IsEnabled="{Binding SelectedCombatant.CanSpendReaction}"
+                                    Command="{Binding SpendReactionCommand}"/>
+                            <Button Grid.Column="1"
+                                    Classes="card"
+                                    Content="{Binding SelectedCombatant.SurgeLabel}"
+                                    IsVisible="{Binding SelectedCombatant.HasSurge}"
+                                    IsEnabled="{Binding SelectedCombatant.CanActionSurge}"
+                                    Command="{Binding ActionSurgeCommand}"/>
+                        </Grid>
+                        <CheckBox Content="Dash (double movement)"
+                                  IsChecked="{Binding SelectedCombatant.Dashed}"
+                                  Command="{Binding DashCommand}"/>
+                        <Grid ColumnDefinitions="*,*,*">
+                            <Button Grid.Column="0"
+                                    Classes="card"
+                                    Content="Ready"
+                                    Margin="0,0,4,0"
+                                    IsEnabled="{Binding SelectedCombatant.CanSpendAction}"
+                                    Command="{Binding ReadyActionCommand}"
+                                    AutomationProperties.Name="Spend this combatant's action now, held until it triggers" ToolTip.Tip="Spend this combatant's action now, held until it triggers"/>
+                            <Button Grid.Column="1"
+                                    Classes="card"
+                                    Content="Trigger"
+                                    Margin="4,0,4,0"
+                                    IsEnabled="{Binding SelectedCombatant.Readied}"
+                                    Command="{Binding TriggerReadiedCommand}"/>
+                            <Button Grid.Column="2"
+                                    Classes="card"
+                                    Content="Delay"
+                                    Margin="4,0,0,0"
+                                    Command="{Binding DelayTurnCommand}"
+                                    AutomationProperties.Name="Drop the active combatant to the bottom of this round's order" ToolTip.Tip="Drop the active combatant to the bottom of this round's order"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <Border Classes="divider"/>
+                        <TextBlock Classes="sectionLabel" Text="TARGET"/>
+                        <ComboBox AutomationProperties.Name="Pick a target" ItemsSource="{Binding Initiative.Combatants}"
+                                  SelectedItem="{Binding AttackTarget}"
+                                  PlaceholderText="Pick a target"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CombatantViewModel">
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBlock Classes="sectionLabel" Text="ACTIONS"/>
+                        <ComboBox AutomationProperties.Name="Ally to help, for Help only" ItemsSource="{Binding Initiative.Combatants}"
+                                  SelectedItem="{Binding HelpAlly}"
+                                  PlaceholderText="Ally to help, for Help only"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CombatantViewModel">
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <ItemsControl ItemsSource="{Binding TacticalActions}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:TacticalActionRule">
+                                    <Button Classes="ghost" Margin="0,4,4,0"
+                                            MaxWidth="240"
+                                            AutomationProperties.Name="{Binding Name}"
+                                            ToolTip.Tip="{Binding Name}"
+                                            CommandParameter="{Binding Id}"
+                                            Command="{Binding $parent[ItemsControl].((vm:DmCombatPanelViewModel)DataContext).TacticalCommand}">
+                                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Classes="sectionLabel" Text="ATTACKS"/>
+                        <ItemsControl ItemsSource="{Binding SelectedCombatant.Attacks}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CombatantAttackViewModel">
+                                    <Border Classes="row" Margin="0,0,0,4">
+                                        <Grid ColumnDefinitions="*,Auto,Auto">
+                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}"
+                                                           Foreground="{DynamicResource WidgetForeground}"
+                                                           FontWeight="SemiBold"/>
+                                                <TextBlock Classes="fieldLabel" Text="{Binding Subtitle}"/>
+                                            </StackPanel>
+                                            <Button Grid.Column="1"
+                                                    Classes="card"
+                                                    Content="Roll"
+                                                    VerticalAlignment="Center"
+                                                    Command="{Binding $parent[ItemsControl].((vm:DmCombatPanelViewModel)DataContext).RollAttackCommand}"
+                                                    CommandParameter="{Binding}"/>
+                                            <Button Grid.Column="2"
+                                                    AutomationProperties.Name="Remove attack"
+                                                    Classes="del"
+                                                    Content="&#x00D7;"
+                                                    VerticalAlignment="Center"
+                                                    Margin="4,0,0,0"
+                                                    Command="{Binding $parent[ItemsControl].((vm:DmCombatPanelViewModel)DataContext).RemoveAttackCommand}"
+                                                    CommandParameter="{Binding}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <StackPanel Spacing="4" IsVisible="{Binding SelectedCombatant.HasLegendaryActions}">
+                            <TextBlock Classes="sectionLabel" Text="{Binding SelectedCombatant.LegendaryLabel}"/>
+                            <ItemsControl ItemsSource="{Binding SelectedCombatant.LegendaryActions}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="gv:LegendaryActionOption">
+                                        <Border Classes="row" Margin="0,0,0,4">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Name}"
+                                                               Foreground="{DynamicResource WidgetForeground}"
+                                                               FontWeight="SemiBold"/>
+                                                    <TextBlock Classes="fieldLabel" Text="{Binding Description}" TextTrimming="CharacterEllipsis"/>
+                                                </StackPanel>
+                                                <Button Grid.Column="1"
+                                                        Classes="card"
+                                                        Content="{Binding Cost, StringFormat='Use ({0})'}"
+                                                        VerticalAlignment="Center"
+                                                        Command="{Binding $parent[ItemsControl].((vm:DmCombatPanelViewModel)DataContext).UseLegendaryCommand}"
+                                                        CommandParameter="{Binding}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                        <StackPanel Spacing="4" IsVisible="{Binding SelectedCombatant.HasLairActions}">
+                            <TextBlock Classes="sectionLabel" Text="{Binding SelectedCombatant.LairLabel}"/>
+                            <ItemsControl ItemsSource="{Binding SelectedCombatant.LairActions}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="gv:LairActionOption">
+                                        <Border Classes="row" Margin="0,0,0,4">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Name}"
+                                                               Foreground="{DynamicResource WidgetForeground}"
+                                                               FontWeight="SemiBold"/>
+                                                    <TextBlock Classes="fieldLabel" Text="{Binding Description}" TextTrimming="CharacterEllipsis"/>
+                                                </StackPanel>
+                                                <Button Grid.Column="1"
+                                                        Classes="card"
+                                                        Content="Use"
+                                                        VerticalAlignment="Center"
+                                                        Command="{Binding $parent[ItemsControl].((vm:DmCombatPanelViewModel)DataContext).UseLairCommand}"
+                                                        CommandParameter="{Binding}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                        <Border Classes="row" Margin="0,2,0,0">
+                            <StackPanel Spacing="6">
+                                <TextBox AutomationProperties.Name="Attack name" Text="{Binding NewAttackName}" Watermark="Attack name" CornerRadius="6"/>
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <TextBlock Grid.Column="0" Classes="fieldLabel" Text="To hit" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <NumericUpDown AutomationProperties.Name="To hit" Grid.Column="1" Value="{Binding NewAttackToHit}" Increment="1"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <TextBlock Grid.Column="0" Classes="fieldLabel" Text="Range ft" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <NumericUpDown AutomationProperties.Name="Range ft" Grid.Column="1" Value="{Binding NewAttackRange}" Increment="5" Minimum="0"/>
+                                </Grid>
+                                <TextBox AutomationProperties.Name="Damage e.g. 1d6+2" Text="{Binding NewAttackDamage}" Watermark="Damage e.g. 1d6+2" CornerRadius="6"/>
+                                <TextBox AutomationProperties.Name="Damage type e.g. slashing" Text="{Binding NewAttackDamageType}" Watermark="Damage type e.g. slashing" CornerRadius="6"/>
+                                <ComboBox AutomationProperties.Name="Mastery, optional" ItemsSource="{Binding MasteryOptions}"
+                                          SelectedItem="{Binding NewAttackMastery}"
+                                          PlaceholderText="Mastery, optional"
+                                          HorizontalAlignment="Stretch">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate x:DataType="models:MasteryRule">
+                                            <TextBlock Text="{Binding Name}"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <Button Classes="accent" HorizontalAlignment="Stretch" Content="Add attack" Command="{Binding AddAttackCommand}"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6"
+                                IsVisible="{Binding HasSelectedWeapons}">
+                        <Border Classes="divider"/>
+                        <TextBlock Classes="sectionLabel" Text="PLAYER WEAPONS"/>
+                        <ItemsControl ItemsSource="{Binding SelectedWeapons}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:InventoryItemViewModel">
+                                    <Border Classes="row" Margin="0,0,0,4">
+                                        <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}"
+                                                           Foreground="{DynamicResource WidgetForeground}"
+                                                           FontWeight="SemiBold"/>
+                                                <TextBlock Classes="fieldLabel" Text="{Binding DamageSummary}"/>
+                                            </StackPanel>
+                                            <Button Grid.Column="1"
+                                                    Classes="card"
+                                                    Content="Attack"
+                                                    Margin="0,0,4,0"
+                                                    VerticalAlignment="Center"
+                                                    IsEnabled="{Binding $parent[ItemsControl].((vm:DmCombatPanelViewModel)DataContext).CanSwingSelectedNow}"
+                                                    Command="{Binding AttackCommand}"/>
+                                            <Button Grid.Column="2"
+                                                    Classes="card"
+                                                    Content="Dmg"
+                                                    VerticalAlignment="Center"
+                                                    Command="{Binding RollDamageCommand}"/>
+                                            <Button Grid.Column="3"
+                                                    Classes="card"
+                                                    Content="Crit"
+                                                    Margin="4,0,0,0"
+                                                    VerticalAlignment="Center"
+                                                    Command="{Binding RollCritCommand}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6"
+                                IsVisible="{Binding SelectedCombatant.HasSpellSlots}">
+                        <Border Classes="divider"/>
+                        <TextBlock Classes="sectionLabel" Text="SPELL SLOTS"/>
+                        <ItemsControl ItemsSource="{Binding SelectedCombatant.SpellSlots}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:SpellSlotRowViewModel">
+                                    <Border Classes="row" Margin="0,0,0,4">
+                                        <Grid ColumnDefinitions="*,Auto,Auto">
+                                            <TextBlock Grid.Column="0"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource WidgetForeground}"
+                                                       Text="{Binding Label}"/>
+                                            <Button Grid.Column="1"
+                                                    Classes="card"
+                                                    Content="Use"
+                                                    Margin="0,0,4,0"
+                                                    IsEnabled="{Binding CanSpend}"
+                                                    Command="{Binding $parent[ItemsControl].((vm:DmCombatPanelViewModel)DataContext).SpendSlotCommand}"
+                                                    CommandParameter="{Binding Level}"/>
+                                            <Button Grid.Column="2"
+                                                    Classes="card"
+                                                    Content="+"
+                                                    IsEnabled="{Binding CanRestore}"
+                                                    Command="{Binding $parent[ItemsControl].((vm:DmCombatPanelViewModel)DataContext).RestoreSlotCommand}"
+                                                    CommandParameter="{Binding Level}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Classes="card"
+                                HorizontalAlignment="Stretch"
+                                Content="Long Rest (reset slots)"
+                                Command="{Binding LongRestCommand}"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6"
+                                IsVisible="{Binding HasSpellcasting}">
+                        <Border Classes="divider"/>
+                        <TextBlock Classes="sectionLabel" Text="SPELLS"/>
+                        <ComboBox AutomationProperties.Name="Pick a spell" ItemsSource="{Binding CastableSpells}"
+                                  SelectedItem="{Binding SelectedCastSpell}"
+                                  PlaceholderText="Pick a spell"
+                                  HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="ui:CastableSpell">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="{Binding Name}"/>
+                                        <TextBlock Text="{Binding Level, StringFormat='L{0}'}"
+                                                   Classes="fieldLabel"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBlock Text="{Binding SelectedCastSpell.CastNote}"
+                                   AutomationProperties.Name="What this spell needs"
+                                   Classes="fieldLabel" TextWrapping="Wrap"
+                                   IsVisible="{Binding SelectedCastSpell, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                        <TextBlock Classes="sectionLabel" Text="CAST AT LEVEL" IsVisible="{Binding HasUpcastChoice}"/>
+                        <ComboBox AutomationProperties.Name="CAST AT LEVEL" ItemsSource="{Binding UpcastLevels}"
+                                  SelectedItem="{Binding SelectedCastLevel}"
+                                  IsVisible="{Binding HasUpcastChoice}"
+                                  HorizontalAlignment="Stretch"/>
+                        <CheckBox AutomationProperties.Name="Cast as ritual"
+                                  Content="Cast as ritual"
+                                  IsChecked="{Binding CastAsRitual}"
+                                  IsVisible="{Binding CanCastAsRitual}"/>
+                        <Button Classes="card"
+                                HorizontalAlignment="Stretch"
+                                Content="Cast"
+                                Command="{Binding CastSpellCommand}"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <Border Classes="divider"/>
+                        <TextBlock Classes="sectionLabel" Text="SAVING THROW"/>
+                        <Grid ColumnDefinitions="Auto,*">
+                            <TextBlock Grid.Column="0" Text="DC" Classes="fieldLabel" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <NumericUpDown AutomationProperties.Name="DC" Grid.Column="1" Minimum="1" Maximum="40" Increment="1" Value="{Binding SaveDc}"/>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding AoeSaveAbilities}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="sys:String">
+                                    <Button Classes="card" Margin="0,0,4,4"
+                                            Content="{Binding}"
+                                            CommandParameter="{Binding}"
+                                            Command="{Binding $parent[ItemsControl].((vm:DmCombatPanelViewModel)DataContext).RollSaveCommand}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Grid ColumnDefinitions="Auto,*">
+                            <TextBlock Grid.Column="0" Text="Area" Classes="fieldLabel" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <ComboBox AutomationProperties.Name="Area" Grid.Column="1" HorizontalAlignment="Stretch" ItemsSource="{Binding AoeSaveAbilities}" SelectedItem="{Binding AoeSaveAbility}"/>
+                        </Grid>
+                        <Button Classes="card" HorizontalAlignment="Stretch" Content="Roll saves for tokens in templates" Command="{Binding RollAoeSavesCommand}" AutomationProperties.Name="Rolls the chosen save at the DC above for every combatant standing in a placed template" ToolTip.Tip="Rolls the chosen save at the DC above for every combatant standing in a placed template"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <Border Classes="divider"/>
+                        <TextBlock Text="{Binding SelectedCombatant.CoverLabel}"
+                                   Foreground="{DynamicResource WidgetForeground}"
+                                   FontSize="{DynamicResource FontSizeSmall}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <Button Classes="card" Content="No cover"
+                                    Command="{Binding SetCoverCommand}"
+                                    CommandParameter="{Binding NoCover}"/>
+                            <Button Classes="card"
+                                    Content="{Binding CoverHalfBonus, StringFormat='Half +{0}'}"
+                                    Command="{Binding SetCoverCommand}"
+                                    CommandParameter="{Binding CoverHalfBonus}"/>
+                            <Button Classes="card"
+                                    Content="{Binding CoverThreeQuartersBonus, StringFormat='3/4 +{0}'}"
+                                    Command="{Binding SetCoverCommand}"
+                                    CommandParameter="{Binding CoverThreeQuartersBonus}"/>
+                        </StackPanel>
+                        <CheckBox Content="Flanking (advantage)"
+                                  IsVisible="{Binding AutoFlankingEnabled}"
+                                  IsChecked="{Binding SelectedCombatant.Flanking}"/>
+                        <CheckBox Content="Friendly to players"
+                                  IsVisible="{Binding SelectedCombatant.CanToggleFriendly}"
+                                  IsChecked="{Binding SelectedCombatant.IsFriendly}"
+                                  Command="{Binding ToggleFriendlyCommand}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <CheckBox Content="Advantage" IsChecked="{Binding SelectedCombatant.ManualAdvantage}"/>
+                            <CheckBox Content="Disadvantage" IsChecked="{Binding SelectedCombatant.ManualDisadvantage}"/>
+                        </StackPanel>
+                        <Grid ColumnDefinitions="Auto,*,Auto,*" Margin="0,2,0,0">
+                            <TextBlock Grid.Column="0" Text="Temp HP" Classes="fieldLabel" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <NumericUpDown AutomationProperties.Name="Temp HP" Grid.Column="1" Minimum="0" Maximum="999" Increment="1" ShowButtonSpinner="False" Value="{Binding SelectedCombatant.TempHp}"/>
+                            <TextBlock Grid.Column="2" Text="Speed ft" Classes="fieldLabel" VerticalAlignment="Center" Margin="10,0,8,0"/>
+                            <NumericUpDown AutomationProperties.Name="Speed ft" Grid.Column="3" Minimum="0" Maximum="999" Increment="5" ShowButtonSpinner="False" Value="{Binding SelectedCombatant.SpeedFeet}"/>
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Button Classes="card" Content="Apply temp/speed" Command="{Binding ApplyCombatantEditsCommand}"/>
+                            <Button Classes="ghost" Content="Reset move" Command="{Binding ResetMoveCommand}" AutomationProperties.Name="Send this token back to where it started its turn, no movement spent" ToolTip.Tip="Send this token back to where it started its turn, no movement spent"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding SelectedCombatant.DamageModsLabel}"
+                                   Classes="fieldLabel"
+                                   TextWrapping="Wrap"
+                                   IsVisible="{Binding SelectedCombatant.HasDamageMods}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <CheckBox AutomationProperties.Name="Reveal exact HP to players" IsChecked="{Binding SelectedCombatant.RevealExactHpToPlayers}"/>
+                        <TextBlock Text="Reveal exact HP to players"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource WidgetForeground}"
+                                   FontSize="{DynamicResource FontSizeSmall}"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="2">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <CheckBox AutomationProperties.Name="Concentrating" IsChecked="{Binding SelectedCombatant.Concentration}"
+                                      Command="{Binding ConcentrationChangedCommand}"/>
+                            <TextBlock Text="Concentrating"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource WidgetForeground}"
+                                       FontSize="{DynamicResource FontSizeSmall}"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding SelectedCombatant.ConcentrationEffectsLabel}"
+                                   Classes="fieldLabel"
+                                   TextWrapping="Wrap"
+                                   IsVisible="{Binding SelectedCombatant.HasConcentrationEffects}"/>
+                    </StackPanel>
+
+                    <Border Classes="row" Padding="8"
+                            IsVisible="{Binding SelectedCombatant.HasPendingSave, FallbackValue=False}">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding SelectedCombatant.PendingSaveLabel}"
+                                       Foreground="{DynamicResource WidgetForeground}"
+                                       FontSize="{DynamicResource FontSizeSmall}"
+                                       TextWrapping="Wrap"/>
+                            <Button Classes="ghost" Content="Roll it for them"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{Binding RollTheirOwedSaveCommand}"
+                                    AutomationProperties.Name="Roll the save this player owes"
+                                    ToolTip.Tip="For a solo game or a player who is not there, the save is owed until somebody rolls it"/>
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Spacing="4">
+                        <Border Classes="divider" Margin="0,4,0,0"/>
+                        <TextBlock Classes="sectionLabel" Text="CONDITIONS"/>
+                        <TextBlock Text="{Binding SelectedCombatant.ConditionsLabel}"
+                                   Classes="fieldLabel"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource AccentColor}"/>
+                        <ItemsControl ItemsSource="{Binding ConditionOptions}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Classes="card"
+                                            Content="{Binding}"
+                                            Margin="0,0,4,4"
+                                            Command="{Binding $parent[ItemsControl].((vm:DmCombatPanelViewModel)DataContext).ToggleConditionCommand}"
+                                            CommandParameter="{Binding}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Classes="ghost"
+                                Content="Clear conditions"
+                                HorizontalAlignment="Left"
+                                IsVisible="{Binding SelectedCombatant.HasConditions}"
+                                Command="{Binding ClearConditionsCommand}"
+                                AutomationProperties.Name="Break every condition on this combatant, like a restoration spell" ToolTip.Tip="Break every condition on this combatant, like a restoration spell"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6" IsVisible="{Binding HasHazards}">
+                        <Border Classes="divider"/>
+                        <TextBlock Classes="sectionLabel" Text="ENVIRONMENT"/>
+                        <TextBlock Text="A fall scales with the distance, everything else ignores it."
+                                   Classes="fieldLabel" TextWrapping="Wrap"/>
+                        <ComboBox AutomationProperties.Name="Hazard"
+                                  HorizontalAlignment="Stretch"
+                                  ItemsSource="{Binding HazardOptions}"
+                                  SelectedItem="{Binding SelectedHazard, Mode=TwoWay}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <TextBlock Grid.Column="0" Text="Feet" Classes="fieldLabel" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <NumericUpDown Grid.Column="1"
+                                           AutomationProperties.Name="How far"
+                                           Minimum="0" Maximum="100000" Increment="5"
+                                           Value="{Binding HazardMagnitude, Mode=TwoWay}"/>
+                            <Button Grid.Column="2" Classes="ghost" Content="Apply" Margin="8,0,0,0"
+                                    Command="{Binding ApplyHazardCommand}"
+                                    AutomationProperties.Name="Hurt the selected combatant with this hazard" ToolTip.Tip="Hurt the selected combatant with this hazard"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6"
+                                IsVisible="{Binding AttackTarget, Converter={x:Static ObjectConverters.IsNotNull}}">
+                        <Border Classes="divider"/>
+                        <TextBlock Classes="sectionLabel" Text="CONCENTRATION HOLD ON TARGET"/>
+                        <TextBlock Text="Applies the condition to the target and ties it to this caster's concentration, it drops when they lose it or go down."
+                                   Classes="fieldLabel" TextWrapping="Wrap"/>
+                        <ItemsControl ItemsSource="{Binding ConditionOptions}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Classes="card"
+                                            Content="{Binding}"
+                                            Margin="0,0,4,4"
+                                            Command="{Binding $parent[ItemsControl].((vm:DmCombatPanelViewModel)DataContext).ApplyConcentrationConditionCommand}"
+                                            CommandParameter="{Binding}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card" Padding="14,12">
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="sectionLabel" Text="ADD COMBATANT"/>
+                    <Button Classes="ghost"
+                            Content="+ Add NPC"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Command="{Binding AddNpcCommand}"/>
+                    <Button Classes="ghost"
+                            Content="+ Pull in Player"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Command="{Binding AddPlayerCommand}"/>
+                    <Button Classes="ghost"
+                            Content="+ Add Encounter"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Command="{Binding AddEncounterCommand}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card" Padding="14,12">
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="sectionLabel" Text="HP OVERVIEW"/>
+                    <ItemsControl ItemsSource="{Binding Initiative.Combatants}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:CombatantViewModel">
+                                <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,3">
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}"
+                                                   Foreground="{DynamicResource WidgetForeground}"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <Border Background="{DynamicResource AccentColor}"
+                                                CornerRadius="4" Padding="5,1"
+                                                VerticalAlignment="Center"
+                                                IsVisible="{Binding Concentration}"
+                                                AutomationProperties.Name="Concentrating" ToolTip.Tip="Concentrating">
+                                            <TextBlock Text="C" FontSize="10" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource Background}"/>
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,8,0"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource AccentColor}">
+                                        <Run Text="{Binding CurrentHp}"/>
+                                        <Run Text="/"/>
+                                        <Run Text="{Binding MaxHp}"/>
+                                    </TextBlock>
+                                    <Button Grid.Column="2"
+                                            Classes="card"
+                                            Padding="6,4"
+                                            Margin="0,0,4,0"
+                                            VerticalAlignment="Center"
+                                            AutomationProperties.Name="Link to token" ToolTip.Tip="Link to token"
+                                            Command="{Binding $parent[ItemsControl].((vm:DmCombatPanelViewModel)DataContext).LinkTokenCommand}"
+                                            CommandParameter="{Binding}">
+                                        <PathIcon Data="{x:Static gv:GlobalVariables.IconLink}" Width="14" Height="14"/>
+                                    </Button>
+                                    <ProgressBar Grid.Column="3"
+                                                 Width="60"
+                                                 Height="4"
+                                                 Minimum="0"
+                                                 Maximum="{Binding MaxHp}"
+                                                 Value="{Binding CurrentHp}"
+                                                 Foreground="{DynamicResource AccentColor}"
+                                                 Background="{DynamicResource Background}"
+                                                 CornerRadius="2"
+                                                 VerticalAlignment="Center"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="card" Padding="14,12">
+                <StackPanel Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Classes="sectionLabel" Text="ROLL LOG" VerticalAlignment="Center"/>
+                        <Button Grid.Column="1"
+                                Classes="card"
+                                Content="Clear"
+                                Command="{Binding ClearLogCommand}"/>
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding CombatLog}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="sys:String">
+                                <TextBlock Text="{Binding}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,2"
+                                           FontSize="{DynamicResource FontSizeSmall}"
+                                           Foreground="{DynamicResource WidgetForeground}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

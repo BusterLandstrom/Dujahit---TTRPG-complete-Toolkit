@@ -1,0 +1,131 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vms="clr-namespace:Dujahit.ViewModels"
+             xmlns:gv="clr-namespace:Dujahit.Models.Database"
+             x:DataType="vms:QuickNotesPanelViewModel"
+             x:Class="Dujahit.Views.QuickNotesPanelView"
+             Background="Transparent">
+
+    <UserControl.Styles>
+        <Style Selector="Border.noteRow">
+            <Setter Property="Background" Value="{DynamicResource Background}"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource CornerRadiusStandard}"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style Selector="Border.noteRow:pointerover">
+            <Setter Property="BorderBrush" Value="{DynamicResource Divider}"/>
+        </Style>
+
+        <Style Selector="Button.del">
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+    </UserControl.Styles>
+
+    <DockPanel LastChildFill="True" Margin="6">
+
+        <Border DockPanel.Dock="Top"
+                Background="{DynamicResource Background}"
+                CornerRadius="{DynamicResource CornerRadiusStandard}"
+                BorderBrush="{DynamicResource Divider}"
+                BorderThickness="1"
+                Padding="10,3"
+                Margin="0,0,0,8">
+            <DockPanel LastChildFill="True">
+                <Button AutomationProperties.Name="Add quick note"
+                        DockPanel.Dock="Right"
+                        Classes="accent"
+                        Width="30"
+                        Height="30"
+                        Padding="0"
+                        Margin="6,0,0,0"
+                        VerticalAlignment="Center"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Command="{Binding AddCommand}">
+                    <PathIcon Data="{x:Static gv:GlobalVariables.IconPlus}" Width="13" Height="13"/>
+                </Button>
+                <TextBox AutomationProperties.Name="New quick note..." Text="{Binding Draft, Mode=TwoWay}"
+                         Watermark="New quick note..."
+                         AcceptsReturn="False"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         Foreground="{DynamicResource WidgetForeground}"
+                         FontSize="{DynamicResource FontSizeNormal}"
+                         VerticalAlignment="Center">
+                    <TextBox.KeyBindings>
+                        <KeyBinding Gesture="Enter" Command="{Binding AddCommand}"/>
+                    </TextBox.KeyBindings>
+                </TextBox>
+            </DockPanel>
+        </Border>
+
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                      VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Notes}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vms:QuickNoteItemViewModel">
+                        <Border Classes="noteRow">
+                            <DockPanel LastChildFill="True">
+
+                                <Border DockPanel.Dock="Left"
+                                        Classes="badge"
+                                        Background="{DynamicResource Widget}"
+                                        Margin="0,0,8,0"
+                                        VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Slug}"
+                                               Foreground="{DynamicResource AccentColor}"/>
+                                </Border>
+
+                                <Button DockPanel.Dock="Right"
+                                        Content="×"
+                                        Classes="del"
+                                        Margin="6,0,0,0"
+                                        VerticalAlignment="Center"
+                                        IsVisible="{Binding !ConfirmingDelete}"
+                                        Command="{Binding ArmDeleteCommand}"/>
+
+                                <Button DockPanel.Dock="Right"
+                                        Content="Delete"
+                                        Classes="danger"
+                                        Margin="6,0,0,0"
+                                        VerticalAlignment="Center"
+                                        IsVisible="{Binding ConfirmingDelete}"
+                                        Command="{Binding DeleteCommand}"/>
+
+                                <Button DockPanel.Dock="Right"
+                                        Content="Cancel"
+                                        Classes="ghost"
+                                        Margin="6,0,0,0"
+                                        VerticalAlignment="Center"
+                                        IsVisible="{Binding ConfirmingDelete}"
+                                        Command="{Binding CancelDeleteCommand}"/>
+
+                                <Button DockPanel.Dock="Right"
+                                        Classes="tool"
+                                        Margin="6,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Click="OnCopyQuickNoteRef"
+                                        AutomationProperties.Name="Copy this quick note's reference tag to paste into a note" ToolTip.Tip="Copy this quick note's reference tag to paste into a note">
+                                    <PathIcon Data="{x:Static gv:GlobalVariables.IconLink}" Width="12" Height="12"/>
+                                </Button>
+
+                                <TextBox AutomationProperties.Name="Note text" Text="{Binding Text, Mode=TwoWay}"
+                                         AcceptsReturn="False"
+                                         BorderThickness="0"
+                                         Background="Transparent"
+                                         Foreground="{DynamicResource WidgetForeground}"
+                                         FontSize="{DynamicResource FontSizeNormal}"
+                                         VerticalAlignment="Center"/>
+                            </DockPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

@@ -1,0 +1,49 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vms="clr-namespace:Dujahit.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1920" d:DesignHeight="1080"
+             x:Class="Dujahit.Views.InitView"
+             x:DataType="vms:InitViewModel"
+             Background="{DynamicResource Background}"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6">
+            <TextBlock Text="Welcome to"
+                       FontSize="56"
+                       Opacity="0.85"
+                       HorizontalAlignment="Center"
+                       Foreground="{DynamicResource Foreground}" />
+            <TextBlock Text="Dujahit"
+                       FontSize="148"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       Foreground="{DynamicResource AccentColor}" />
+            <StackPanel Orientation="Horizontal" Spacing="16" HorizontalAlignment="Center" Margin="0,4,0,30">
+                <Border Width="120" Height="1" VerticalAlignment="Center" Background="{DynamicResource AccentHover}" />
+                <TextBlock Text="☽ ✦ ☾" FontSize="26" VerticalAlignment="Center" Foreground="{DynamicResource AccentColor}" />
+                <Border Width="120" Height="1" VerticalAlignment="Center" Background="{DynamicResource AccentHover}" />
+            </StackPanel>
+            <Border BorderBrush="{DynamicResource AccentHover}"
+                    BorderThickness="2"
+                    CornerRadius="{DynamicResource CornerRadiusLarge}"
+                    HorizontalAlignment="Center"
+                    BoxShadow="0 10 60 -10 #000000">
+                <Button Classes="primary"
+                        Content="Start your journey"
+                        FontSize="30"
+                        Padding="40,22"
+                        CornerRadius="{DynamicResource CornerRadiusLarge}"
+                        Command="{Binding StartJourneyCommand}" />
+            </Border>
+            <TextBlock Text="Created for you by BL"
+                       FontSize="16"
+                       Margin="0,40,0,0"
+                       Opacity="0.55"
+                       HorizontalAlignment="Center"
+                       Foreground="{DynamicResource Foreground}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

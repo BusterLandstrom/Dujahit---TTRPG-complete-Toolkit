@@ -1,5 +1,8 @@
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
+using Avalonia.Media;
+using Dujahit.Models;
 using Dujahit.ViewModels;
 using System;
 
@@ -18,9 +21,22 @@ namespace Dujahit
 
             if (type != null)
             {
-                var control = (Control)Activator.CreateInstance(type)!;
-                control.DataContext = data;
-                return control;
+                try
+                {
+                    var control = (Control)Activator.CreateInstance(type)!;
+                    control.DataContext = data;
+                    return control;
+                }
+                catch (Exception ex)
+                {
+                    ErrorLog.Log("[ViewLocator] " + name + " would not build", ex);
+                    return new TextBlock
+                    {
+                        Text = name + " failed to open, the reason is in the log under AppData logs.",
+                        TextWrapping = TextWrapping.Wrap,
+                        Margin = new Thickness(24)
+                    };
+                }
             }
 
             return new TextBlock { Text = "Not Found: " + name };

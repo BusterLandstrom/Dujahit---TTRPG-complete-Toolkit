@@ -1,0 +1,497 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Dujahit.ViewModels"
+             xmlns:gv="clr-namespace:Dujahit.Models.Database"
+             xmlns:md="clr-namespace:Dujahit.Models"
+             x:Class="Dujahit.Views.Map.MapCanvasView"
+             x:DataType="vm:MapCanvasViewModel"
+             Background="{DynamicResource Widget}">
+    <Grid>
+        <Grid.Styles>
+            <Style Selector="Image.token">
+                <Setter Property="Stretch" Value="Uniform"/>
+            </Style>
+            <Style Selector="Image.token.active">
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="{DynamicResource SystemAccentColor}"
+                                          BlurRadius="14"
+                                          OffsetX="0" OffsetY="0"
+                                          Opacity="1"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style Selector="Image.token.selected">
+                <Setter Property="Effect">
+                    <DropShadowEffect Color="#3CAA6C"
+                                      BlurRadius="10"
+                                      OffsetX="0" OffsetY="0"
+                                      Opacity="1"/>
+                </Setter>
+            </Style>
+            <Style Selector="Button.tokenslot">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Padding" Value="2"/>
+                <Setter Property="BorderThickness" Value="2"/>
+                <Setter Property="BorderBrush" Value="Transparent"/>
+                <Setter Property="CornerRadius" Value="6"/>
+            </Style>
+            <Style Selector="Button.tokenslot:pointerover /template/ ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource Divider}"/>
+            </Style>
+            <Style Selector="Button.tokenslot.active">
+                <Setter Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
+            </Style>
+            <Style Selector="Button.tokendel">
+                <Setter Property="Width" Value="16"/>
+                <Setter Property="Height" Value="16"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Margin" Value="0"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Background" Value="{DynamicResource Danger}"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderThickness" Value="0"/>
+            </Style>
+        </Grid.Styles>
+
+        <Image Source="{Binding BackgroundImage}"
+           Stretch="Uniform"
+           IsHitTestVisible="False"/>
+
+        <Canvas x:Name="DrawCanvas"
+                Background="Transparent"
+                IsHitTestVisible="True">
+            <Canvas x:Name="WorldCanvas" IsHitTestVisible="False"/>
+        </Canvas>
+
+        <Border Classes="toolPanel"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="14"
+                IsVisible="{Binding ToolsVisible}"
+                ZIndex="998">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Width="184" Spacing="10">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" Text="TOOLS" Classes="sectionLabel" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1"
+                            Classes="tool"
+                            Width="24" Height="24"
+                            AutomationProperties.Name="Hide tools" ToolTip.Tip="Hide tools"
+                            Command="{Binding ToggleToolsCommand}">
+                        <PathIcon Data="{x:Static gv:GlobalVariables.IconClose}" Width="12" Height="12"/>
+                    </Button>
+                </Grid>
+                <WrapPanel>
+                    <Button Classes="tool" AutomationProperties.Name="Draw" ToolTip.Tip="Draw"
+                            Classes.active="{Binding IsDrawMode}"
+                            Command="{Binding SetDrawModeCommand}">
+                        <PathIcon Data="{x:Static gv:GlobalVariables.IconDraw}" Width="18" Height="18"/>
+                    </Button>
+                    <Button Classes="tool" AutomationProperties.Name="Tokens" ToolTip.Tip="Tokens"
+                            Classes.active="{Binding IsTokenMode}"
+                            IsVisible="{Binding TokensEnabled}"
+                            Command="{Binding SetTokenModeCommand}">
+                        <PathIcon Data="{x:Static gv:GlobalVariables.IconToken}" Width="18" Height="18"/>
+                    </Button>
+                    <Button Classes="tool" AutomationProperties.Name="Library" ToolTip.Tip="Library, your objects, tokens and maps"
+                            Command="{Binding OpenLibraryCommand}"
+                            IsVisible="{Binding CanUploadTokens}">
+                        <PathIcon Data="{x:Static gv:GlobalVariables.IconTaskList}" Width="18" Height="18"/>
+                    </Button>
+                    <Button Classes="tool" AutomationProperties.Name="Ping" ToolTip.Tip="Ping"
+                            Classes.active="{Binding IsPingMode}"
+                            Command="{Binding SetPingModeCommand}">
+                        <PathIcon Data="{x:Static gv:GlobalVariables.IconPing}" Width="18" Height="18"/>
+                    </Button>
+                    <Button Classes="tool" AutomationProperties.Name="Walls" ToolTip.Tip="Walls"
+                            Classes.active="{Binding IsWallMode}"
+                            Command="{Binding SetWallModeCommand}"
+                            IsVisible="{Binding CanEditWalls}">
+                        <PathIcon Data="{x:Static gv:GlobalVariables.IconWall}" Width="18" Height="18"/>
+                    </Button>
+                    <Button Classes="tool" AutomationProperties.Name="Doors" ToolTip.Tip="Doors"
+                            Classes.active="{Binding IsDoorMode}"
+                            Command="{Binding SetDoorModeCommand}"
+                            IsVisible="{Binding CanEditWalls}">
+                        <PathIcon Data="{x:Static gv:GlobalVariables.IconDoor}" Width="18" Height="18"/>
+                    </Button>
+                    <Button Classes="tool" AutomationProperties.Name="Fog of war" ToolTip.Tip="Fog of war"
+                            Classes.active="{Binding IsFogMode}"
+                            Command="{Binding SetFogModeCommand}"
+                            IsVisible="{Binding CanEditFog}">
+                        <PathIcon Data="{x:Static gv:GlobalVariables.IconFog}" Width="18" Height="18"/>
+                    </Button>
+                    <Button Classes="tool" Content="~" FontSize="22"
+                            AutomationProperties.Name="Difficult terrain" ToolTip.Tip="Difficult terrain"
+                            Classes.active="{Binding IsTerrainMode}"
+                            Command="{Binding SetTerrainModeCommand}"
+                            IsVisible="{Binding CanEditWalls}"/>
+                    <Button Classes="tool" Content="#" FontSize="22"
+                            AutomationProperties.Name="Map objects" ToolTip.Tip="Map objects"
+                            Classes.active="{Binding IsMapObjectMode}"
+                            Command="{Binding SetMapObjectModeCommand}"
+                            IsVisible="{Binding CanEditWalls}"/>
+                    <Button Classes="tool" AutomationProperties.Name="AoE template" ToolTip.Tip="AoE template"
+                            Classes.active="{Binding IsTemplateMode}"
+                            Command="{Binding SetTemplateModeCommand}">
+                        <PathIcon Data="{x:Static gv:GlobalVariables.IconHighlight}" Width="18" Height="18"/>
+                    </Button>
+                    <Button Classes="tool" Content="&#x2194;" FontSize="20"
+                            AutomationProperties.Name="Measure" ToolTip.Tip="Measure between two squares"
+                            Classes.active="{Binding IsRulerMode}"
+                            Command="{Binding SetRulerModeCommand}"/>
+                </WrapPanel>
+
+                <Border Classes="divider"/>
+                <WrapPanel>
+                    <Button Classes="tool" AutomationProperties.Name="Undo" ToolTip.Tip="Undo your own last draw or wall, Ctrl+Z"
+                            IsEnabled="{Binding CanUndo}"
+                            Command="{Binding UndoCommand}" Content="&#x21B6;" FontSize="18"/>
+                    <Button Classes="tool" AutomationProperties.Name="Redo" ToolTip.Tip="Put back what you just undid"
+                            IsEnabled="{Binding CanRedo}"
+                            Command="{Binding RedoCommand}" Content="&#x21B7;" FontSize="18"/>
+                </WrapPanel>
+                <Border Classes="divider"/>
+
+                <StackPanel Spacing="10" IsVisible="{Binding IsTokenMode}">
+                    <TextBlock Text="TOKENS" Classes="sectionLabel" IsVisible="{Binding TokensEnabled}"/>
+
+                    <ItemsControl ItemsSource="{Binding Library}" IsVisible="{Binding TokensEnabled}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:TokenLibraryEntryViewModel">
+                                <Grid Width="48" Margin="0,0,6,6" ToolTip.Tip="{Binding SubLabel}">
+                                    <Button AutomationProperties.Name="{Binding Name}" Classes="tokenslot"
+                                            Classes.active="{Binding IsSelected}"
+                                            Command="{Binding SelectCommand}">
+                                        <Image Source="{Binding Preview}" Width="40" Height="40" Stretch="Uniform"/>
+                                    </Button>
+                                    <Button Classes="tokendel" AutomationProperties.Name="Remove" ToolTip.Tip="Remove"
+                                            VerticalAlignment="Top" HorizontalAlignment="Right"
+                                            Command="{Binding RemoveCommand}">
+                                        <PathIcon Data="{x:Static gv:GlobalVariables.IconClose}" Width="9" Height="9"/>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <StackPanel Spacing="6" IsVisible="{Binding CanUploadTokens}">
+                        <TextBlock Text="NEW TOKEN" Classes="sectionLabel"/>
+                        <TextBox AutomationProperties.Name="Name" Text="{Binding NewTokenName}" Watermark="Name" HorizontalAlignment="Stretch"/>
+                        <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                                   Text="The name and the monster below apply to whichever you make, an uploaded picture or a colour. Name it before you upload or it lands as Token 4."/>
+                        <Button Classes="ghost" Content="Upload an image"
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding UploadTokenCommand}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBox AutomationProperties.Name="AB" Text="{Binding NewTokenGlyph}" Watermark="AB" Width="52" MaxLength="2"/>
+                            <TextBox AutomationProperties.Name="#RRGGBB" Text="{Binding NewTokenColor}" Watermark="#RRGGBB" Width="110"/>
+                        </StackPanel>
+                        <WrapPanel>
+                            <Button AutomationProperties.Name="Token colour, red" Classes="swatch" Background="#E57373" CommandParameter="#E57373" Command="{Binding SetNewTokenColorCommand}"/>
+                            <Button AutomationProperties.Name="Token colour, green" Classes="swatch" Background="#81C784" CommandParameter="#81C784" Command="{Binding SetNewTokenColorCommand}"/>
+                            <Button AutomationProperties.Name="Token colour, blue" Classes="swatch" Background="#64B5F6" CommandParameter="#64B5F6" Command="{Binding SetNewTokenColorCommand}"/>
+                            <Button AutomationProperties.Name="Token colour, yellow" Classes="swatch" Background="#FFD54F" CommandParameter="#FFD54F" Command="{Binding SetNewTokenColorCommand}"/>
+                            <Button AutomationProperties.Name="Token colour, purple" Classes="swatch" Background="#BA68C8" CommandParameter="#BA68C8" Command="{Binding SetNewTokenColorCommand}"/>
+                            <Button AutomationProperties.Name="Token colour, brown" Classes="swatch" Background="#A1887F" CommandParameter="#A1887F" Command="{Binding SetNewTokenColorCommand}"/>
+                            <Button AutomationProperties.Name="Token colour, grey" Classes="swatch" Background="#90A4AE" CommandParameter="#90A4AE" Command="{Binding SetNewTokenColorCommand}"/>
+                            <Button AutomationProperties.Name="Token colour, orange" Classes="swatch" Background="#FF8A65" CommandParameter="#FF8A65" Command="{Binding SetNewTokenColorCommand}"/>
+                        </WrapPanel>
+                        <ComboBox AutomationProperties.Name="Bind to monster (optional)" ItemsSource="{Binding Monsters}"
+                                  SelectedItem="{Binding SelectedMonster}"
+                                  PlaceholderText="Bind to monster (optional)"
+                                  HorizontalAlignment="Stretch"/>
+                        <TextBlock Text="Bind a monster to give the token a statblock and roll it into the fight. Left blank it is just a marker."
+                                   Foreground="{DynamicResource WidgetForeground}"
+                                   Opacity="0.65" FontSize="11" TextWrapping="Wrap"/>
+                        <NumericUpDown Value="{Binding NewTokenInitiative}"
+                                       Watermark="Initiative (blank = roll each)"
+                                       FormatString="0"
+                                       Increment="1"
+                                       HorizontalAlignment="Stretch"/>
+                        <Button Classes="ghost" Content="Add colour token"
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding CreateColorTokenCommand}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Spacing="6" IsVisible="{Binding IsDrawMode}">
+                    <TextBlock Text="DRAW" Classes="sectionLabel"/>
+                    <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                               Text="Drag to draw. Right-click drops a ping, the tool stays where it is. Ctrl+Z or the undo button takes back your own last line."/>
+                </StackPanel>
+
+                <StackPanel Spacing="6" IsVisible="{Binding IsPingMode}">
+                    <TextBlock Text="PING" Classes="sectionLabel"/>
+                    <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                               Text="Click to ping. Right-click draws instead, so pointing at something and scribbling on it are the same trip."/>
+                </StackPanel>
+
+                <StackPanel Spacing="6" IsVisible="{Binding IsFogMode}">
+                    <TextBlock Text="FOG OF WAR" Classes="sectionLabel"/>
+                    <CheckBox AutomationProperties.Name="FOG OF WAR" Content="Enable fog"
+                              IsChecked="{Binding FogEnabled, Mode=OneWay}"
+                              Command="{Binding ToggleFogEnabledCommand}"/>
+                    <CheckBox AutomationProperties.Name="Dynamic vision" Content="Vision reveals fog as tokens move"
+                              ToolTip.Tip="A token uncovers fog within its vision that walls do not block"
+                              IsChecked="{Binding DynamicVisionEnabled}"/>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Button Classes="tool" AutomationProperties.Name="Hide brush" ToolTip.Tip="Hide brush"
+                                Classes.active="{Binding FogHide}"
+                                Command="{Binding FogHideBrushCommand}">
+                            <PathIcon Data="{x:Static gv:GlobalVariables.IconFog}" Width="16" Height="16"/>
+                        </Button>
+                        <Button Classes="tool" AutomationProperties.Name="Reveal brush" ToolTip.Tip="Reveal brush"
+                                Classes.active="{Binding !FogHide}"
+                                Command="{Binding FogRevealBrushCommand}">
+                            <PathIcon Data="{x:Static gv:GlobalVariables.IconPing}" Width="16" Height="16"/>
+                        </Button>
+                    </StackPanel>
+                    <Button Classes="ghost" Content="Hide all"
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding HideAllFogCommand}"/>
+                    <Button Classes="ghost" Content="Reveal all"
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding RevealAllFogCommand}"/>
+                </StackPanel>
+
+                <StackPanel Spacing="6" IsVisible="{Binding IsWallMode}">
+                    <TextBlock Text="WALLS" Classes="sectionLabel"/>
+                    <CheckBox AutomationProperties.Name="WALLS" Content="Enable walls"
+                              IsChecked="{Binding WallsEnabled, Mode=OneWay}"
+                              Command="{Binding ToggleWallsEnabledCommand}"/>
+                    <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                               Text="Click and drag to lay a wall. Right-click a wall to remove it. Players don't see plain walls."/>
+                </StackPanel>
+
+                <StackPanel Spacing="6" IsVisible="{Binding IsDoorMode}">
+                    <TextBlock Text="DOORS" Classes="sectionLabel"/>
+                    <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                               Text="Click a wall to turn it into a door, click a door to open or close it."/>
+                </StackPanel>
+
+                <StackPanel Spacing="6" IsVisible="{Binding IsTemplateMode}">
+                    <TextBlock Text="AOE TEMPLATE" Classes="sectionLabel"/>
+                    <ComboBox AutomationProperties.Name="AOE TEMPLATE" ItemsSource="{Binding AoeShapes}"
+                              DisplayMemberBinding="{Binding Name}"
+                              SelectedValueBinding="{Binding Id}"
+                              SelectedValue="{Binding AoeShape}"
+                              HorizontalAlignment="Stretch"/>
+                    <NumericUpDown Value="{Binding AoeSizeFt}"
+                                   Watermark="Size (ft)"
+                                   FormatString="0"
+                                   Increment="5"
+                                   Minimum="5"
+                                   HorizontalAlignment="Stretch"/>
+                    <NumericUpDown Value="{Binding AoeWidthFt}"
+                                   Watermark="Width (ft)"
+                                   FormatString="0"
+                                   Increment="5"
+                                   Minimum="5"
+                                   IsVisible="{Binding AoeUsesWidth}"
+                                   HorizontalAlignment="Stretch"/>
+                    <CheckBox Content="From selected token" IsChecked="{Binding AoeFromToken}"/>
+                    <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                               Text="Press and drag from the origin to aim, release to place. Circle and cube ignore the aim."/>
+                    <StackPanel Spacing="6" IsVisible="{Binding CanEditFog}">
+                        <Button Classes="ghost" Content="Clear templates"
+                                HorizontalAlignment="Stretch"
+                                IsVisible="{Binding !ConfirmingClearTemplates}"
+                                Command="{Binding ArmClearTemplatesCommand}"/>
+                        <Button Classes="danger" Content="Confirm clear"
+                                HorizontalAlignment="Stretch"
+                                IsVisible="{Binding ConfirmingClearTemplates}"
+                                Command="{Binding ClearTemplatesCommand}"/>
+                        <Button Classes="ghost" Content="Cancel"
+                                HorizontalAlignment="Stretch"
+                                IsVisible="{Binding ConfirmingClearTemplates}"
+                                Command="{Binding CancelClearTemplatesCommand}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Spacing="6" IsVisible="{Binding IsTerrainMode}">
+                    <TextBlock Text="DIFFICULT TERRAIN" Classes="sectionLabel"/>
+                    <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                               Text="Left drag to paint, right drag to erase. It costs double to move through, and the reachable overlay bends around it."/>
+                    <Button Classes="ghost" Content="Clear all"
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding ClearDifficultTerrainCommand}"/>
+                </StackPanel>
+
+                <StackPanel Spacing="6" IsVisible="{Binding IsMapObjectMode}">
+                    <TextBlock Text="MAP OBJECTS" Classes="sectionLabel"/>
+                    <ComboBox AutomationProperties.Name="Map object" ItemsSource="{Binding GridItemPalette}"
+                              SelectedItem="{Binding SelectedGridItem}"
+                              PlaceholderText="Pick an object"
+                              HorizontalAlignment="Stretch">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="md:GridItemRule">
+                                <TextBlock Text="{Binding Name}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                               Text="Left drag to place the picked object, right drag to clear. Whatever the template says it blocks is what it blocks, movement, sight, or neither."/>
+                    <Button Classes="ghost" Content="Clear all"
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding ClearMapObjectsCommand}"/>
+
+                    <Border Classes="divider" Margin="0,4,0,0"/>
+                    <TextBlock Text="YOUR OWN IMAGE" Classes="sectionLabel"/>
+                    <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                               Text="Pick a picture and click the map to drop it, a chair, a crate, a bloodstain. Right click puts the picture down. Click one you placed to select it, then Delete removes it. Anything you pick is kept below, so a second chair is one click and not another trip through the file picker."/>
+
+                    <ItemsControl ItemsSource="{Binding PropLibrary}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:TokenLibraryEntryViewModel">
+                                <Grid Width="48" Margin="0,0,6,6" ToolTip.Tip="{Binding Name}">
+                                    <Button AutomationProperties.Name="{Binding Name}" Classes="tokenslot"
+                                            Classes.active="{Binding IsSelected}"
+                                            Command="{Binding SelectCommand}">
+                                        <Image Source="{Binding Preview}" Width="40" Height="40" Stretch="Uniform"/>
+                                    </Button>
+                                    <Button Classes="tokendel" AutomationProperties.Name="Remove" ToolTip.Tip="Remove"
+                                            VerticalAlignment="Top" HorizontalAlignment="Right"
+                                            Command="{Binding RemoveCommand}">
+                                        <PathIcon Data="{x:Static gv:GlobalVariables.IconClose}" Width="9" Height="9"/>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBox AutomationProperties.Name="Object name" Text="{Binding NewPropName}"
+                             Watermark="Name it before you pick" HorizontalAlignment="Stretch"/>
+                    <Button Classes="ghost" Content="Pick an image"
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding UploadPropCommand}"/>
+                    <Border Classes="row" IsVisible="{Binding HasPropArmed}" Padding="6">
+                        <StackPanel Spacing="6">
+                            <Image Source="{Binding PropPreview}" Height="64" Stretch="Uniform"/>
+                            <Grid ColumnDefinitions="Auto,*">
+                                <TextBlock Grid.Column="0" Text="Squares" Classes="fieldLabel" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <NumericUpDown AutomationProperties.Name="Squares across" Grid.Column="1" Minimum="0.25" Maximum="20" Increment="0.25"
+                                               Value="{Binding NewPropSquares}"/>
+                            </Grid>
+                            <CheckBox Content="Blocks movement" IsChecked="{Binding NewPropBlocks}"/>
+                            <CheckBox Content="Blocks sight" IsChecked="{Binding NewPropBlocksSight}"/>
+                            <CheckBox Content="Snap to grid"
+                                      ToolTip.Tip="Off lets scenery sit anywhere on the backdrop instead of on a square, map objects only"
+                                      IsChecked="{Binding NewPropSnap}"/>
+                            <Button Classes="ghost" Content="Put the image down"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{Binding DisarmPropCommand}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Classes="row" IsVisible="{Binding SelectedIsProp}" Padding="6">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="SELECTED OBJECT" Classes="sectionLabel"/>
+                            <Grid ColumnDefinitions="Auto,*">
+                                <TextBlock Grid.Column="0" Text="Squares" Classes="fieldLabel" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <NumericUpDown AutomationProperties.Name="Squares across" Grid.Column="1" Minimum="0.25" Maximum="20" Increment="0.25"
+                                               Value="{Binding SelectedPropSquares}"/>
+                            </Grid>
+                            <CheckBox Content="Blocks movement" IsChecked="{Binding SelectedPropBlocks}"/>
+                            <CheckBox Content="Blocks sight" IsChecked="{Binding SelectedPropBlocksSight}"/>
+                            <Button Classes="danger" Content="Delete it"
+                                    HorizontalAlignment="Stretch"
+                                    Command="{Binding DeleteSelectedPropCommand}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Spacing="6" IsVisible="{Binding IsDoorMode}">
+                    <TextBlock Text="DOORS" Classes="sectionLabel"/>
+                    <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                               Text="Drag along a square edge to put a new door there, or click a wall you already drew to turn it into one. Click a door to open and close it."/>
+                </StackPanel>
+
+                <StackPanel Spacing="6" IsVisible="{Binding IsRulerMode}">
+                    <TextBlock Text="MEASURE" Classes="sectionLabel"/>
+                    <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                               Text="Click one square then another for the distance between them, right click clears it."/>
+                    <TextBlock Text="{Binding RulerLabel}" FontSize="20" FontWeight="SemiBold"
+                               Foreground="{DynamicResource AccentColor}"
+                               IsVisible="{Binding RulerLabel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                    <TextBlock Text="{Binding RulerHint}" TextWrapping="Wrap" FontSize="12"
+                               Foreground="{DynamicResource Danger}"
+                               IsVisible="{Binding HasRulerHint}"/>
+                    <CheckBox Content="Ignore walls" IsChecked="{Binding RulerIgnoresWalls}"/>
+                    <CheckBox Content="Ignore occupied squares" IsChecked="{Binding RulerIgnoresOccupied}"/>
+                    <Button Classes="ghost" Content="Clear"
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding ClearRulerCommand}"/>
+                </StackPanel>
+
+                <StackPanel Spacing="10" IsVisible="{Binding ShowColorTools}">
+                    <TextBlock Text="COLOUR" Classes="sectionLabel"/>
+                    <WrapPanel>
+                        <Button AutomationProperties.Name="Drawing colour, gold" Classes="swatch" Background="#FFD700" CommandParameter="#FFD700" Command="{Binding RequestColorCommand}"/>
+                        <Button AutomationProperties.Name="Drawing colour, sky blue" Classes="swatch" Background="#4FC3F7" CommandParameter="#4FC3F7" Command="{Binding RequestColorCommand}"/>
+                        <Button AutomationProperties.Name="Drawing colour, red" Classes="swatch" Background="#E57373" CommandParameter="#E57373" Command="{Binding RequestColorCommand}"/>
+                        <Button AutomationProperties.Name="Drawing colour, green" Classes="swatch" Background="#81C784" CommandParameter="#81C784" Command="{Binding RequestColorCommand}"/>
+                        <Button AutomationProperties.Name="Drawing colour, purple" Classes="swatch" Background="#BA68C8" CommandParameter="#BA68C8" Command="{Binding RequestColorCommand}"/>
+                        <Button AutomationProperties.Name="Drawing colour, amber" Classes="swatch" Background="#FFB74D" CommandParameter="#FFB74D" Command="{Binding RequestColorCommand}"/>
+                        <Button AutomationProperties.Name="Drawing colour, cyan" Classes="swatch" Background="#4DD0E1" CommandParameter="#4DD0E1" Command="{Binding RequestColorCommand}"/>
+                        <Button AutomationProperties.Name="Drawing colour, pink" Classes="swatch" Background="#F06292" CommandParameter="#F06292" Command="{Binding RequestColorCommand}"/>
+                        <Button AutomationProperties.Name="Drawing colour, lime" Classes="swatch" Background="#AED581" CommandParameter="#AED581" Command="{Binding RequestColorCommand}"/>
+                        <Button AutomationProperties.Name="Drawing colour, violet" Classes="swatch" Background="#9575CD" CommandParameter="#9575CD" Command="{Binding RequestColorCommand}"/>
+                        <Button AutomationProperties.Name="Drawing colour, orange" Classes="swatch" Background="#FF8A65" CommandParameter="#FF8A65" Command="{Binding RequestColorCommand}"/>
+                        <Button AutomationProperties.Name="Drawing colour, brown" Classes="swatch" Background="#A1887F" CommandParameter="#A1887F" Command="{Binding RequestColorCommand}"/>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding MyColor, StringFormat='You: {0}'}"
+                               Classes="fieldLabel"
+                               Foreground="{DynamicResource WidgetForeground}"/>
+                    <TextBlock Text="{Binding ColorWarning}"
+                               Foreground="{DynamicResource Danger}"
+                               FontSize="11"
+                               TextWrapping="Wrap"
+                               IsVisible="{Binding ColorWarning, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                </StackPanel>
+
+                <StackPanel Spacing="8"
+                            IsVisible="{Binding SelectedToken, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <Border Classes="divider"/>
+                    <TextBlock Text="SELECTED TOKEN" Classes="sectionLabel"/>
+                    <ComboBox AutomationProperties.Name="SELECTED TOKEN" ItemsSource="{Binding CreatureSizes}"
+                              SelectedItem="{Binding SelectedTokenSize}"
+                              HorizontalAlignment="Stretch"/>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Button Classes="tool" AutomationProperties.Name="Rotate left" ToolTip.Tip="Rotate left" Command="{Binding RotateLeftCommand}">
+                            <PathIcon Data="{x:Static gv:GlobalVariables.IconRotateLeft}" Width="18" Height="18"/>
+                        </Button>
+                        <Button Classes="tool" AutomationProperties.Name="Rotate right" ToolTip.Tip="Rotate right" Command="{Binding RotateRightCommand}">
+                            <PathIcon Data="{x:Static gv:GlobalVariables.IconRotateRight}" Width="18" Height="18"/>
+                        </Button>
+                    </StackPanel>
+                    <Button Classes="ghost" Content="Open sheet"
+                            HorizontalAlignment="Stretch"
+                            Command="{Binding OpenSheetCommand}"
+                            IsVisible="{Binding CanOpenSelectedSheet}"/>
+                </StackPanel>
+            </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <Button HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="14"
+                ZIndex="999"
+                Classes="ghost"
+                Content="Show tools"
+                AutomationProperties.Name="Show the map tools" ToolTip.Tip="Show the map tools"
+                IsVisible="{Binding !ToolsVisible}"
+                Command="{Binding ToggleToolsCommand}"/>
+    </Grid>
+</UserControl>

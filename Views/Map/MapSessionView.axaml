@@ -1,0 +1,86 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Dujahit.ViewModels"
+             xmlns:items="clr-namespace:Dujahit.Views.Map.Items"
+             xmlns:panels="clr-namespace:Dujahit.Views.Map.Panels"
+             xmlns:map="clr-namespace:Dujahit.Views.Map"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1920" d:DesignHeight="1080"
+             x:Class="Dujahit.Views.Map.MapSessionView"
+             x:DataType="vm:MapSessionViewModel"
+             Background="{DynamicResource Background}">
+
+    <UserControl.DataTemplates>
+
+        <DataTemplate DataType="vm:CharacterQuickPanelViewModel">
+            <panels:CharacterQuickPanelView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:DmCombatPanelViewModel">
+            <panels:DmCombatPanelView/>
+        </DataTemplate>
+    </UserControl.DataTemplates>
+
+    <Grid ColumnDefinitions="*,Auto">
+
+        <map:MapCanvasView Grid.Column="0"
+                             DataContext="{Binding Canvas}"/>
+
+        <Border Grid.Column="0"
+                Classes="badge"
+                Background="{DynamicResource AccentColor}"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,14,14,0"
+                IsVisible="{Binding IsBroadcasting}"
+                AutomationProperties.Name="This map is live to your players" ToolTip.Tip="This map is live to your players">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <Ellipse Width="8" Height="8" VerticalAlignment="Center"
+                         Fill="{DynamicResource Background}"/>
+                <TextBlock Text="LIVE" Foreground="{DynamicResource Background}"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Column="1" Width="300" RowDefinitions="Auto,*,4,2*" Margin="8,0,0,0" ClipToBounds="True"
+              IsVisible="{Binding ShowSidebar}">
+            <StackPanel Grid.Row="0" Spacing="6" Margin="0,0,0,8">
+                <Button Classes="accent"
+                        Content="{Binding BroadcastLabel}"
+                        Command="{Binding ToggleBroadcastCommand}"
+                        IsVisible="{Binding CanBroadcast}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Padding="12,9"/>
+                <Button Classes="danger"
+                        Content="Close map"
+                        Command="{Binding CloseMapCommand}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Padding="12,9"
+                        AutomationProperties.Name="Close this map, stop sharing it and drop the back to the map pill"
+                        ToolTip.Tip="Close this map, stop sharing it and drop the back to the map pill"/>
+                <Button Classes="choose"
+                        Content="Resync players"
+                        Command="{Binding ResyncCommand}"
+                        IsVisible="{Binding IsBroadcasting}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Padding="12,9"
+                        AutomationProperties.Name="Re-push this map and the current initiative to everyone, use it if a player's view is stuck" ToolTip.Tip="Re-push this map and the current initiative to everyone, use it if a player's view is stuck"/>
+            </StackPanel>
+            <items:InitiativeTrackerView Grid.Row="1"
+                                         MinHeight="0"
+                                         DataContext="{Binding Initiative}"/>
+            <GridSplitter Grid.Row="2"
+                          Height="4"
+                          ResizeDirection="Rows"
+                          HorizontalAlignment="Stretch"
+                          Background="Transparent"
+                          AutomationProperties.Name="Drag to give the roll log more room" ToolTip.Tip="Drag to give the roll log more room"/>
+            <ContentControl Grid.Row="3"
+                            MinHeight="0"
+                            Content="{Binding RoleSidePanel}"
+                            Margin="0,8,0,0"/>
+        </Grid>
+    </Grid>
+</UserControl>

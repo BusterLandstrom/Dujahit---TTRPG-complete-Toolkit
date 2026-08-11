@@ -1,0 +1,161 @@
+﻿<views:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:Dujahit.Views"
+        x:Class="Dujahit.Views.Map.Dialogs.CreateMapDialog"
+        Title="Create Map"
+        Background="{DynamicResource Background}"
+        FontFamily="{DynamicResource MainFont}"
+        Foreground="{DynamicResource Foreground}">
+
+    <views:DialogWindow.Styles>
+        <Style Selector="TextBlock.label">
+            <Setter Property="Foreground" Value="{DynamicResource WidgetForeground}"/>
+            <Setter Property="FontSize" Value="{DynamicResource FontSizeSmall}"/>
+            <Setter Property="LetterSpacing" Value="2"/>
+            <Setter Property="Opacity" Value="0.75"/>
+            <Setter Property="Margin" Value="0,10,0,4"/>
+        </Style>
+        <Style Selector="Border.kindCard">
+            <Setter Property="Background" Value="{DynamicResource Background}"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource CornerRadiusStandard}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Divider}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Border.kindCard.selected">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+        </Style>
+    </views:DialogWindow.Styles>
+
+    <Border Classes="panel" Margin="16">
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+
+            <StackPanel Grid.Row="0" Spacing="2" Margin="0,0,0,10">
+                <TextBlock Text="New map" Classes="header"/>
+                <TextBlock Text="Pick the grid, then line it up with the map art" Classes="subtitle" FontSize="13"/>
+            </StackPanel>
+
+            <TextBlock Grid.Row="1" Classes="label" Text="NAME"/>
+            <TextBox AutomationProperties.Name="Map name" Grid.Row="2" x:Name="NameInput" Watermark="Map name"/>
+
+            <TextBlock Grid.Row="3" Classes="label" Text="GRID TYPE"/>
+            <Grid Grid.Row="4" ColumnDefinitions="*,*" MaxWidth="420" HorizontalAlignment="Left">
+                <Border x:Name="SquaresCard" Classes="kindCard" Tag="Squares"
+                        Margin="0,0,6,0"
+                        PointerPressed="OnGridCardClicked">
+                    <StackPanel>
+                        <TextBlock Text="Battle Map"
+                                   Foreground="{DynamicResource AccentColor}"
+                                   FontSize="16"/>
+                        <TextBlock Text="5 ft squares"
+                                   Foreground="{DynamicResource WidgetForeground}"
+                                   Opacity="0.7"
+                                   FontSize="12"/>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" x:Name="HexesCard" Classes="kindCard" Tag="Hexes"
+                        Margin="6,0,0,0"
+                        PointerPressed="OnGridCardClicked">
+                    <StackPanel>
+                        <TextBlock Text="Overland"
+                                   Foreground="{DynamicResource AccentColor}"
+                                   FontSize="16"/>
+                        <TextBlock Text="Hexagons"
+                                   Foreground="{DynamicResource WidgetForeground}"
+                                   Opacity="0.7"
+                                   FontSize="12"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <StackPanel Grid.Row="5" x:Name="BlankSizePanel" IsVisible="False" Spacing="4" Margin="0,14,0,0">
+                <TextBlock Classes="label" Text="HOW BIG, IN SQUARES"/>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <NumericUpDown AutomationProperties.Name="Squares across" x:Name="ColsInput"
+                                   Value="32" Minimum="4" Maximum="400" Increment="1" FormatString="0" Width="130"/>
+                    <TextBlock Text="by" VerticalAlignment="Center" Foreground="{DynamicResource WidgetForeground}"/>
+                    <NumericUpDown AutomationProperties.Name="Squares down" x:Name="RowsInput"
+                                   Value="20" Minimum="4" Maximum="400" Increment="1" FormatString="0" Width="130"/>
+                </StackPanel>
+                <ItemsControl x:Name="PresetList" Margin="0,6,0,0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+                <TextBlock x:Name="BlankSizeReadout"
+                           Foreground="{DynamicResource WidgetForeground}"
+                           Opacity="0.55" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0"/>
+            </StackPanel>
+
+            <Grid Grid.Row="5" x:Name="ArtPanel" Margin="0,16,0,0" ColumnDefinitions="Auto,260">
+
+                <Border Grid.Column="0"
+                        x:Name="PreviewViewport"
+                        Width="440"
+                        Height="300"
+                        Background="#11000000"
+                        BorderBrush="{DynamicResource Divider}"
+                        BorderThickness="1"
+                        CornerRadius="{DynamicResource CornerRadiusStandard}"
+                        ClipToBounds="True"
+                        Margin="0,0,16,0"
+                        PointerPressed="OnViewportPressed"
+                        PointerMoved="OnViewportMoved"
+                        PointerReleased="OnViewportReleased"
+                        PointerWheelChanged="OnViewportWheel">
+                    <Canvas x:Name="PreviewWorld" Background="Transparent"/>
+                </Border>
+
+                <StackPanel Grid.Column="1" Spacing="4">
+                    <TextBlock Classes="label" Text="CELL SIZE (SOURCE PX)"/>
+                    <NumericUpDown AutomationProperties.Name="CELL SIZE (SOURCE PX)" x:Name="CellPxInput"
+                                   Value="50" Minimum="6" Maximum="1024"
+                                   Increment="1"
+                                   FormatString="0"
+                                   ValueChanged="OnCellPxChanged"/>
+                    <TextBlock x:Name="ScaleReadout"
+                               Text="scale 1.00x"
+                               Foreground="{DynamicResource WidgetForeground}"
+                               Opacity="0.7"
+                               FontSize="12"
+                               Margin="0,2,0,0"/>
+
+                    <TextBlock Classes="label" Text="ZOOM"/>
+                    <Slider AutomationProperties.Name="ZOOM" x:Name="ZoomSlider"
+                            Minimum="1" Maximum="16" Value="1"
+                            TickFrequency="1"/>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                        <Button Classes="ghost" Content="Fit" Click="OnFitClicked"/>
+                        <Button Classes="ghost" Content="1:1" Click="OnActualSizeClicked"/>
+                    </StackPanel>
+
+                    <TextBlock Text="Drag to pan, scroll to zoom. Nudge cell size until the gold lines sit on the map's printed grid."
+                               Foreground="{DynamicResource WidgetForeground}"
+                               Opacity="0.55"
+                               FontSize="12"
+                               TextWrapping="Wrap"
+                               Margin="0,10,0,0"/>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Grid.Row="6"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                        HorizontalAlignment="Right"
+                        Margin="0,16,0,0">
+                <TextBlock x:Name="NameWarning"
+                           Text="Give the map a name first"
+                           Foreground="{DynamicResource DangerRed}"
+                           VerticalAlignment="Center"
+                           IsVisible="False"/>
+                <Button Classes="ghost" Content="Cancel" Click="OnCancel" IsCancel="True"/>
+                <Button Classes="primary" Content="Create" Click="OnCreate" IsDefault="True"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</views:DialogWindow>

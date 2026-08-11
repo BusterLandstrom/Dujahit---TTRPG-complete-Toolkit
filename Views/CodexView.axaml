@@ -1,0 +1,284 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:gv="clr-namespace:Dujahit.Models.Database"
+             xmlns:vm="using:Dujahit.ViewModels"
+             xmlns:v="using:Dujahit.Views"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="760"
+             x:Class="Dujahit.Views.CodexView"
+             x:DataType="vm:CodexViewModel"
+             Background="Transparent"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">
+
+    <UserControl.DataTemplates>
+        <DataTemplate DataType="vm:MarkdownEditorViewModel">
+            <v:MarkdownEditorView/>
+        </DataTemplate>
+    </UserControl.DataTemplates>
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.h">
+            <Setter Property="FontSize" Value="{DynamicResource FontSizeHeader}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
+        </Style>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{DynamicResource Widget}"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource CornerRadiusStandard}"/>
+            <Setter Property="Padding" Value="14"/>
+        </Style>
+        <Style Selector="Button.action">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10,4"/>
+        </Style>
+        <Style Selector="TextBox.filter">
+            <Setter Property="Background" Value="{DynamicResource Background}"/>
+            <Setter Property="Foreground" Value="{DynamicResource WidgetForeground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Divider}"/>
+        </Style>
+    </UserControl.Styles>
+
+    <TabControl Margin="16" SelectedIndex="{Binding SelectedTabIndex}">
+
+        <TabItem Header="Chapters">
+            <Grid ColumnDefinitions="280,*" Margin="0,10,0,0">
+                <Border Grid.Column="0" Classes="card" Margin="0,0,8,0">
+                    <DockPanel>
+                        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Classes="h" Text="Chapters"/>
+                            <Button Grid.Column="1" Classes="action" Content="+ Chapter"
+                                    Command="{Binding Chapters.AddRootCommand}"/>
+                        </Grid>
+                        <TreeView Margin="0,8,0,0"
+                                  ItemsSource="{Binding Chapters.Chapters}"
+                                  SelectedItem="{Binding Chapters.SelectedNode, Mode=TwoWay}">
+                            <TreeView.Styles>
+                                <Style Selector="TreeViewItem" x:DataType="vm:NotePageTreeNode">
+                                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                                </Style>
+                            </TreeView.Styles>
+                            <TreeView.ItemTemplate>
+                                <TreeDataTemplate ItemsSource="{Binding Children}"
+                                                  DataType="vm:NotePageTreeNode">
+                                    <Grid Classes="treeRow" ColumnDefinitions="*,Auto">
+                                        <TextBlock Grid.Column="0" Text="{Binding DisplayTitle}" Padding="4,2" VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <Button Grid.Column="1" Classes="treeAdd" Content="+"
+                                                Command="{Binding $parent[TreeView].((vm:CodexViewModel)DataContext).Chapters.AddChildCommand}"
+                                                CommandParameter="{Binding}"
+                                                AutomationProperties.Name="New sub-page under this chapter" ToolTip.Tip="New sub-page under this chapter"/>
+                                    </Grid>
+                                </TreeDataTemplate>
+                            </TreeView.ItemTemplate>
+                        </TreeView>
+                    </DockPanel>
+                </Border>
+
+                <Grid Grid.Column="1" RowDefinitions="Auto,*" Margin="8,0,0,0">
+                    <Border Grid.Row="0" Classes="card" Margin="0,0,0,8"
+                            IsVisible="{Binding Chapters.HasSelection}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Panel Grid.Column="0" HorizontalAlignment="Left">
+                                <Button Classes="titleEdit"
+                                        Content="{Binding Chapters.SelectedTitle}"
+                                        Command="{Binding Chapters.BeginRenameCommand}"
+                                        IsVisible="{Binding Chapters.IsNotRenaming}"
+                                        AutomationProperties.Name="Click to rename" ToolTip.Tip="Click to rename"/>
+                                <TextBox x:Name="ChapterTitleBox" AutomationProperties.Name="Rename chapter" Classes="titleBox"
+                                         Text="{Binding Chapters.RenameDraft, Mode=TwoWay}"
+                                         IsVisible="{Binding Chapters.IsRenaming}"
+                                         LostFocus="OnChapterTitleLostFocus">
+                                    <TextBox.KeyBindings>
+                                        <KeyBinding Gesture="Enter" Command="{Binding Chapters.CommitRenameCommand}"/>
+                                        <KeyBinding Gesture="Escape" Command="{Binding Chapters.CancelRenameCommand}"/>
+                                    </TextBox.KeyBindings>
+                                </TextBox>
+                            </Panel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                <Button Classes="action" Content="Copy ref"
+                                        Command="{Binding Chapters.CopyReferenceCommand}"
+                                        AutomationProperties.Name="Copy this chapter's reference tag to paste into another page" ToolTip.Tip="Copy this chapter's reference tag to paste into another page"/>
+                                <Button AutomationProperties.Name="Delete" Classes="action"
+                                        Foreground="{DynamicResource Danger}"
+                                        BorderBrush="{DynamicResource Danger}"
+                                        Command="{Binding Chapters.DeleteCommand}">
+                                    <PathIcon Data="{x:Static gv:GlobalVariables.IconClose}" Width="11" Height="11"/>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <ContentControl Grid.Row="1" Content="{Binding Chapters.Editor}"
+                                    IsVisible="{Binding Chapters.HasSelection}"/>
+                </Grid>
+            </Grid>
+        </TabItem>
+
+        <TabItem Header="NPCs">
+            <DockPanel Margin="0,10,0,0">
+
+                <Border DockPanel.Dock="Top" Classes="card" Margin="0,0,0,8">
+                    <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto,Auto" RowDefinitions="Auto,Auto">
+
+                        <TextBox AutomationProperties.Name="Search by name or slug" Grid.Row="0" Grid.Column="0" Classes="filter"
+                                 Watermark="Search by name or slug"
+                                 Text="{Binding Npcs.Search, Mode=TwoWay}"/>
+                        <ComboBox AutomationProperties.Name="Race" Grid.Row="0" Grid.Column="1" Width="160" Margin="6,0,0,0"
+                                  PlaceholderText="Race"
+                                  ItemsSource="{Binding Npcs.AvailableRaces}"
+                                  SelectedItem="{Binding Npcs.RaceFilter, Mode=TwoWay}"/>
+                        <ComboBox AutomationProperties.Name="Class" Grid.Row="0" Grid.Column="2" Width="160" Margin="6,0,0,0"
+                                  PlaceholderText="Class"
+                                  ItemsSource="{Binding Npcs.AvailableClasses}"
+                                  SelectedItem="{Binding Npcs.ClassFilter, Mode=TwoWay}"/>
+                        <TextBox AutomationProperties.Name="Tags (space- or comma-separated)" Grid.Row="0" Grid.Column="3" Width="220" Margin="6,0,0,0"
+                                 Classes="filter"
+                                 Watermark="Tags (space- or comma-separated)"
+                                 Text="{Binding Npcs.TagFilter, Mode=TwoWay}"/>
+                        <Button Grid.Row="0" Grid.Column="4" Classes="action" Margin="6,0,0,0"
+                                Content="Clear"
+                                Command="{Binding Npcs.ClearFiltersCommand}"/>
+                        <Button Grid.Row="0" Grid.Column="5" Classes="action" Margin="6,0,0,0"
+                                Content="+ NPC"
+                                Command="{Binding Npcs.CreateNpcCommand}"/>
+                        <Button Grid.Row="0" Grid.Column="6" Classes="action" Margin="6,0,0,0"
+                                Content="+ Monster"
+                                ToolTip.Tip="Opens the monster list in the template editor, where a statblock carries resistances, legendary actions and lair actions"
+                                Command="{Binding Npcs.CreateMonsterCommand}"/>
+                        <Button Grid.Row="0" Grid.Column="7" Classes="action" Margin="6,0,0,0"
+                                Content="Paste statblock"
+                                ToolTip.Tip="Paste a statblock as text and it parses out AC, hit points, speed, abilities, saves and the damage lists"
+                                Command="{Binding Npcs.ImportStatblockCommand}"/>
+
+                        <TextBlock Grid.Row="1" Grid.ColumnSpan="8" Margin="0,8,0,0"
+                                   Foreground="{DynamicResource Muted}"
+                                   FontSize="12"
+                                   Text="Tags listed in any NPC: tip - click into the filter box and type any tag, e.g. 'chapter-2 halfling'"/>
+                    </Grid>
+                </Border>
+
+                <Border Classes="card">
+                    <ListBox ItemsSource="{Binding Npcs.Visible}"
+                             SelectedItem="{Binding Npcs.Selected, Mode=TwoWay}"
+                             Background="Transparent">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="vm:NpcListItemViewModel">
+                                <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" Margin="0,4">
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontSize="16"
+                                                   Foreground="{DynamicResource AccentColor}"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <TextBlock Text="{Binding SlugDisplay}"
+                                                       Foreground="{DynamicResource Muted}"
+                                                       FontSize="11"/>
+                                            <TextBlock Text="{Binding Race}"
+                                                       Foreground="{DynamicResource Muted}"
+                                                       FontSize="11"/>
+                                            <TextBlock Text="{Binding Class}"
+                                                       Foreground="{DynamicResource Muted}"
+                                                       FontSize="11"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding TagsDisplay}"
+                                                   Foreground="{DynamicResource AccentHover}"
+                                                   FontSize="11"
+                                                   Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="{Binding Level, StringFormat=Lvl {0}}"
+                                               Foreground="{DynamicResource WidgetForeground}"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,12,0"/>
+                                    <Button Grid.Column="2" Classes="action" Content="Edit"
+                                            Command="{Binding $parent[ItemsControl].((vm:CodexViewModel)DataContext).Npcs.EditSelectedCommand}"
+                                            CommandParameter="{Binding Id}"/>
+                                    <Button Grid.Column="3" Classes="action" Content="View" Margin="6,0,0,0"
+                                            Command="{Binding $parent[ItemsControl].((vm:CodexViewModel)DataContext).Npcs.ViewSelectedCommand}"
+                                            CommandParameter="{Binding Id}"/>
+                                    <Button AutomationProperties.Name="Delete" Grid.Column="4" Classes="action" Margin="6,0,0,0"
+                                            Foreground="{DynamicResource Danger}"
+                                            BorderBrush="{DynamicResource Danger}"
+                                            Command="{Binding $parent[ItemsControl].((vm:CodexViewModel)DataContext).Npcs.DeleteSelectedCommand}"
+                                            CommandParameter="{Binding Id}">
+                                        <PathIcon Data="{x:Static gv:GlobalVariables.IconClose}" Width="11" Height="11"/>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+            </DockPanel>
+        </TabItem>
+
+        <TabItem Header="Items">
+            <DockPanel Margin="0,10,0,0">
+                <Border DockPanel.Dock="Top" Classes="card" Margin="0,0,0,8">
+                    <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto">
+                        <TextBox AutomationProperties.Name="Search by name or slug" Grid.Column="0" Classes="filter"
+                                 Watermark="Search by name or slug"
+                                 Text="{Binding Items.Search, Mode=TwoWay}"/>
+                        <ComboBox AutomationProperties.Name="Type" Grid.Column="1" Width="160" Margin="6,0,0,0"
+                                  PlaceholderText="Type"
+                                  ItemsSource="{Binding Items.AvailableTypes}"
+                                  SelectedItem="{Binding Items.TypeFilter, Mode=TwoWay}"/>
+                        <TextBox AutomationProperties.Name="Tags (e.g. weapons two-handed)" Grid.Column="2" Width="220" Margin="6,0,0,0"
+                                 Classes="filter"
+                                 Watermark="Tags (e.g. weapons two-handed)"
+                                 Text="{Binding Items.TagFilter, Mode=TwoWay}"/>
+                        <Button Grid.Column="3" Classes="action" Margin="6,0,0,0"
+                                Content="Clear"
+                                Command="{Binding Items.ClearFiltersCommand}"/>
+                        <Button Grid.Column="4" Classes="action" Margin="6,0,0,0"
+                                Content="+ Item"
+                                Command="{Binding Items.CreateItemCommand}"/>
+                    </Grid>
+                </Border>
+
+                <Border Classes="card">
+                    <ListBox ItemsSource="{Binding Items.Visible}"
+                             SelectedItem="{Binding Items.Selected, Mode=TwoWay}"
+                             Background="Transparent">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="vm:ItemListItemViewModel">
+                                <Grid ColumnDefinitions="*,Auto,Auto,Auto" Margin="0,4">
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding Name}"
+                                                   FontSize="16"
+                                                   Foreground="{DynamicResource AccentColor}"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <TextBlock Text="{Binding SlugDisplay}"
+                                                       Foreground="{DynamicResource Muted}" FontSize="11"/>
+                                            <TextBlock Text="{Binding ItemType}"
+                                                       Foreground="{DynamicResource Muted}" FontSize="11"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding TagsDisplay}"
+                                                   Foreground="{DynamicResource AccentHover}"
+                                                   FontSize="11" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                                        <Button Classes="action" Content="Edit"
+                                                Command="{Binding $parent[ItemsControl].((vm:CodexViewModel)DataContext).Items.EditItemCommand}"
+                                                CommandParameter="{Binding Id}"/>
+                                        <Button Classes="action" Content="View"
+                                                Command="{Binding $parent[ItemsControl].((vm:CodexViewModel)DataContext).Items.ViewItemCommand}"
+                                                CommandParameter="{Binding Id}"/>
+                                    </StackPanel>
+                                    <Button AutomationProperties.Name="Delete" Grid.Column="3" Classes="action" Margin="6,0,0,0"
+                                            Foreground="{DynamicResource Danger}"
+                                            BorderBrush="{DynamicResource Danger}"
+                                            Command="{Binding $parent[ItemsControl].((vm:CodexViewModel)DataContext).Items.DeleteSelectedCommand}"
+                                            CommandParameter="{Binding Id}">
+                                        <PathIcon Data="{x:Static gv:GlobalVariables.IconClose}" Width="11" Height="11"/>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+            </DockPanel>
+        </TabItem>
+    </TabControl>
+</UserControl>

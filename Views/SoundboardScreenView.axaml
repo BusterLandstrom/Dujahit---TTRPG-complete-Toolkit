@@ -1,0 +1,195 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vms="clr-namespace:Dujahit.ViewModels"
+             x:DataType="vms:SoundboardScreenViewModel"
+             x:Class="Dujahit.Views.SoundboardScreenView"
+             Background="Transparent"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">
+
+    <UserControl.Styles>
+        <Style Selector="Button.sound">
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+
+        <Style Selector="Button.star">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+        </Style>
+
+        <Style Selector="Button.del">
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="FontSize" Value="16"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Margin="24" RowDefinitions="Auto,*">
+
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,16">
+            <TextBlock Classes="header" Text="Soundboard"/>
+            <TextBlock Classes="muted" Text="Play music and effects for the whole table or just the players you pick." IsVisible="{Binding Board.IsDm}"/>
+            <TextBlock Classes="muted" Text="What the dm plays comes through here. How loud it gets is up to you." IsVisible="{Binding Board.IsListener}"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnDefinitions="2*,*">
+
+            <Border Grid.Column="0" Classes="card" Padding="20" Margin="0,0,16,0">
+                <Grid RowDefinitions="Auto,*,Auto,Auto">
+
+                    <Border Grid.Row="0"
+                            Background="{DynamicResource Background}"
+                            CornerRadius="{DynamicResource CornerRadiusStandard}"
+                            Padding="12,10"
+                            Margin="0,0,0,12"
+                            IsVisible="{Binding Board.HasMusicPlaying}">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <TextBlock Grid.Column="0" Text="Now playing" Classes="fieldLabel" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Board.NowPlaying}"
+                                       Foreground="{DynamicResource AccentColor}"
+                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="10,0,10,0"/>
+                            <Button Grid.Column="2" Classes="danger" Content="Stop" Command="{Binding Board.StopMusicCommand}"
+                                    IsVisible="{Binding Board.IsDm}"/>
+                        </Grid>
+                    </Border>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" IsVisible="{Binding Board.IsDm}">
+                        <StackPanel Spacing="16">
+
+                            <StackPanel Spacing="6" IsVisible="{Binding Board.HasFavourites}">
+                                <TextBlock Classes="sectionLabel" Text="FAVOURITES"/>
+                                <ItemsControl ItemsSource="{Binding Board.Favourites}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vms:SoundItemViewModel">
+                                            <Button Classes="sound" Content="{Binding Name}"
+                                                    Command="{Binding PlayCommand}" Margin="0,0,6,6"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <StackPanel Spacing="6">
+                                <TextBlock Classes="sectionLabel" Text="MUSIC"/>
+                                <ItemsControl ItemsSource="{Binding Board.Music}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vms:SoundItemViewModel">
+                                            <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,3">
+                                                <Button Grid.Column="0" Classes="sound" Content="{Binding Name}"
+                                                        Command="{Binding PlayCommand}"
+                                                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"/>
+                                                <Button Grid.Column="1" Classes="star" Content="&#x2605;"
+                                                        Command="{Binding FavouriteCommand}" AutomationProperties.Name="Favourite" ToolTip.Tip="Favourite"/>
+                                                <Button Grid.Column="2" Classes="del" Content="&#x00D7;"
+                                                        Command="{Binding DeleteCommand}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+
+                            <StackPanel Spacing="6">
+                                <TextBlock Classes="sectionLabel" Text="EFFECTS"/>
+                                <ItemsControl ItemsSource="{Binding Board.Sfx}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vms:SoundItemViewModel">
+                                            <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,3">
+                                                <Button Grid.Column="0" Classes="sound" Content="{Binding Name}"
+                                                        Command="{Binding PlayCommand}"
+                                                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"/>
+                                                <Button Grid.Column="1" Classes="star" Content="&#x2605;"
+                                                        Command="{Binding FavouriteCommand}" AutomationProperties.Name="Favourite" ToolTip.Tip="Favourite"/>
+                                                <Button Grid.Column="2" Classes="del" Content="&#x00D7;"
+                                                        Command="{Binding DeleteCommand}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <StackPanel Grid.Row="2" Spacing="4" Margin="0,14,0,0" IsVisible="{Binding Board.IsTransferring}">
+                        <TextBlock Classes="muted" FontSize="12" TextTrimming="CharacterEllipsis"
+                                   Text="{Binding Board.TransferLabel}"/>
+                        <ProgressBar Minimum="0" Maximum="100" Height="6"
+                                     AutomationProperties.Name="Upload progress"
+                                     Value="{Binding Board.TransferProgress}"/>
+                    </StackPanel>
+
+                    <Grid Grid.Row="3" ColumnDefinitions="*,*,Auto" Margin="0,14,0,0" IsVisible="{Binding Board.IsDm}">
+                        <Button Grid.Column="0" Classes="choose" Content="+ Music" Command="{Binding Board.AddMusicCommand}"
+                                Margin="0,0,4,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                        <Button Grid.Column="1" Classes="choose" Content="+ Effect" Command="{Binding Board.AddSfxCommand}"
+                                Margin="4,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                        <Button Grid.Column="2" Classes="choose" Content="Sync" Margin="4,0,0,0"
+                                Command="{Binding Board.SyncCommand}" AutomationProperties.Name="Re-share every sound to the current players" ToolTip.Tip="Re-share every sound to the current players"/>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Column="1" Spacing="16">
+
+                <Border Classes="card" Padding="20" IsVisible="{Binding Board.IsDm}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Classes="sectionLabel" Text="AUDIENCE"/>
+                        <CheckBox AutomationProperties.Name="AUDIENCE" Content="Play to everyone" IsChecked="{Binding Board.TargetEveryone}"/>
+
+                        <StackPanel Spacing="6" IsEnabled="{Binding !Board.TargetEveryone}">
+                            <TextBlock Classes="fieldLabel" Text="Chosen players"/>
+                            <ItemsControl ItemsSource="{Binding Board.Players}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vms:SoundTargetViewModel">
+                                        <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+                                            <CheckBox Grid.Column="0" Content="{Binding Name}"
+                                                      IsChecked="{Binding IsSelected}"
+                                                      IsEnabled="{Binding Online}"/>
+                                            <TextBlock Grid.Column="1" Classes="muted" Text="offline"
+                                                       VerticalAlignment="Center"
+                                                       IsVisible="{Binding !Online}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Classes="muted" FontSize="12"
+                                       Text="No players connected yet."
+                                       IsVisible="{Binding !Board.HasPlayers}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card" Padding="20" IsVisible="{Binding Board.IsDm}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Classes="sectionLabel" Text="LEVELS"/>
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="fieldLabel" Text="Music"/>
+                            <Slider AutomationProperties.Name="Music" Minimum="0" Maximum="100" Value="{Binding Board.MusicVolume}"/>
+                        </StackPanel>
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="fieldLabel" Text="Effects"/>
+                            <Slider AutomationProperties.Name="Effects" Minimum="0" Maximum="100" Value="{Binding Board.SfxVolume}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Classes="card" Padding="20">
+                    <StackPanel Spacing="12">
+                        <TextBlock Classes="sectionLabel" Text="MY OUTPUT"/>
+                        <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                                   Text="How loud this machine plays. It is yours only, nobody else at the table can change it."/>
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="fieldLabel" Text="My volume"/>
+                            <Slider AutomationProperties.Name="My volume" Minimum="0" Maximum="100" Value="{Binding Board.ListenerVolume}"/>
+                        </StackPanel>
+                        <CheckBox Content="Mute everything" IsChecked="{Binding Board.IsMuted}"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

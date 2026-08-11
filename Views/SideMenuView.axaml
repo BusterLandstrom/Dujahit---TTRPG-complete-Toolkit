@@ -1,0 +1,167 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vms="clr-namespace:Dujahit.ViewModels"
+             xmlns:gv="clr-namespace:Dujahit.Models.Database"
+             mc:Ignorable="d" d:DesignWidth="320" d:DesignHeight="1080"
+             x:DataType="vms:SideMenuViewModel"
+             x:Class="Dujahit.Views.SideMenuView"
+             FontFamily="{DynamicResource MainFont}">
+
+    <Border Background="{DynamicResource Widget}"
+            CornerRadius="0,20,20,0"
+            Margin="0,0,40,0"
+            BoxShadow="7 0 22 0 #66000000">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+            <Grid.Styles>
+                <Style Selector="Button.navItem">
+                    <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    <Setter Property="HorizontalContentAlignment" Value="Left" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Foreground" Value="{DynamicResource WidgetForeground}" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="BorderThickness" Value="3,0,0,0" />
+                    <Setter Property="CornerRadius" Value="0,10,10,0" />
+                    <Setter Property="Padding" Value="20,12" />
+                    <Setter Property="Margin" Value="0,3,10,3" />
+                    <Setter Property="FontSize" Value="15" />
+                </Style>
+
+                <Style Selector="Button.navItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="{DynamicResource Background}" />
+                    <Setter Property="TextBlock.Foreground" Value="{DynamicResource AccentColor}" />
+                </Style>
+
+                <Style Selector="Button.navItem.selected">
+                    <Setter Property="Foreground" Value="{DynamicResource AccentColor}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource AccentColor}" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </Style>
+                <Style Selector="Button.navItem.selected /template/ ContentPresenter#PART_ContentPresenter">
+                    <Setter Property="Background" Value="{DynamicResource Background}" />
+                </Style>
+            </Grid.Styles>
+
+            <StackPanel Grid.Row="0" Margin="24,26,24,18" Spacing="6">
+                <TextBlock Text="CAMPAIGN"
+                           FontSize="{DynamicResource FontSizeSmall}"
+                           LetterSpacing="3"
+                           Foreground="{DynamicResource Muted}" />
+                <TextBlock Text="{Binding CampaignName}"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           TextWrapping="Wrap"
+                           Foreground="{DynamicResource AccentColor}" />
+
+                <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,12,0,0">
+                    <Button Grid.Column="0"
+                            IsVisible="{Binding CanSearch}"
+                            Command="{Binding SearchCommand}"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            Background="{DynamicResource Background}"
+                            Foreground="{DynamicResource WidgetForeground}"
+                            BorderBrush="{DynamicResource Divider}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="12,9"
+                            AutomationProperties.Name="Search the campaign (Ctrl+Q)" ToolTip.Tip="Search the campaign (Ctrl+Q)">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <PathIcon Grid.Column="0"
+                                      Data="{x:Static gv:GlobalVariables.IconSearch}"
+                                      Width="15" Height="15"
+                                      Margin="0,0,8,0"
+                                      Foreground="{DynamicResource AccentColor}"/>
+                            <TextBlock Grid.Column="1" Text="Search" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="2" Text="Ctrl+Q" FontSize="11" Opacity="0.65" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Button>
+
+                    <Button Grid.Column="1"
+                            Command="{Binding SettingsCommand}"
+                            IsVisible="{Binding CanOpenSettings}"
+                            Width="38" Height="38"
+                            Margin="8,0,0,0"
+                            Padding="0"
+                            CornerRadius="19"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Background="{DynamicResource Background}"
+                            BorderBrush="{DynamicResource Divider}"
+                            BorderThickness="1"
+                            AutomationProperties.Name="Campaign settings" ToolTip.Tip="Campaign settings">
+                        <PathIcon Data="{x:Static gv:GlobalVariables.IconGear}"
+                                  Width="17" Height="17"
+                                  Foreground="{DynamicResource AccentColor}"/>
+                    </Button>
+
+                    <Button Grid.Column="2"
+                            Click="OnOpenHelp"
+                            Width="38" Height="38"
+                            Margin="8,0,0,0"
+                            Padding="0"
+                            CornerRadius="19"
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            Background="{DynamicResource Background}"
+                            BorderBrush="{DynamicResource Divider}"
+                            BorderThickness="1"
+                            AutomationProperties.Name="Help, how references work" ToolTip.Tip="Help, how references work">
+                        <PathIcon Data="{x:Static gv:GlobalVariables.IconHelp}"
+                                  Width="17" Height="17"
+                                  Foreground="{DynamicResource AccentColor}"/>
+                    </Button>
+                </Grid>
+
+                <Button IsVisible="{Binding CanLeave}"
+                        Command="{Binding LeaveCommand}"
+                        Margin="0,8,0,0"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Background="{DynamicResource Background}"
+                        Foreground="{DynamicResource Danger}"
+                        BorderBrush="{DynamicResource Divider}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="12,7"
+                        Content="Leave campaign"
+                        AutomationProperties.Name="Leave this campaign and go back to the start screen"
+                        ToolTip.Tip="Leave this campaign and go back to the start screen"/>
+
+                <Border Height="1" Margin="0,10,0,0" Background="{DynamicResource Divider}" />
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="1" Padding="6,0,0,0">
+                <ItemsControl ItemsSource="{Binding NavItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vms:NavItem">
+                            <Button Classes="navItem"
+                                    Classes.selected="{Binding IsSelected}"
+                                    Command="{Binding NavigateCommand}"
+                                    Content="{Binding Label}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Margin="24,12,24,20" Spacing="8">
+                <Border Height="1" Background="{DynamicResource Divider}" />
+                <TextBlock Text="☽ ✦ ☾"
+                           HorizontalAlignment="Center"
+                           FontSize="14"
+                           Foreground="{DynamicResource Muted}" />
+                <TextBlock Text="{DynamicResource ThemeEasterEgg}"
+                           IsVisible="{DynamicResource ThemeEasterEggVisible}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap"
+                           FontSize="10"
+                           Opacity="0.75"
+                           Foreground="{DynamicResource AccentColor}" />
+            </StackPanel>
+
+        </Grid>
+    </Border>
+</UserControl>

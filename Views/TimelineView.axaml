@@ -1,0 +1,89 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Dujahit.ViewModels"
+             xmlns:gv="clr-namespace:Dujahit.Models.Database"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+             x:Class="Dujahit.Views.TimelineView"
+             x:DataType="vm:TimelineViewModel"
+             FontFamily="{DynamicResource MainFont}"
+             Background="Transparent">
+
+    <Grid RowDefinitions="Auto,Auto,*" Margin="28,24">
+        <StackPanel Grid.Row="0" Spacing="2">
+            <TextBlock Text="Timeline" Classes="header"/>
+            <TextBlock Text="The chronicle of what has happened, in order" Classes="subtitle"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Classes="divider" Margin="0,16"/>
+
+        <Grid Grid.Row="2" ColumnDefinitions="1.3*,1.4*">
+            <Border Grid.Column="0" Classes="panel" Margin="0,0,10,0">
+                <Grid RowDefinitions="Auto,*">
+                    <Button Grid.Row="0" Classes="primary" Content="Add event"
+                            HorizontalAlignment="Left" Margin="0,0,0,12"
+                            Command="{Binding AddCommand}"/>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <ListBox ItemsSource="{Binding Events}"
+                                     SelectedItem="{Binding Selected}"
+                                     Background="Transparent">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:TimelineEventViewModel">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Title}" Classes="tileName"/>
+                                                <TextBlock Text="{Binding WhenLabel}" Classes="muted" FontSize="12"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                <Button Classes="card" AutomationProperties.Name="Move up"
+                                                        Command="{Binding $parent[ItemsControl].((vm:TimelineViewModel)DataContext).MoveUpCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <PathIcon Data="{x:Static gv:GlobalVariables.IconChevronUp}" Width="11" Height="11"/>
+                                                </Button>
+                                                <Button Classes="card" AutomationProperties.Name="Move down"
+                                                        Command="{Binding $parent[ItemsControl].((vm:TimelineViewModel)DataContext).MoveDownCommand}"
+                                                        CommandParameter="{Binding}">
+                                                    <PathIcon Data="{x:Static gv:GlobalVariables.IconChevronDown}" Width="11" Height="11"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <TextBlock Text="No events yet. Add the first beat of the story."
+                                       Classes="muted" FontSize="13" Margin="2,8"
+                                       IsVisible="{Binding !HasEvents}"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Classes="panel" Margin="10,0,0,0" IsVisible="{Binding HasSelected}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="EVENT" Classes="sectionLabel"/>
+                        <TextBox AutomationProperties.Name="Title" Watermark="Title" Text="{Binding Selected.Title}"/>
+                        <TextBox AutomationProperties.Name="In-world date (optional)" Watermark="In-world date (optional)" Text="{Binding Selected.InWorldDate}"/>
+                        <TextBox AutomationProperties.Name="What happened" Watermark="What happened"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Height="200"
+                                 Text="{Binding Selected.Description}"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Classes="primary" Content="Save" Command="{Binding SaveSelectedCommand}"/>
+                            <Button Classes="danger" Content="Delete"
+                                    Command="{Binding ArmDeleteCommand}"
+                                    IsVisible="{Binding !ConfirmingDelete}"/>
+                            <Button Classes="danger" Content="Confirm delete"
+                                    Command="{Binding DeleteSelectedCommand}"
+                                    IsVisible="{Binding ConfirmingDelete}"/>
+                            <Button Classes="ghost" Content="Cancel"
+                                    Command="{Binding CancelDeleteCommand}"
+                                    IsVisible="{Binding ConfirmingDelete}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

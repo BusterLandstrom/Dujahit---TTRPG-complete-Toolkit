@@ -1,0 +1,156 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Dujahit.ViewModels"
+             x:Class="Dujahit.Views.HelpView"
+             x:DataType="vm:HelpViewModel"
+             Background="Transparent"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">
+
+    <UserControl.Styles>
+        <Style Selector="Border.codebox">
+            <Setter Property="Background" Value="{DynamicResource Widget}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource Divider}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="12,9"/>
+        </Style>
+        <Style Selector="Border.codebox SelectableTextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource WidgetForeground}"/>
+        </Style>
+        <Style Selector="Border.codebox SelectableTextBlock">
+            <Setter Property="FontFamily" Value="Cascadia Code,Consolas,monospace"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+        <Style Selector="TextBlock.body">
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="21"/>
+        </Style>
+    </UserControl.Styles>
+
+    <TabControl>
+
+            <TabItem Header="The basics">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="14" Margin="0,10,16,10" MaxWidth="780" HorizontalAlignment="Left">
+                        <TextBlock Classes="body"
+                                   Text="A reference is a link you drop inside a note. You type a short tag and it turns into a link to whatever it points at, an NPC, a mindmap widget, an item and so on. Click it later and it takes you there, an NPC opens its sheet, a mindmap widget or note opens and highlights, and an item pops open its details."/>
+
+                        <TextBlock Classes="sectionLabel" Text="THE TAG"/>
+                        <Border Classes="codebox">
+                            <SelectableTextBlock Text="&lt;ref type=&quot;npc&quot; id=&quot;griznak-the-fence&quot;/&gt;"/>
+                        </Border>
+                        <TextBlock Classes="body"
+                                   Text="type is the kind of thing you're pointing at. id is which one. You don't have to remember ids, the thing itself hands you the whole tag to copy, the other tabs show where."/>
+
+                        <TextBlock Classes="sectionLabel" Text="WHAT THE LINK SHOWS"/>
+                        <TextBlock Classes="body"
+                                   Text="The link reads as the real name of whatever you pointed at, the NPC's name, the widget's title and so on. You don't set that label yourself, it comes from the thing you linked."/>
+
+                        <TextBlock Classes="sectionLabel" Text="TWO THINGS TO REMEMBER"/>
+                        <TextBlock Classes="body"
+                                   Text="Keep the whole tag on one line. And if whatever you linked gets deleted later, it stops being a link and just reads [broken ...] as plain text, so you can spot it and fix it instead of it quietly pointing at nothing."/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="What the app runs">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="14" Margin="0,10,16,10" MaxWidth="780" HorizontalAlignment="Left">
+                        <TextBlock Classes="body"
+                                   Text="The app runs the fight, it does not run the whole rulebook. Here is where that line sits."/>
+
+                        <TextBlock Classes="sectionLabel" Text="IT RESOLVES THESE FOR YOU"/>
+                        <TextBlock Classes="body"
+                                   Text="Initiative and the round counter, and the action, bonus action and reaction economy including multiattack and Action Surge. Attack rolls against real AC, with advantage and disadvantage worked out from flanking, conditions, cover and line of sight off the walls. Damage with resistance, vulnerability, immunity and temp hp. Conditions that bend rolls, block actions and stop movement. Movement budgets with difficult terrain and objects, opportunity attacks, and area templates that roll everyone's save. Death saves, concentration saves, spell slots, class resources and weapon masteries."/>
+
+                        <TextBlock Classes="sectionLabel" Text="YOU RUN THESE YOURSELF"/>
+                        <TextBlock Classes="body"
+                                   Text="Any feature on the character sheet tagged not enforced. Most class and subclass features are written out as text for you to read and rule on, the engine only fires the behaviours it actually implements. The sheet says which is which."/>
+                        <TextBlock Classes="body"
+                                   Text="A few smaller ones. Hide does not roll stealth for anybody. Cleave tells you its second target has to be within reach and leaves that to you. A spell cast outside a fight rolls to chat and applies nothing, since there is no initiative and no target to apply it to. Walls stay hidden from players unless you turn them on for that map."/>
+
+                        <TextBlock Classes="sectionLabel" Text="SUMMONS"/>
+                        <TextBlock Classes="body"
+                                   Text="A summon from a concentration spell goes away on its own the moment the caster's concentration drops, whether that is a failed save, dropping to zero, or unticking the box. Anything else, a familiar or a steed, stays until you press Dismiss summons on the combat panel. There is no separate timer, so a ten minute duration is still yours to watch."/>
+
+                        <TextBlock Classes="sectionLabel" Text="THE RULEBOOK IS DATA"/>
+                        <TextBlock Classes="body"
+                                   Text="Almost every number and rule in the fight comes out of the campaign's rulebook json, not the code, so the template editor can retune it. If you pull a whole section out, the app keeps running on what is left and tells you which section it fell back on. The bundled bestiary is small, so paste a statblock out of a book into the template editor and it becomes a monster you can drop on a map."/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="NPCs">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="14" Margin="0,10,16,10" MaxWidth="780" HorizontalAlignment="Left">
+                        <TextBlock Classes="body"
+                                   Text="Open an NPC to create or edit it and you'll see its reference tag next to the name, something like:"/>
+                        <Border Classes="codebox">
+                            <SelectableTextBlock Text="&lt;ref type=&quot;npc&quot; id=&quot;griznak-the-fence&quot;/&gt;"/>
+                        </Border>
+                        <TextBlock Classes="body"
+                                   Text="Copy that and paste it into any note. When you click the link in a note it opens that NPC's sheet."/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Mindmap widgets">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="14" Margin="0,10,16,10" MaxWidth="780" HorizontalAlignment="Left">
+                        <TextBlock Classes="body"
+                                   Text="On a mindmap, hover a widget and hit the pencil. The editor has a Reference from notes box holding the widget's tag:"/>
+                        <Border Classes="codebox">
+                            <SelectableTextBlock Text="&lt;ref type=&quot;mindmap&quot; id=&quot;griznak-a1b2c3&quot;/&gt;"/>
+                        </Border>
+                        <TextBlock Classes="body"
+                                   Text="Paste it into a note. Clicking it opens the mindmap and jumps to that widget. Good for tying your notes to the people and events you've already mapped out."/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Items">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="14" Margin="0,10,16,10" MaxWidth="780" HorizontalAlignment="Left">
+                        <TextBlock Classes="body"
+                                   Text="Items work the same way:"/>
+                        <Border Classes="codebox">
+                            <SelectableTextBlock Text="&lt;ref type=&quot;item&quot; id=&quot;ring-of-jumping&quot;/&gt;"/>
+                        </Border>
+                        <TextBlock Classes="body"
+                                   Text="Drop it in a note and it shows the item's name. Click the link and the item's details pop open, with an Add to user button that puts a copy on your character."/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Notes">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="14" Margin="0,10,16,10" MaxWidth="780" HorizontalAlignment="Left">
+                        <TextBlock Classes="body"
+                                   Text="You can link one note from another. Open a note and hit Copy ref in its toolbar to put its tag on the clipboard:"/>
+                        <Border Classes="codebox">
+                            <SelectableTextBlock Text="&lt;ref type=&quot;note&quot; id=&quot;a1b2c3d4e5f6...&quot;/&gt;"/>
+                        </Border>
+                        <TextBlock Classes="body"
+                                   Text="Paste it into another note. Clicking it opens that note and highlights it in the sidebar, even if it's buried in a sub-page."/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="Quick notes">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Spacing="14" Margin="0,10,16,10" MaxWidth="780" HorizontalAlignment="Left">
+                        <TextBlock Classes="body"
+                                   Text="In the quick notes panel, each note has a link button. Hit it to copy that quick note's tag:"/>
+                        <Border Classes="codebox">
+                            <SelectableTextBlock Text="&lt;ref type=&quot;quicknote&quot; id=&quot;qn-3&quot;/&gt;"/>
+                        </Border>
+                        <TextBlock Classes="body"
+                                   Text="This one behaves differently from the rest. Instead of a clickable link, it pulls the quick note's text straight into the page. Edit that text in the note and it saves back to the quick note."/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+    </TabControl>
+</UserControl>

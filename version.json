@@ -1,6 +1,6 @@
-{
-  "Version": 0.05,
-  "IsBeta": true,
-  "IsUrgent": true,
-  "InstallPath": "https://github.com/BusterLandstrom/Dujahit---TTRPG-complete-Toolkit/blob/master/version.json"
+﻿{
+    "IsUrgent":  false,
+    "IsBeta":  true,
+    "Version":  "0.7",
+    "InstallPath":  null
 }

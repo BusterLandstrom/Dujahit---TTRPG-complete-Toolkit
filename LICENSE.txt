@@ -1,0 +1,16 @@
+Dujahit
+
+Copyright (c) Regian Landstrom
+
+This work is licensed under the Creative Commons Attribution-NonCommercial 4.0
+International License (CC BY-NC 4.0).
+
+You are free to use, share and adapt this software and its source, and to fork
+it and put your own spin on it, as long as you give appropriate credit. You may
+not use it, or a fork of it, to make a commercial product.
+
+The full license text is available at:
+https://creativecommons.org/licenses/by-nc/4.0/
+
+Dujahit is provided as-is, without warranty of any kind. Install it and press
+Next to continue.

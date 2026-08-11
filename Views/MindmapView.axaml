@@ -1,0 +1,163 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Dujahit.ViewModels"
+             x:Class="Dujahit.Views.MindmapView"
+             x:DataType="vm:MindmapViewModel"
+             Background="Transparent"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">
+
+    <UserControl.Styles>
+        <Style Selector="Button.maptile">
+            <Setter Property="Width" Value="210"/>
+            <Setter Property="Height" Value="120"/>
+            <Setter Property="Margin" Value="0,0,14,14"/>
+            <Setter Property="Padding" Value="14"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Background" Value="{DynamicResource Widget}"/>
+            <Setter Property="BorderBrush" Value="#22FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Top"/>
+        </Style>
+        <Style Selector="Button.maptile:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#22FFD700"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid>
+
+        <ScrollViewer IsVisible="{Binding !IsMapOpen}" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="18" Margin="24" MaxWidth="900" HorizontalAlignment="Left">
+                <TextBlock Classes="header" Text="Mindmaps"/>
+                <TextBlock Classes="muted" TextWrapping="Wrap"
+                           Text="Map out NPCs, people and events, connect them and colour-code. Keep a map private or share it with the table. Open one to work on it fullscreen."/>
+
+                <Border Classes="card" Padding="16">
+                    <StackPanel Spacing="10">
+                        <TextBlock Classes="sectionLabel" Text="SEARCH OR CREATE A MINDMAP"/>
+                        <Grid ColumnDefinitions="*,Auto,Auto" >
+                            <TextBox AutomationProperties.Name="Search or create a mindmap" Grid.Column="0" Text="{Binding NewMapTitle}" Watermark="Search your maps, or type a name to create one" CornerRadius="8" Margin="0,0,10,0"/>
+                            <CheckBox Grid.Column="1" Content="Shared" IsChecked="{Binding NewMapShared}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <Button Grid.Column="2" Classes="accent" Content="+ Create" Command="{Binding CreateMapCommand}"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Spacing="10" IsVisible="{Binding HasSharedMaps}">
+                    <TextBlock Classes="sectionLabel" Text="SHARED"/>
+                    <ItemsControl ItemsSource="{Binding SharedMaps}">
+                        <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:MindmapListItem">
+                                <Button AutomationProperties.Name="{Binding Title}" Classes="maptile"
+                                        Command="{Binding $parent[ItemsControl].((vm:MindmapViewModel)DataContext).OpenMapCommand}"
+                                        CommandParameter="{Binding}">
+                                    <Grid RowDefinitions="*,Auto">
+                                        <TextBlock Grid.Row="0" Text="{Binding Title}" FontWeight="SemiBold" FontSize="15"
+                                                   TextWrapping="Wrap" MaxLines="3" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Grid.Row="1" Text="{Binding ScopeLabel}" Classes="muted" FontSize="11"/>
+                                    </Grid>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <StackPanel Spacing="10" IsVisible="{Binding HasPrivateMaps}">
+                    <TextBlock Classes="sectionLabel" Text="PRIVATE"/>
+                    <ItemsControl ItemsSource="{Binding PrivateMaps}">
+                        <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:MindmapListItem">
+                                <Button AutomationProperties.Name="{Binding Title}" Classes="maptile"
+                                        Command="{Binding $parent[ItemsControl].((vm:MindmapViewModel)DataContext).OpenMapCommand}"
+                                        CommandParameter="{Binding}">
+                                    <Grid RowDefinitions="*,Auto">
+                                        <TextBlock Grid.Row="0" Text="{Binding Title}" FontWeight="SemiBold" FontSize="15"
+                                                   TextWrapping="Wrap" MaxLines="3" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Grid.Row="1" Text="{Binding ScopeLabel}" Classes="muted" FontSize="11"/>
+                                    </Grid>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <TextBlock Classes="muted" TextWrapping="Wrap" IsVisible="{Binding !HasPrivateMaps}"
+                           Text="No maps yet. Create one above to get started."/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid IsVisible="{Binding IsMapOpen}" RowDefinitions="Auto,*">
+
+            <Border Grid.Row="0" Classes="card" Padding="10" Margin="12,12,12,6">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button Classes="choose" Content="&#x2190; Maps" Command="{Binding CloseMapCommand}"/>
+                        <TextBox AutomationProperties.Name="Map title" Text="{Binding SelectedMap.Title}" Width="220" CornerRadius="8"
+                                 IsEnabled="{Binding SelectedMap.IsOwner}"/>
+                        <Button Classes="choose" Content="Rename" Command="{Binding RenameMapCommand}"
+                                IsVisible="{Binding SelectedMap.IsOwner}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <ComboBox AutomationProperties.Name="Node template" ItemsSource="{Binding NodeTemplates}" SelectedItem="{Binding PickedTemplate}" Width="130"/>
+                        <Button Classes="accent" Content="+ Add widget" Command="{Binding AddNodeCommand}"/>
+                        <ToggleButton Content="Connect" IsChecked="{Binding LinkMode}"
+                                      AutomationProperties.Name="On: drag from one widget to another to connect them" ToolTip.Tip="On: drag from one widget to another to connect them"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button Classes="choose" Content="Share" IsVisible="{Binding SelectedMap.IsOwner}">
+                            <Button.Flyout>
+                                <Flyout>
+                                    <StackPanel Spacing="6" Width="220">
+                                        <TextBlock Classes="sectionLabel" Text="SHARE WITH"/>
+                                        <ItemsControl ItemsSource="{Binding ShareTargets}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:MindShareTarget">
+                                                    <CheckBox Content="{Binding Name}" IsChecked="{Binding IsShared}" Margin="0,2"
+                                                              Command="{Binding $parent[ItemsControl].((vm:MindmapViewModel)DataContext).ToggleShareCommand}"
+                                                              CommandParameter="{Binding}"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <TextBlock Classes="muted" FontSize="11" TextWrapping="Wrap"
+                                                   Text="Ticking someone shares this whole map with them, live. Untick to revoke."/>
+                                    </StackPanel>
+                                </Flyout>
+                            </Button.Flyout>
+                        </Button>
+                        <Button Classes="danger" Content="Delete" Command="{Binding DeleteMapCommand}"
+                                IsVisible="{Binding SelectedMap.IsOwner}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="1" Classes="card" Margin="12,6,12,12" ClipToBounds="True">
+                <Grid>
+                    <Canvas x:Name="GraphCanvas" Background="Transparent" IsHitTestVisible="True">
+                        <Canvas x:Name="WorldCanvas"/>
+                    </Canvas>
+                    <TextBlock Classes="muted" Text="Add a widget to start mapping. Drag to move, scroll to zoom, drag empty space to pan."
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               IsVisible="{Binding ShowEmptyHint}"/>
+                    <Border Classes="card" Padding="8" Margin="0,0,0,16" IsVisible="{Binding HasSelectedLink}"
+                            HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="Relation" VerticalAlignment="Center" Opacity="0.7"/>
+                            <Button Classes="ghost" Content="Ally" Command="{Binding SetLinkRelationCommand}" CommandParameter="ally"
+                                    ToolTip.Tip="Green line, click again to clear" AutomationProperties.Name="Mark this connection as an ally relation"/>
+                            <Button Classes="ghost" Content="Enemy" Command="{Binding SetLinkRelationCommand}" CommandParameter="enemy"
+                                    ToolTip.Tip="Red line, click again to clear" AutomationProperties.Name="Mark this connection as an enemy relation"/>
+                            <Button Classes="ghost" Content="Rival" Command="{Binding SetLinkRelationCommand}" CommandParameter="rival"
+                                    ToolTip.Tip="Orange line, click again to clear" AutomationProperties.Name="Mark this connection as a rival relation"/>
+                            <Button Classes="danger" Content="Remove" Command="{Binding DeleteLinkCommand}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

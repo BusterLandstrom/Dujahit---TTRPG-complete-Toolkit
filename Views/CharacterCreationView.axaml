@@ -1,0 +1,695 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Dujahit.ViewModels"
+             xmlns:models="clr-namespace:Dujahit.Models"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="820"
+             x:Class="Dujahit.Views.CharacterCreationView"
+             x:DataType="vm:CharacterCreationViewModel"
+             Background="Transparent"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">
+
+  <UserControl.Styles>
+    <Style Selector="TabItem">
+      <Setter Property="FontSize" Value="{DynamicResource FontSizeHeader}"/>
+      <Setter Property="Foreground" Value="{DynamicResource WidgetForeground}"/>
+      <Setter Property="Padding" Value="18,10"/>
+    </Style>
+    <Style Selector="TabItem:selected">
+      <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
+    </Style>
+
+    <Style Selector="ListBoxItem">
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Margin" Value="0,0,0,8"/>
+    </Style>
+    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="ListBoxItem:selected Border.card">
+      <Setter Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
+    </Style>
+    <Style Selector="ListBoxItem:selected Border.selbar">
+      <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
+    </Style>
+
+    <Style Selector="Button.accent">
+      <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
+      <Setter Property="Foreground" Value="{DynamicResource Background}"/>
+      <Setter Property="CornerRadius" Value="{DynamicResource CornerRadiusStandard}"/>
+      <Setter Property="Padding" Value="18,10"/>
+      <Setter Property="FontSize" Value="{DynamicResource FontSizeHeader}"/>
+    </Style>
+    <Style Selector="Button.accent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentHover}"/>
+      <Setter Property="Foreground" Value="{DynamicResource Background}"/>
+    </Style>
+    <Style Selector="Button.accent:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentHover}"/>
+      <Setter Property="Foreground" Value="{DynamicResource Background}"/>
+    </Style>
+
+    <Style Selector="Button.step">
+      <Setter Property="Width" Value="34"/>
+      <Setter Property="Height" Value="34"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="FontSize" Value="{DynamicResource FontSizeHeader}"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Background" Value="{DynamicResource Divider}"/>
+      <Setter Property="Foreground" Value="{DynamicResource Foreground}"/>
+      <Setter Property="CornerRadius" Value="8"/>
+    </Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,*,Auto">
+
+    <Border Grid.Row="0"
+            Background="{DynamicResource Widget}"
+            CornerRadius="{DynamicResource CornerRadiusStandard}"
+            Margin="16,16,16,0"
+            Padding="18">
+      <Grid ColumnDefinitions="2*,Auto,Auto,Auto">
+        <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+          <TextBlock Text="{Binding SaveButtonText}"
+                     FontSize="{DynamicResource FontSizeSmall}"
+                     Foreground="{DynamicResource AccentColor}"/>
+          <TextBox AutomationProperties.Name="Character name" Watermark="Character name"
+                   Text="{Binding Name}"
+                   FontSize="22"
+                   MinHeight="52"
+                   Padding="12,10"
+                   MinWidth="520"
+                   HorizontalAlignment="Left"/>
+          <StackPanel Spacing="4" Margin="0,8,0,0">
+            <TextBlock Text="Token colour" FontSize="{DynamicResource FontSizeSmall}" Opacity="0.7"/>
+            <ItemsControl ItemsSource="{Binding ColorSwatches}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <WrapPanel/>
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:ColorSwatchOption">
+                  <Button AutomationProperties.Name="{Binding Tip}" Width="26" Height="26" Padding="0" Margin="0,0,5,5" CornerRadius="6"
+                          Background="{Binding Brush}"
+                          BorderThickness="2"
+                          BorderBrush="{Binding Outline}"
+                          IsEnabled="{Binding !IsTaken}"
+                          Opacity="{Binding SwatchOpacity}"
+                          ToolTip.Tip="{Binding Tip}"
+                          Command="{Binding $parent[ItemsControl].((vm:CharacterCreationViewModel)DataContext).SelectColorCommand}"
+                          CommandParameter="{Binding}"/>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Column="1" Spacing="2" Margin="20,0" VerticalAlignment="Center">
+          <TextBlock Text="Level" FontSize="{DynamicResource FontSizeSmall}" Opacity="0.7"/>
+          <ComboBox AutomationProperties.Name="Level" ItemsSource="{Binding LevelChoices}"
+                    SelectedItem="{Binding Level}"
+                    MinWidth="80"/>
+        </StackPanel>
+
+        <StackPanel Grid.Column="2" Spacing="2" Margin="0,0,20,0" VerticalAlignment="Center">
+          <TextBlock Text="HP" FontSize="{DynamicResource FontSizeSmall}" Opacity="0.7"/>
+          <TextBlock Text="{Binding MaxHp}"
+                     FontSize="{DynamicResource FontSizeHeader}"
+                     Foreground="{DynamicResource AccentColor}"/>
+        </StackPanel>
+
+        <Button Grid.Column="3"
+                Content="Cancel"
+                Command="{Binding CancelCommand}"
+                Padding="18,10"
+                VerticalAlignment="Center"/>
+      </Grid>
+    </Border>
+
+    <Border Grid.Row="1" Margin="16">
+      <TabControl SelectedIndex="{Binding Step, Mode=TwoWay}">
+
+        <TabItem Header="Base">
+          <ScrollViewer Padding="4,16">
+            <StackPanel Spacing="16" MaxWidth="520" HorizontalAlignment="Left">
+              <StackPanel Spacing="6">
+                <TextBlock Text="Progression" FontSize="{DynamicResource FontSizeNormal}"/>
+                <ComboBox AutomationProperties.Name="Progression" ItemsSource="{Binding XpModes}"
+                          SelectedItem="{Binding SelectedXpMode}"
+                          MinWidth="220">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:XpModeOption">
+                      <TextBlock Text="{Binding Name}"/>
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock Text="Milestone leaves XP off the sheet, XP tracks toward the campaign's level table."
+                           FontSize="{DynamicResource FontSizeSmall}"
+                           Opacity="0.7"
+                           TextWrapping="Wrap"/>
+              </StackPanel>
+            </StackPanel>
+          </ScrollViewer>
+        </TabItem>
+
+        <TabItem Header="Species">
+          <Grid RowDefinitions="Auto,Auto,*" Margin="4,16">
+            <StackPanel Grid.Row="0" Spacing="6" Margin="0,0,0,12" MaxWidth="420" HorizontalAlignment="Left">
+              <TextBlock Text="Subspecies" FontSize="{DynamicResource FontSizeNormal}"/>
+              <ComboBox AutomationProperties.Name="Subspecies" ItemsSource="{Binding Subraces}"
+                        SelectedItem="{Binding SelectedSubrace}"
+                        IsEnabled="{Binding HasSubraces}"
+                        MinWidth="240">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:SubraceOption">
+                    <TextBlock Text="{Binding Name}"/>
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+
+            <TextBox Grid.Row="1"
+                     AutomationProperties.Name="Search species..." Watermark="Search species..."
+                     Text="{Binding RaceSearch}"
+                     FontSize="{DynamicResource FontSizeNormal}"
+                     Width="320" HorizontalAlignment="Left"
+                     Margin="0,0,0,12"/>
+
+            <ListBox Grid.Row="2"
+                     ItemsSource="{Binding Races}"
+                     SelectedItem="{Binding SelectedRace}"
+                     Background="Transparent">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:RaceOption">
+                  <Border Classes="card"
+                          Background="{DynamicResource Widget}"
+                          BorderBrush="{DynamicResource Divider}"
+                          BorderThickness="1"
+                          CornerRadius="{DynamicResource CornerRadiusStandard}">
+                    <Grid ColumnDefinitions="4,*">
+                      <Border Grid.Column="0" Classes="selbar"
+                              Background="Transparent"
+                              CornerRadius="8,0,0,8"/>
+                      <StackPanel Grid.Column="1" Spacing="4" Margin="14,12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                          <TextBlock Text="{Binding Name}" FontSize="{DynamicResource FontSizeHeader}" VerticalAlignment="Center"/>
+                          <Border IsVisible="{Binding HasVersion}"
+                                  Background="{DynamicResource Divider}" CornerRadius="6"
+                                  Padding="6,1" VerticalAlignment="Center"
+                                  AutomationProperties.Name="Ruleset edition" ToolTip.Tip="Ruleset edition">
+                            <TextBlock Text="{Binding Version}" FontSize="11"
+                                       Foreground="{DynamicResource WidgetForeground}"/>
+                          </Border>
+                        </StackPanel>
+                        <TextBlock Text="{Binding SummaryLine}"
+                                   FontSize="{DynamicResource FontSizeSmall}"
+                                   Foreground="{DynamicResource AccentHover}"/>
+                        <TextBlock Text="{Binding Description}"
+                                   FontSize="{DynamicResource FontSizeSmall}"
+                                   Opacity="0.75"
+                                   TextWrapping="Wrap"
+                                   MaxLines="3"
+                                   TextTrimming="CharacterEllipsis"/>
+                      </StackPanel>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Grid>
+        </TabItem>
+
+        <TabItem Header="Class">
+          <Grid RowDefinitions="Auto,*,Auto" Margin="4,16">
+            <TextBox Grid.Row="0"
+                     AutomationProperties.Name="Search classes..." Watermark="Search classes..."
+                     Text="{Binding ClassSearch}"
+                     FontSize="{DynamicResource FontSizeNormal}"
+                     Width="320" HorizontalAlignment="Left"
+                     Margin="0,0,0,12"/>
+
+            <ListBox Grid.Row="1"
+                     ItemsSource="{Binding Classes}"
+                     SelectedItem="{Binding SelectedClass}"
+                     Background="Transparent">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:ClassOption">
+                  <Border Classes="card"
+                          Background="{DynamicResource Widget}"
+                          BorderBrush="{DynamicResource Divider}"
+                          BorderThickness="1"
+                          CornerRadius="{DynamicResource CornerRadiusStandard}">
+                    <Grid ColumnDefinitions="4,*">
+                      <Border Grid.Column="0" Classes="selbar"
+                              Background="Transparent"
+                              CornerRadius="8,0,0,8"/>
+                      <StackPanel Grid.Column="1" Spacing="4" Margin="14,12">
+                        <TextBlock Text="{Binding Name}" FontSize="{DynamicResource FontSizeHeader}"/>
+                        <TextBlock Text="{Binding SummaryLine}"
+                                   FontSize="{DynamicResource FontSizeSmall}"
+                                   Foreground="{DynamicResource AccentHover}"/>
+                        <TextBlock Text="{Binding Description}"
+                                   FontSize="{DynamicResource FontSizeSmall}"
+                                   Opacity="0.75"
+                                   TextWrapping="Wrap"
+                                   MaxLines="3"
+                                   TextTrimming="CharacterEllipsis"/>
+                      </StackPanel>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+
+            <StackPanel Grid.Row="2" Spacing="6" Margin="0,12,0,0" MaxWidth="560" HorizontalAlignment="Left"
+                        IsVisible="{Binding ShowMulticlassEditor}">
+              <TextBlock Text="Class levels" FontWeight="SemiBold"/>
+              <TextBlock Text="Optional, split your levels over more than one class. Leave this alone for a single class character."
+                         FontSize="{DynamicResource FontSizeSmall}"
+                         Opacity="0.7"
+                         TextWrapping="Wrap"/>
+              <ItemsControl ItemsSource="{Binding MulticlassRows}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:MulticlassRow">
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2">
+                      <ComboBox AutomationProperties.Name="Pick a class" PlaceholderText="Pick a class"
+                                ItemsSource="{Binding $parent[ItemsControl].((vm:CharacterCreationViewModel)DataContext).Classes}"
+                                SelectedItem="{Binding SelectedClass}"
+                                MinWidth="220">
+                        <ComboBox.ItemTemplate>
+                          <DataTemplate x:DataType="vm:ClassOption">
+                            <TextBlock Text="{Binding Name}"/>
+                          </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                      </ComboBox>
+                      <NumericUpDown AutomationProperties.Name="Levels in this class"
+                                     Value="{Binding Level}"
+                                     Minimum="1" Maximum="{Binding MaxLevel}" Increment="1"
+                                     Width="120"/>
+                      <Button Content="Remove"
+                              Command="{Binding $parent[ItemsControl].((vm:CharacterCreationViewModel)DataContext).RemoveMulticlassRowCommand}"
+                              CommandParameter="{Binding}"/>
+                    </StackPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <Button Content="Add class" Command="{Binding AddMulticlassRowCommand}" HorizontalAlignment="Left"/>
+            </StackPanel>
+          </Grid>
+        </TabItem>
+
+        <TabItem Header="Abilities">
+          <ScrollViewer Padding="4,16">
+            <StackPanel Spacing="16">
+              <StackPanel Orientation="Horizontal" Spacing="20">
+                <RadioButton Content="Point Buy" GroupName="abm" IsChecked="{Binding IsPointBuy, Mode=TwoWay}"
+                             Command="{Binding UseAbilityMethodCommand}" CommandParameter="pointbuy"/>
+                <RadioButton Content="Manual" GroupName="abm" IsChecked="{Binding IsManual, Mode=TwoWay}"
+                             Command="{Binding UseAbilityMethodCommand}" CommandParameter="manual"/>
+                <RadioButton Content="Roll" GroupName="abm" IsChecked="{Binding IsRolling, Mode=TwoWay}"
+                             Command="{Binding UseAbilityMethodCommand}" CommandParameter="roll"/>
+                <Button Content="Fill standard array" Command="{Binding FillStandardArrayCommand}"/>
+                <Button Content="Roll all" Command="{Binding RollAllAbilitiesCommand}" IsVisible="{Binding IsRolling}"/>
+                <TextBlock Text="{Binding PointsRemainingLabel}"
+                           IsVisible="{Binding IsPointBuy}"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource AccentColor}"
+                           FontSize="{DynamicResource FontSizeNormal}"/>
+              </StackPanel>
+
+              <ItemsControl ItemsSource="{Binding Abilities}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal"/>
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:AbilityEntry">
+                    <Border Width="180"
+                            Margin="8"
+                            Padding="14"
+                            Background="{DynamicResource Widget}"
+                            CornerRadius="{DynamicResource CornerRadiusStandard}">
+                      <StackPanel Spacing="8" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding Abbrev}"
+                                   FontSize="{DynamicResource FontSizeHeader}"
+                                   Foreground="{DynamicResource AccentColor}"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="{Binding Name}"
+                                   FontSize="{DynamicResource FontSizeSmall}"
+                                   Opacity="0.7"
+                                   HorizontalAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                          <Button Classes="step" Content="-" Command="{Binding DecreaseCommand}"/>
+                          <TextBlock Text="{Binding Score}"
+                                     FontSize="30"
+                                     MinWidth="44"
+                                     TextAlignment="Center"
+                                     VerticalAlignment="Center"/>
+                          <Button Classes="step" Content="+" Command="{Binding IncreaseCommand}"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding ModifierLabel}"
+                                   FontSize="{DynamicResource FontSizeNormal}"
+                                   HorizontalAlignment="Center"
+                                   Opacity="0.85"/>
+                        <Button Content="Roll"
+                                Command="{Binding RollCommand}"
+                                IsVisible="{Binding $parent[ItemsControl].((vm:CharacterCreationViewModel)DataContext).IsRolling}"
+                                HorizontalAlignment="Center"
+                                Padding="14,4"/>
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </ScrollViewer>
+        </TabItem>
+
+        <TabItem Header="Backstory">
+          <ScrollViewer Padding="4,16">
+            <StackPanel Spacing="12" MaxWidth="560" HorizontalAlignment="Left">
+              <StackPanel Spacing="6" IsVisible="{Binding HasBackgrounds}">
+                <TextBlock Text="Background" FontWeight="SemiBold"/>
+                <TextBlock Text="Your character's origin, the 2024 background. Pick one to record it on the sheet."
+                           FontSize="{DynamicResource FontSizeSmall}"
+                           Opacity="0.7"
+                           TextWrapping="Wrap"/>
+                <ComboBox AutomationProperties.Name="Pick a background" ItemsSource="{Binding Backgrounds}"
+                          SelectedItem="{Binding SelectedBackground}"
+                          PlaceholderText="Pick a background"
+                          HorizontalAlignment="Stretch">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:BackgroundOption">
+                      <TextBlock Text="{Binding Name}"/>
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock Text="{Binding SelectedBackground.Description}"
+                           FontSize="{DynamicResource FontSizeSmall}"
+                           Opacity="0.8"
+                           TextWrapping="Wrap"/>
+
+                <StackPanel Spacing="6" IsVisible="{Binding HasBackgroundAbilities}" Margin="0,6,0,0">
+                  <TextBlock Text="Ability score bonuses (2024)" FontWeight="SemiBold"/>
+                  <TextBlock Text="This background boosts these abilities. Put +2 in one and +1 in another, or tick the box to spread +1 to all three."
+                             FontSize="{DynamicResource FontSizeSmall}" Opacity="0.7" TextWrapping="Wrap"/>
+                  <CheckBox AutomationProperties.Name="This background boosts these abilities. Put +2 in one and +1 in another, or tick the box to spread +1 to all three." Content="Spread +1 to all three" IsChecked="{Binding BgSpread}"/>
+                  <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding BgNotSpread}" Margin="0,2,0,0">
+                    <TextBlock Grid.Column="0" Text="+2 to" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox AutomationProperties.Name="+2 to" Grid.Column="1" ItemsSource="{Binding BackgroundAbilities}"
+                              SelectedItem="{Binding BgPlusTwo}" HorizontalAlignment="Stretch"/>
+                  </Grid>
+                  <Grid ColumnDefinitions="Auto,*" IsVisible="{Binding BgNotSpread}">
+                    <TextBlock Grid.Column="0" Text="+1 to" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <ComboBox AutomationProperties.Name="+1 to" Grid.Column="1" ItemsSource="{Binding BackgroundAbilities}"
+                              SelectedItem="{Binding BgPlusOne}" HorizontalAlignment="Stretch"/>
+                  </Grid>
+                  <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding HasOriginFeat}">
+                    <TextBlock Text="Origin feat:" Opacity="0.7"/>
+                    <TextBlock Text="{Binding OriginFeatLabel}" Foreground="{DynamicResource AccentColor}"/>
+                  </StackPanel>
+                </StackPanel>
+              </StackPanel>
+              <StackPanel Spacing="6" IsVisible="{Binding HasLanguages}">
+                <TextBlock Text="Languages" FontWeight="SemiBold"/>
+                <ItemsControl ItemsSource="{Binding RaceLanguageNames}" IsVisible="{Binding HasRaceLanguages}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <WrapPanel/>
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Background="{DynamicResource Divider}" CornerRadius="6" Padding="8,2" Margin="0,0,6,6">
+                        <TextBlock Text="{Binding}" FontSize="{DynamicResource FontSizeSmall}"/>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <StackPanel Spacing="6" IsVisible="{Binding HasLanguagePicks}">
+                  <TextBlock Text="Your background grants extra languages, pick them here or leave them for later."
+                             FontSize="{DynamicResource FontSizeSmall}"
+                             Opacity="0.7"
+                             TextWrapping="Wrap"/>
+                  <ItemsControl ItemsSource="{Binding LanguagePicks}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:LanguagePickRow">
+                        <ComboBox AutomationProperties.Name="Pick a language" PlaceholderText="Pick a language"
+                                  ItemsSource="{Binding Options}"
+                                  SelectedItem="{Binding Selected}"
+                                  HorizontalAlignment="Stretch"
+                                  Margin="0,2">
+                          <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="models:LanguageOption">
+                              <TextBlock Text="{Binding Name}"/>
+                            </DataTemplate>
+                          </ComboBox.ItemTemplate>
+                        </ComboBox>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </StackPanel>
+              <StackPanel Spacing="6" IsVisible="{Binding HasBackstoryOptions}">
+                <TextBlock Text="Optional, start from a base backstory then edit it, or leave it blank and write your own"
+                           FontSize="{DynamicResource FontSizeSmall}"
+                           Opacity="0.7"
+                           TextWrapping="Wrap"/>
+                <Grid ColumnDefinitions="*,Auto">
+                  <ComboBox AutomationProperties.Name="Pick a base backstory" Grid.Column="0"
+                            ItemsSource="{Binding BackstoryOptions}"
+                            SelectedItem="{Binding SelectedBackstoryOption}"
+                            PlaceholderText="Pick a base backstory"
+                            HorizontalAlignment="Stretch">
+                    <ComboBox.ItemTemplate>
+                      <DataTemplate x:DataType="models:BackstoryOption">
+                        <TextBlock Text="{Binding Title}"/>
+                      </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                  </ComboBox>
+                  <Button Grid.Column="1"
+                          Margin="6,0,0,0"
+                          Content="Use"
+                          Command="{Binding ApplyBackstoryCommand}"/>
+                </Grid>
+              </StackPanel>
+              <TextBox AutomationProperties.Name="Write this character's backstory, or pick a base above to start from" Text="{Binding Backstory}"
+                       AcceptsReturn="True"
+                       TextWrapping="Wrap"
+                       MinHeight="240"
+                       Watermark="Write this character's backstory, or pick a base above to start from"/>
+            </StackPanel>
+          </ScrollViewer>
+        </TabItem>
+
+        <TabItem Header="Choices">
+          <ScrollViewer Padding="4,16">
+            <StackPanel Spacing="16">
+              <TextBlock Text="Pick a class to see its choices."
+                         Opacity="0.6"
+                         FontSize="{DynamicResource FontSizeNormal}"
+                         IsVisible="{Binding !HasChoices}"/>
+
+              <ItemsControl ItemsSource="{Binding ChoiceGroups}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <WrapPanel/>
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:ChoiceGroupViewModel">
+                    <Border Width="360"
+                            Margin="0,0,12,12"
+                            Padding="16,14"
+                            VerticalAlignment="Top"
+                            Background="{DynamicResource Widget}"
+                            CornerRadius="12">
+                      <StackPanel Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                          <TextBlock Grid.Column="0"
+                                     Text="{Binding Label}"
+                                     FontWeight="SemiBold"
+                                     FontSize="{DynamicResource FontSizeNormal}"/>
+                          <TextBlock Grid.Column="1"
+                                     Text="{Binding CounterLabel}"
+                                     Opacity="0.7"
+                                     FontSize="{DynamicResource FontSizeSmall}"
+                                     VerticalAlignment="Center"/>
+                        </Grid>
+                        <TextBlock Text="{Binding Description}"
+                                   Opacity="0.6"
+                                   TextWrapping="Wrap"
+                                   FontSize="{DynamicResource FontSizeSmall}"/>
+                        <ItemsControl ItemsSource="{Binding Options}">
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ChoiceOptionViewModel">
+                              <CheckBox IsChecked="{Binding IsSelected}"
+                                        Content="{Binding Name}"
+                                        Margin="0,2"
+                                        ToolTip.Tip="{Binding TooltipText}"
+                                        ToolTip.ShowDelay="300"/>
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </ScrollViewer>
+        </TabItem>
+
+        <TabItem Header="Equipment">
+          <Grid RowDefinitions="Auto,*" Margin="4,16">
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" Margin="0,0,0,12">
+                <TextBox AutomationProperties.Name="Search equipment..." Watermark="Search equipment..."
+                         Text="{Binding EquipmentSearch}"
+                         FontSize="{DynamicResource FontSizeNormal}"
+                         Width="320"/>
+                <ComboBox AutomationProperties.Name="Equipment type filter" ItemsSource="{Binding EquipmentTypes}"
+                          SelectedItem="{Binding EquipmentTypeFilter}"
+                          MinWidth="150"
+                          VerticalAlignment="Center"/>
+                <ComboBox AutomationProperties.Name="Equipment property filter" ItemsSource="{Binding EquipmentProperties}"
+                          SelectedItem="{Binding EquipmentPropertyFilter}"
+                          IsVisible="{Binding HasEquipmentProperties}"
+                          MinWidth="150"
+                          VerticalAlignment="Center"/>
+                <CheckBox Content="Only what I can use"
+                          IsChecked="{Binding ProficientOnly}"
+                          IsVisible="{Binding CanFilterByProficiency}"
+                          VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <ListBox Grid.Row="1" ItemsSource="{Binding Equipment}" Background="Transparent"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+              <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:ItemOption">
+                    <Border Margin="0,0,0,6"
+                            Padding="12,8"
+                            Background="{DynamicResource Widget}"
+                            CornerRadius="8">
+                      <CheckBox AutomationProperties.Name="Select" IsChecked="{Binding IsSelected}">
+                        <StackPanel Spacing="2">
+                          <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="{Binding Name}" FontSize="{DynamicResource FontSizeNormal}"/>
+                            <TextBlock Text="{Binding ItemType}"
+                                       FontSize="{DynamicResource FontSizeSmall}"
+                                       Opacity="0.6"
+                                       VerticalAlignment="Center"/>
+                            <Border IsVisible="{Binding Display.HasMagic, FallbackValue=False}"
+                                    Background="{DynamicResource AccentColor}" CornerRadius="6"
+                                    Padding="6,1" VerticalAlignment="Center">
+                              <TextBlock Text="{Binding Display.MagicTag}" Foreground="{DynamicResource Background}" FontSize="11"/>
+                            </Border>
+                          </StackPanel>
+                          <StackPanel Orientation="Horizontal" Spacing="14">
+                            <TextBlock Text="{Binding Display.StatLine}"
+                                       IsVisible="{Binding Display.HasStats, FallbackValue=False}"
+                                       FontSize="{DynamicResource FontSizeSmall}" Opacity="0.85"/>
+                            <TextBlock Text="{Binding Display.PropertiesLine}"
+                                       IsVisible="{Binding Display.HasProperties, FallbackValue=False}"
+                                       FontSize="{DynamicResource FontSizeSmall}" Opacity="0.6"/>
+                          </StackPanel>
+                        </StackPanel>
+                      </CheckBox>
+                    </Border>
+                  </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Grid>
+        </TabItem>
+
+        <TabItem Header="Spells" IsVisible="{Binding IsSpellcaster}">
+          <Grid RowDefinitions="Auto,*" Margin="4,16">
+            <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,12">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="Prepare your starting spells" FontWeight="SemiBold"
+                           FontSize="{DynamicResource FontSizeNormal}"/>
+                <TextBlock Grid.Column="1" Text="{Binding SpellPrepLabel}" Opacity="0.75"
+                           FontSize="{DynamicResource FontSizeSmall}" VerticalAlignment="Center"/>
+              </Grid>
+              <TextBlock Text="Tick the cantrips and spells your character starts with, you can change these later on the sheet."
+                         Opacity="0.6" TextWrapping="Wrap" FontSize="{DynamicResource FontSizeSmall}"/>
+            </StackPanel>
+            <ScrollViewer Grid.Row="1">
+              <ItemsControl ItemsSource="{Binding SpellGroups}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:SpellLevelGroup">
+                    <StackPanel Margin="0,4,0,8" HorizontalAlignment="Left">
+                      <TextBlock Text="{Binding Header}" Classes="sectionLabel" Margin="0,6,0,2"/>
+                      <ItemsControl ItemsSource="{Binding Spells}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="vm:SpellPrepEntry">
+                            <Button AutomationProperties.Name="{Binding Name}" Command="{Binding ToggleCommand}"
+                                    Background="Transparent" BorderThickness="0" Padding="0"
+                                    HorizontalContentAlignment="Stretch">
+                              <Grid ColumnDefinitions="Auto,*,Auto,Auto" Margin="0,2" MinWidth="440">
+                                <CheckBox AutomationProperties.Name="Prepared" Grid.Column="0" IsChecked="{Binding IsPrepared}" IsHitTestVisible="False"/>
+                                <Button Grid.Column="1" Command="{Binding ViewCommand}" Content="{Binding Name}"
+                                        Background="Transparent" BorderThickness="0" Padding="0"
+                                        Cursor="Hand" HorizontalContentAlignment="Left" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="{Binding SchoolLabel}"
+                                           Opacity="0.6" FontSize="{DynamicResource FontSizeSmall}"
+                                           Margin="8,0" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="3" Text="{Binding LevelLabel}"
+                                           Opacity="0.6" FontSize="{DynamicResource FontSizeSmall}"
+                                           VerticalAlignment="Center"/>
+                              </Grid>
+                            </Button>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+          </Grid>
+        </TabItem>
+
+      </TabControl>
+    </Border>
+
+    <Border Grid.Row="2"
+            Background="{DynamicResource Widget}"
+            CornerRadius="{DynamicResource CornerRadiusStandard}"
+            Margin="16,0,16,16"
+            Padding="18,12">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <Button Grid.Column="0"
+                Content="Back"
+                Command="{Binding BackStepCommand}"
+                IsEnabled="{Binding !IsFirstStep}"
+                Padding="18,10"/>
+
+        <TextBlock Grid.Column="1"
+                   Text="{Binding Blocker}"
+                   IsVisible="{Binding HasBlocker}"
+                   Foreground="{DynamicResource Danger}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   TextWrapping="Wrap"/>
+
+        <Button Grid.Column="2"
+                Classes="accent"
+                Content="Next"
+                Command="{Binding NextStepCommand}"
+                IsVisible="{Binding !IsLastStep}"
+                Padding="24,10"/>
+        <Button Grid.Column="2"
+                Classes="accent"
+                Content="{Binding SaveButtonText}"
+                Command="{Binding CreateCommand}"
+                IsVisible="{Binding IsLastStep}"
+                Padding="24,10"/>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

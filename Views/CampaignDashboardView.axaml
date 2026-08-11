@@ -1,0 +1,182 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Dujahit.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="820"
+             x:Class="Dujahit.Views.CampaignDashboardView"
+             x:DataType="vm:CampaignDashboardViewModel"
+             Background="Transparent"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">  
+
+  <Grid RowDefinitions="Auto,*">
+
+    <Border Grid.Row="0" Classes="panel" Margin="16,16,16,8">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+          <TextBlock Classes="sectionLabel" Text="CAMPAIGN"/>
+          <TextBlock Text="{Binding CampaignName}" Classes="header" FontSize="26"/>
+          <TextBlock Text="{Binding PresenceLabel}" Classes="muted" FontSize="14"/>
+        </StackPanel>
+        <Button Grid.Column="1" Classes="ghost" Content="Refresh"
+                Command="{Binding RefreshCommand}" VerticalAlignment="Center"/>
+      </Grid>
+    </Border>
+
+    <ScrollViewer Grid.Row="1" Padding="16,8,16,16">
+      <Grid ColumnDefinitions="1.25*,*">
+
+        <StackPanel Grid.Column="0" Spacing="16" Margin="0,0,8,0">
+
+          <Border Classes="panel">
+            <StackPanel Spacing="12">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="Party" Classes="header"/>
+                <TextBlock Grid.Column="1" Text="{Binding Players.Count}" Classes="muted"
+                           FontSize="14" VerticalAlignment="Center"/>
+              </Grid>
+              <Border Classes="divider"/>
+
+              <ItemsControl ItemsSource="{Binding Players}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:DashboardPlayer">
+                    <Border Classes="row" Margin="0,0,0,8">
+                      <Grid ColumnDefinitions="Auto,*,Auto">
+                        <Grid Grid.Column="0" Width="40" Height="40" Margin="0,0,12,0">
+                          <Ellipse Fill="{DynamicResource Divider}"/>
+                          <TextBlock Text="{Binding Initial}"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"
+                                     Foreground="{DynamicResource AccentColor}"
+                                     FontSize="{DynamicResource FontSizeHeader}"/>
+                        </Grid>
+                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                          <TextBlock Text="{Binding Username}" FontSize="{DynamicResource FontSizeNormal}"/>
+                          <TextBlock Text="{Binding RoleLabel}" Classes="muted" FontSize="12"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                          <Ellipse Width="9" Height="9" VerticalAlignment="Center"
+                                   Fill="#3CAA6C" IsVisible="{Binding IsOnline}"/>
+                          <Ellipse Width="9" Height="9" VerticalAlignment="Center"
+                                   Fill="{DynamicResource Divider}" IsVisible="{Binding !IsOnline}"/>
+                          <TextBlock Text="online" FontSize="12" Opacity="0.8"
+                                     VerticalAlignment="Center" IsVisible="{Binding IsOnline}"/>
+                          <TextBlock Text="offline" FontSize="12" Opacity="0.45"
+                                     VerticalAlignment="Center" IsVisible="{Binding !IsOnline}"/>
+                        </StackPanel>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <TextBlock Text="No one has joined this campaign yet."
+                         Classes="muted" FontSize="13"
+                         IsVisible="{Binding !HasPlayers}"/>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="panel">
+            <StackPanel Spacing="12">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Column="0" Text="Characters" Classes="header"/>
+                <TextBlock Grid.Column="1" Text="{Binding Characters.Count}" Classes="muted"
+                           FontSize="14" VerticalAlignment="Center"/>
+              </Grid>
+              <Border Classes="divider"/>
+
+              <ItemsControl ItemsSource="{Binding Characters}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:DashboardCharacter">
+                    <Border Classes="row" Margin="0,0,0,8">
+                      <StackPanel Spacing="8">
+                        <Grid ColumnDefinitions="*,Auto">
+                          <StackPanel Grid.Column="0" Spacing="2">
+                            <TextBlock Text="{Binding Name}" FontSize="{DynamicResource FontSizeHeader}"/>
+                            <TextBlock Text="{Binding SubLine}" FontSize="12"
+                                       Foreground="{DynamicResource AccentHover}"/>
+                          </StackPanel>
+                          <StackPanel Grid.Column="1" Spacing="2" HorizontalAlignment="Right">
+                            <TextBlock Text="{Binding HpLabel}"
+                                       FontSize="{DynamicResource FontSizeNormal}"
+                                       Foreground="{DynamicResource AccentColor}"
+                                       HorizontalAlignment="Right"/>
+                            <TextBlock Text="{Binding OwnerLabel}" FontSize="12" Opacity="0.55"
+                                       HorizontalAlignment="Right"/>
+                          </StackPanel>
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                          <Border Background="{DynamicResource Divider}" CornerRadius="6" Padding="8,3">
+                            <TextBlock Text="{Binding AcLabel}" FontSize="12"
+                                       Foreground="{DynamicResource WidgetForeground}"/>
+                          </Border>
+                          <Border Background="{DynamicResource Divider}" CornerRadius="6" Padding="8,3">
+                            <TextBlock Text="{Binding PpLabel}" FontSize="12"
+                                       Foreground="{DynamicResource WidgetForeground}"/>
+                          </Border>
+                        </StackPanel>
+
+                        <ProgressBar Minimum="0" Maximum="{Binding MaxHp}" Value="{Binding CurrentHp}"
+                                     Height="6" CornerRadius="3"
+                                     Foreground="{DynamicResource AccentColor}"
+                                     Background="{DynamicResource Divider}"/>
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <TextBlock Text="No characters in this campaign yet."
+                         Classes="muted" FontSize="13"
+                         IsVisible="{Binding !HasCharacters}"/>
+            </StackPanel>
+          </Border>
+
+        </StackPanel>
+
+        <Border Grid.Column="1" Classes="panel" Margin="8,0,0,0">
+          <StackPanel Spacing="12">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Text="Pinned notes" Classes="header"/>
+              <TextBlock Grid.Column="1" Text="{Binding PinnedNotes.Count}" Classes="muted"
+                         FontSize="14" VerticalAlignment="Center"/>
+            </Grid>
+            <Border Classes="divider"/>
+
+            <ItemsControl ItemsSource="{Binding PinnedNotes}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:DashboardStickyNote">
+                  <Border Classes="sticky" Margin="0,0,0,10">
+                    <StackPanel Spacing="8">
+                      <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Text="{Binding Title}"
+                                   FontSize="{DynamicResource FontSizeHeader}"
+                                   Foreground="{DynamicResource AccentColor}"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <Button Grid.Column="1" Classes="close" Content="×"
+                                Command="{Binding UnpinCommand}"
+                                AutomationProperties.Name="Unpin from dashboard" ToolTip.Tip="Unpin from dashboard"/>
+                      </Grid>
+                      <TextBlock Text="{Binding Preview}" Classes="body"
+                                 FontSize="13" Opacity="0.85"
+                                 TextWrapping="Wrap" MaxLines="12"
+                                 TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <StackPanel Spacing="6" IsVisible="{Binding !HasPinnedNotes}">
+              <TextBlock Text="Nothing pinned." Classes="muted" FontSize="13"/>
+              <TextBlock Text="Open a page in Notes and hit Pin to dashboard to stick it here."
+                         Classes="muted" FontSize="12" Opacity="0.5" TextWrapping="Wrap"/>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+      </Grid>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

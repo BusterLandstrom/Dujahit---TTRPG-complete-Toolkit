@@ -1,0 +1,57 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Dujahit.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="760"
+             x:DataType="vm:CreateCViewModel"
+             x:Class="Dujahit.Views.CreateCView"
+             Background="{DynamicResource Background}"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">
+    <Grid>
+        <Button Classes="ghost"
+                Content="Back"
+                Command="{Binding Back}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="20" />
+        <Border Classes="card"
+                Width="560"
+                Padding="36"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+            <StackPanel Spacing="20">
+                <StackPanel Spacing="4">
+                    <TextBlock Classes="header" Text="Create campaign" />
+                    <TextBlock Classes="subtitle" Text="{Binding CampaignName}" />
+                </StackPanel>
+                <Border Classes="divider" />
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="fieldLabel" Text="Rule template" />
+                    <Button Classes="choose"
+                            Content="Choose file"
+                            HorizontalAlignment="Left"
+                            Command="{Binding ChooseTemplate}" />
+                    <TextBlock Classes="subtitle"
+                               Text="{Binding SelectedTemplatePath}"
+                               TextTrimming="CharacterEllipsis"
+                               ToolTip.Tip="{Binding SelectedTemplatePath}"
+                               IsVisible="{Binding SelectedTemplatePath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </StackPanel>
+                <StackPanel Spacing="8">
+                    <TextBlock Classes="fieldLabel" Text="Campaign port" />
+                    <TextBox AutomationProperties.Name="5555" Text="{Binding CampaignPort, Mode=TwoWay}"
+                             Watermark="5555"
+                             Height="42"
+                             HorizontalAlignment="Stretch" />
+                </StackPanel>
+                <Button Classes="primary"
+                        Content="Create campaign"
+                        Command="{Binding CreateCampaign}"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,8,0,0" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

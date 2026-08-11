@@ -1,0 +1,103 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Dujahit.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="760"
+             x:Class="Dujahit.Views.CompendiumView"
+             x:DataType="vm:CompendiumViewModel"
+             Background="Transparent"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">
+
+    <UserControl.Styles>
+        <Style Selector="ListBox.compendium">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style Selector="ListBox.compendium ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="ListBox.compendium ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="ListBox.compendium ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Margin="24" RowDefinitions="Auto,*">
+
+        <Border Grid.Row="0" Classes="card" Padding="20" Margin="0,0,0,16">
+            <StackPanel Spacing="12">
+                <TextBlock Classes="header" Text="Compendium"/>
+                <TextBox AutomationProperties.Name="Search by name..." Watermark="Search by name..." Text="{Binding SearchText}"/>
+                <WrapPanel Orientation="Horizontal">
+                    <Button Classes="choose" Content="All" Command="{Binding SetCategoryCommand}" CommandParameter="All" Margin="0,0,8,8"/>
+                    <Button Classes="choose" Content="Spells" Command="{Binding SetCategoryCommand}" CommandParameter="Spells" Margin="0,0,8,8"/>
+                    <Button Classes="choose" Content="Items" Command="{Binding SetCategoryCommand}" CommandParameter="Items" Margin="0,0,8,8"/>
+                    <Button Classes="choose" Content="Species" Command="{Binding SetCategoryCommand}" CommandParameter="Species" Margin="0,0,8,8"/>
+                    <Button Classes="choose" Content="Feats" Command="{Binding SetCategoryCommand}" CommandParameter="Feats" Margin="0,0,8,8"/>
+                    <Button Classes="choose" Content="Backgrounds" Command="{Binding SetCategoryCommand}" CommandParameter="Backgrounds" Margin="0,0,8,8"/>
+                    <Button Classes="choose" Content="Deities" Command="{Binding SetCategoryCommand}" CommandParameter="Deities" Margin="0,0,8,8"/>
+                    <Button Classes="choose" Content="Alignments" Command="{Binding SetCategoryCommand}" CommandParameter="Alignments" Margin="0,0,8,8"/>
+                    <Button Classes="choose" Content="Monsters" IsVisible="{Binding ShowMonsters}"
+                            Command="{Binding SetCategoryCommand}" CommandParameter="Monsters" Margin="0,0,8,8"/>
+                </WrapPanel>
+                <WrapPanel Orientation="Horizontal">
+                    <TextBlock Text="Edition" Classes="muted" VerticalAlignment="Center" Margin="0,0,8,8"/>
+                    <Button Classes="choose" Content="Both" Command="{Binding SetVersionCommand}" CommandParameter="both" Margin="0,0,8,8"/>
+                    <Button Classes="choose" Content="2014" Command="{Binding SetVersionCommand}" CommandParameter="2014" Margin="0,0,8,8"/>
+                    <Button Classes="choose" Content="2024" Command="{Binding SetVersionCommand}" CommandParameter="2024" Margin="0,0,8,8"/>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+
+        <ListBox Grid.Row="1" Classes="compendium" ItemsSource="{Binding Entries}">
+            <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:CompendiumEntry">
+                        <Border Classes="card" Padding="16" Margin="0,0,0,8"
+                                Cursor="Hand" Tapped="OnEntryTapped"
+                                AutomationProperties.Name="Click to see the full entry" ToolTip.Tip="Click to see the full entry">
+                            <StackPanel Spacing="4">
+                                <Grid ColumnDefinitions="*,Auto,Auto">
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}"
+                                                   Foreground="{DynamicResource AccentColor}"
+                                                   FontSize="16" VerticalAlignment="Center"/>
+                                        <Border IsVisible="{Binding HasVersion}"
+                                                Background="{DynamicResource Divider}" CornerRadius="6"
+                                                Padding="6,1" VerticalAlignment="Center"
+                                                AutomationProperties.Name="Ruleset edition" ToolTip.Tip="Ruleset edition">
+                                            <TextBlock Text="{Binding Version}"
+                                                       Foreground="{DynamicResource WidgetForeground}" FontSize="11"/>
+                                        </Border>
+                                    </StackPanel>
+                                    <Border Grid.Column="1" IsVisible="{Binding Item.HasMagic, FallbackValue=False}"
+                                            Background="{DynamicResource AccentColor}" CornerRadius="6"
+                                            Padding="6,1" Margin="0,0,8,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Item.MagicTag, FallbackValue=''}" Foreground="{DynamicResource Background}" FontSize="11"/>
+                                    </Border>
+                                    <TextBlock Grid.Column="2" Text="{Binding Category}" Classes="subtitle"/>
+                                </Grid>
+
+                                <Grid ColumnDefinitions="Auto,Auto,*" IsVisible="{Binding IsItem}">
+                                    <TextBlock Grid.Column="0" Text="{Binding Item.StatLine, FallbackValue=''}"
+                                               IsVisible="{Binding Item.HasStats, FallbackValue=False}"
+                                               Foreground="{DynamicResource WidgetForeground}" FontSize="13" Margin="0,0,16,0"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Item.PropertiesLine, FallbackValue=''}"
+                                               IsVisible="{Binding Item.HasProperties, FallbackValue=False}"
+                                               Opacity="0.7" FontSize="13"/>
+                                </Grid>
+
+                                <TextBlock Text="{Binding Subtitle}" Classes="muted" FontSize="13"
+                                           IsVisible="{Binding !IsItem}"/>
+                                <TextBlock Text="{Binding Detail}" Classes="body" FontSize="13"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>

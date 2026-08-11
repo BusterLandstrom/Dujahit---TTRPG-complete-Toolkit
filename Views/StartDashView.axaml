@@ -1,0 +1,105 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vms="clr-namespace:Dujahit.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1920" d:DesignHeight="1080"
+             x:DataType="vms:StartDashViewModel"
+             x:Class="Dujahit.Views.StartDashView"
+             Background="{DynamicResource Background}"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">
+
+    <Grid Margin="40" RowDefinitions="Auto,*">
+
+        <Grid.Styles>
+            <Style Selector="ListBox">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+            </Style>
+            <Style Selector="ListBoxItem">
+                <Setter Property="CornerRadius" Value="{DynamicResource CornerRadiusStandard}" />
+                <Setter Property="Margin" Value="0,2" />
+                <Setter Property="Padding" Value="20,12" />
+            </Style>
+            <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource Background}" />
+            </Style>
+            <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource Background}" />
+            </Style>
+        </Grid.Styles>
+
+        <Border Grid.Row="0" Classes="card" Margin="0,0,0,20">
+            <StackPanel Spacing="14">
+                <Grid ColumnDefinitions="Auto,*">
+                    <Button Classes="ghost"
+                            Content="Back"
+                            Command="{Binding Back}"
+                            VerticalAlignment="Center"
+                            Margin="0,0,14,0" />
+                    <TextBlock Grid.Column="1" Classes="header" Text="Campaigns" VerticalAlignment="Center" />
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto,Auto">
+                    <TextBox Grid.Column="0"
+                             FontSize="18"
+                             Height="48"
+                             Text="{Binding CampaignName}"
+                             Watermark="{Binding CampaignNameWatermark}" />
+                    <Button Grid.Column="1"
+                            Classes="primary"
+                            Content="Create"
+                            Margin="10,0,0,0"
+                            Command="{Binding CreateCampaign}" />
+                    <Button Grid.Column="2"
+                            Classes="ghost"
+                            Content="Join"
+                            Margin="10,0,0,0"
+                            Command="{Binding JoinCampaign}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1" Classes="card" Padding="14">
+            <ListBox ItemsSource="{Binding Campaigns}"
+                     SelectedItem="{Binding SelectedCampaign, Mode=TwoWay}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="*,Auto,Auto">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}"
+                                           FontSize="22"
+                                           Foreground="{DynamicResource Foreground}" />
+                                <TextBlock Classes="muted"
+                                           Text="{Binding Description}"
+                                           Opacity="0.6" />
+                            </StackPanel>
+                            <Border Grid.Column="1"
+                                    Classes="badge"
+                                    Background="{DynamicResource AccentColor}"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,10,0"
+                                    IsVisible="{Binding IsRemote}">
+                                <TextBlock Text="PLAYER" Foreground="{DynamicResource Background}"/>
+                            </Border>
+                            <Border Grid.Column="1"
+                                    Classes="badge"
+                                    Background="{DynamicResource Divider}"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,10,0"
+                                    IsVisible="{Binding !IsRemote}">
+                                <TextBlock Text="HOST" Foreground="{DynamicResource WidgetForeground}"/>
+                            </Border>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding LastModified, StringFormat='{}{0:MMM dd, yyyy}'}"
+                                       FontSize="16"
+                                       VerticalAlignment="Center"
+                                       Opacity="0.5"
+                                       Foreground="{DynamicResource Foreground}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+    </Grid>
+</UserControl>

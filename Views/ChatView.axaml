@@ -1,0 +1,201 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:gv="clr-namespace:Dujahit.Models.Database"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="using:Dujahit.Models"
+             xmlns:vms="using:Dujahit.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             Background="Transparent"
+             x:Class="Dujahit.Views.ChatView"
+             FontFamily="{DynamicResource MainFont}"
+             x:DataType="vms:ChatViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="Button.channel">
+            <Setter Property="Background" Value="{DynamicResource Background}"/>
+            <Setter Property="Foreground" Value="{DynamicResource WidgetForeground}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="14"/>
+            <Setter Property="Padding" Value="13,5"/>
+            <Setter Property="Margin" Value="0,0,5,0"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style Selector="Button.channel:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource Divider}"/>
+        </Style>
+
+
+        <Style Selector="Border.msg">
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="9,6"/>
+            <Setter Property="Margin" Value="0,1"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="Border.msg:pointerover">
+            <Setter Property="Background" Value="{DynamicResource Widget}"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <Button Grid.Row="0"
+                AutomationProperties.Name="Chat" Classes="widgetBar"
+                Command="{Binding ToggleMinimizeCommand}"
+                BorderThickness="1,1,0,0"
+                CornerRadius="10,0,0,0"
+                Height="30"
+                IsVisible="{Binding IsMinimized}">
+            <Grid ColumnDefinitions="*,Auto" Margin="12,0,12,0">
+                <TextBlock Grid.Column="0"
+                           Text="Chat"
+                           Classes="widgetTitle"
+                           VerticalAlignment="Center"/>
+                <PathIcon Grid.Column="1"
+                          Data="{x:Static gv:GlobalVariables.IconChevronUp}"
+                          Width="11" Height="11"
+                          VerticalAlignment="Center"
+                          Foreground="{DynamicResource WidgetForeground}"/>
+            </Grid>
+        </Button>
+
+        <Border Grid.Row="1"
+                Classes="widget"
+                BorderThickness="1,1,0,0"
+                CornerRadius="10,0,0,0"
+                IsVisible="{Binding IsExpanded}">
+            <Grid Margin="10" RowDefinitions="Auto,*,Auto">
+
+                <Grid Grid.Row="0" Margin="0,0,0,8"
+                      ColumnDefinitions="*,Auto,Auto">
+
+                    <ScrollViewer Grid.Column="0"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Disabled">
+                        <ItemsControl ItemsSource="{Binding Channels}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="models:ChatChannel">
+                                    <Button Classes="channel"
+                                            Content="{Binding Name}"
+                                            Command="{Binding $parent[ItemsControl].((vms:ChatViewModel)DataContext).SwitchChannelCommand}"
+                                            CommandParameter="{Binding}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <Button Grid.Column="1" Content="+"
+                            Classes="iconBtn"
+                                                                AutomationProperties.Name="New channel"
+                            FontSize="18"
+                            Margin="5,0"
+                            Name="AddChannelButton">
+                        <Button.Flyout>
+                            <Flyout Placement="Bottom">
+                                <StackPanel Width="220" Spacing="6">
+                                    <TextBlock Text="New channel name"
+                                               Classes="fieldLabel"/>
+                                    <TextBox AutomationProperties.Name="e.g. dm-only" Text="{Binding NewChannelName, Mode=TwoWay}"
+                                             CornerRadius="8"
+                                             Watermark="e.g. dm-only"/>
+                                    <Button Content="Create"
+                                            Classes="accent"
+                                            HorizontalAlignment="Right"
+                                            Command="{Binding CreateChannelCommand}"/>
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+
+                    <Button Grid.Column="2"
+                            AutomationProperties.Name="Minimize chat"
+                            Classes="iconBtn"
+                            Command="{Binding ToggleMinimizeCommand}">
+                        <PathIcon Data="{x:Static gv:GlobalVariables.IconChevronDown}" Width="12" Height="12"/>
+                    </Button>
+                </Grid>
+
+                <Border Grid.Row="1"
+                        Background="{DynamicResource Background}"
+                        CornerRadius="{DynamicResource CornerRadiusStandard}"
+                        Padding="6,4">
+                    <ScrollViewer Name="MessageScroller"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Messages}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="models:ChatMessage">
+                                    <Border Classes="msg">
+                                        <StackPanel Spacing="2">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="{Binding Sender}"
+                                                           FontWeight="SemiBold"
+                                                           FontSize="13"
+                                                           Foreground="{DynamicResource AccentColor}"/>
+                                                <TextBlock Text="{Binding TimeLabel}"
+                                                           FontSize="10"
+                                                           Opacity="0.5"
+                                                           VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource WidgetForeground}"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Message}"
+                                                       TextWrapping="Wrap"
+                                                       FontSize="13"
+                                                       Foreground="{DynamicResource WidgetForeground}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+
+                <StackPanel Grid.Row="2" Spacing="6" Margin="0,10,0,0">
+                    <StackPanel Spacing="6" IsVisible="{Binding ShowDiceBar}">
+                        <WrapPanel>
+                            <Button Classes="choose" Content="Adv" Command="{Binding SetDiceModeCommand}" CommandParameter="adv" Margin="0,0,4,4"/>
+                            <Button Classes="choose" Content="Norm" Command="{Binding SetDiceModeCommand}" CommandParameter="" Margin="0,0,4,4"/>
+                            <Button Classes="choose" Content="Dis" Command="{Binding SetDiceModeCommand}" CommandParameter="dis" Margin="0,0,4,4"/>
+                            <TextBlock Text="{Binding DiceModeLabel}" Classes="muted" FontSize="11" VerticalAlignment="Center" Margin="4,0,8,0"/>
+                            <TextBlock Text="mod" Classes="fieldLabel" VerticalAlignment="Center" Margin="0,0,2,0"/>
+                            <NumericUpDown AutomationProperties.Name="mod" Minimum="-20" Maximum="20" Increment="1" Value="{Binding DiceModifier}" Width="96" VerticalAlignment="Center"/>
+                        </WrapPanel>
+                        <WrapPanel>
+                            <Button Classes="choose" Content="d4" Command="{Binding RollDieCommand}" CommandParameter="4" Margin="0,0,4,4"/>
+                            <Button Classes="choose" Content="d6" Command="{Binding RollDieCommand}" CommandParameter="6" Margin="0,0,4,4"/>
+                            <Button Classes="choose" Content="d8" Command="{Binding RollDieCommand}" CommandParameter="8" Margin="0,0,4,4"/>
+                            <Button Classes="choose" Content="d10" Command="{Binding RollDieCommand}" CommandParameter="10" Margin="0,0,4,4"/>
+                            <Button Classes="choose" Content="d12" Command="{Binding RollDieCommand}" CommandParameter="12" Margin="0,0,4,4"/>
+                            <Button Classes="choose" Content="d20" Command="{Binding RollDieCommand}" CommandParameter="20" Margin="0,0,4,4"/>
+                            <Button Classes="choose" Content="d100" Command="{Binding RollDieCommand}" CommandParameter="100" Margin="0,0,4,4"/>
+                        </WrapPanel>
+                    </StackPanel>
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <ToggleButton Grid.Column="0"
+                                      Content="Dice"
+                                      IsChecked="{Binding ShowDiceBar}"
+                                      Margin="0,0,6,0"
+                                      Padding="10,0"
+                                      AutomationProperties.Name="Show or hide the quick dice" ToolTip.Tip="Show or hide the quick dice"/>
+                        <TextBox AutomationProperties.Name="Type a message or /roll 4d20, /invite username..." Grid.Column="1"
+                                 FontFamily="{DynamicResource MainFont}"
+                                 CornerRadius="8"
+                                 Text="{Binding CurrentMessage, Mode=TwoWay}"
+                                 Watermark="Type a message or /roll 4d20, /invite username..."
+                                 KeyDown="OnInputKeyDown"/>
+                        <Button Grid.Column="2"
+                                Classes="accent"
+                                Content="Send"
+                                Command="{Binding SendMessageCommand}"
+                                Margin="6,0,0,0"/>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

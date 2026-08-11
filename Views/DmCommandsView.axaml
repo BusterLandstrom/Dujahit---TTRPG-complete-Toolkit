@@ -1,0 +1,87 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Dujahit.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="900"
+             x:Class="Dujahit.Views.DmCommandsView"
+             x:DataType="vm:DmCommandsViewModel"
+             Background="Transparent"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">
+
+  <ScrollViewer Padding="32">
+    <StackPanel Spacing="18" MaxWidth="980" HorizontalAlignment="Left">
+
+      <TextBlock Classes="header" Text="DM Commands"/>
+      <TextBlock Classes="subtitle" Text="Gift money or items to characters, and control who owns each one or whether the whole table can see it. Unassigned characters show up here too."/>
+
+      <Border Classes="card">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="sectionLabel" Text="Characters"/>
+          <TextBlock Classes="fieldLabel" Text="Tick the characters you want to gift to below. The owner and visible-to-all controls apply per character when you press Apply."/>
+          <ItemsControl ItemsSource="{Binding Characters}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:CharacterRow">
+                <Border Background="{DynamicResource Background}" CornerRadius="{DynamicResource CornerRadiusStandard}" Padding="12" Margin="0,4">
+                  <Grid ColumnDefinitions="Auto,*,210,Auto,Auto">
+                    <CheckBox AutomationProperties.Name="Select" Grid.Column="0" IsChecked="{Binding IsSelected}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Name}" Foreground="{DynamicResource WidgetForeground}" FontWeight="SemiBold"/>
+                      <TextBlock Text="{Binding OwnerLabel}" Classes="fieldLabel"/>
+                    </StackPanel>
+                    <ComboBox AutomationProperties.Name="Assignee" Grid.Column="2" ItemsSource="{Binding Assignees}" SelectedItem="{Binding SelectedAssignee}" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="8,0">
+                      <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:AssigneeOption">
+                          <TextBlock Text="{Binding Name}"/>
+                        </DataTemplate>
+                      </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <CheckBox Grid.Column="3" IsChecked="{Binding VisibleToAll}" Content="Visible to all" VerticalAlignment="Center" Margin="8,0" Foreground="{DynamicResource WidgetForeground}"/>
+                    <Button Grid.Column="4" Classes="ghost" Content="Apply" Command="{Binding ApplyCommand}" VerticalAlignment="Center"/>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="sectionLabel" Text="Gift Money"/>
+          <ItemsControl ItemsSource="{Binding Currencies}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:GiftCurrency">
+                <Grid ColumnDefinitions="40,*,160" Margin="0,3">
+                  <TextBlock Grid.Column="0" Text="{Binding Glyph}" Foreground="{DynamicResource AccentColor}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                  <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{DynamicResource WidgetForeground}" VerticalAlignment="Center"/>
+                  <NumericUpDown AutomationProperties.Name="{Binding Name}" Grid.Column="2" Value="{Binding Amount}" Minimum="0" Increment="1" FormatString="0"/>
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+            <Button Classes="ghost" Content="Clear" Command="{Binding ClearMoneyCommand}"/>
+            <Button Classes="primary" Content="Gift Money" Command="{Binding GiftMoneyCommand}"/>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="12">
+          <TextBlock Classes="sectionLabel" Text="Gift Item"/>
+          <TextBlock Classes="fieldLabel" Text="Tick the characters above, set a quantity, then pick an item from the catalog."/>
+          <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right">
+            <TextBlock Text="Quantity" VerticalAlignment="Center" Foreground="{DynamicResource WidgetForeground}"/>
+            <NumericUpDown AutomationProperties.Name="Quantity" Value="{Binding ItemQuantity}" Minimum="1" Increment="1" FormatString="0" Width="140"/>
+            <Button Classes="primary" Content="Gift Item..." Command="{Binding GiftItemCommand}"/>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <TextBlock Classes="muted" Text="{Binding Status}" TextWrapping="Wrap"/>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

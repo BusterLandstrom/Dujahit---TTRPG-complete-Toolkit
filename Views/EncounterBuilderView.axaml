@@ -1,0 +1,323 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Dujahit.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="900"
+             x:Class="Dujahit.Views.EncounterBuilderView"
+             x:DataType="vm:EncounterBuilderViewModel"
+             FontFamily="{DynamicResource MainFont}"
+             Background="Transparent">
+
+    <Grid RowDefinitions="Auto,Auto,*" Margin="28,24">
+
+        <StackPanel Grid.Row="0" Spacing="2">
+            <TextBlock Text="Encounters" Classes="header"/>
+            <TextBlock Text="Build, score and save fights for this campaign" Classes="subtitle"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Classes="divider" Margin="0,16"/>
+
+        <Grid Grid.Row="2" ColumnDefinitions="1.1*,1.4*,1.2*">
+
+            <Border Grid.Column="0" Classes="panel" Margin="0,0,10,0">
+                <Grid RowDefinitions="Auto,Auto,*">
+                    <TextBlock Grid.Row="0" Text="MONSTERS" Classes="sectionLabel"/>
+                    <TextBox AutomationProperties.Name="Search monsters or CR" Grid.Row="1"
+                             Margin="0,10,0,12"
+                             Watermark="Search monsters or CR"
+                             Text="{Binding MonsterSearch}"/>
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding VisibleMonsters}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:MonsterCatalogRowViewModel">
+                                    <Border Classes="row" Margin="0,0,0,8">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <StackPanel Grid.Column="0" Spacing="3" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" Classes="tileName"/>
+                                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                                    <TextBlock Text="{Binding CrLabel}" Classes="muted" FontSize="12"/>
+                                                    <TextBlock Text="{Binding XpLabel}" Classes="muted" FontSize="12"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <Button Grid.Column="1"
+                                                    Classes="accent"
+                                                    Content="Add"
+                                                    VerticalAlignment="Center"
+                                                    Command="{Binding $parent[ItemsControl].((vm:EncounterBuilderViewModel)DataContext).AddMonsterCommand}"
+                                                    CommandParameter="{Binding}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Classes="panel" Margin="10,0">
+                <Grid RowDefinitions="Auto,Auto,*,Auto,Auto,Auto">
+                    <TextBox AutomationProperties.Name="Encounter name" Grid.Row="0"
+                             FontSize="18"
+                             Watermark="Encounter name"
+                             Text="{Binding EncounterName}"/>
+
+                    <Border Grid.Row="1"
+                            Margin="0,12"
+                            CornerRadius="{DynamicResource CornerRadiusStandard}"
+                            Padding="18,14"
+                            Background="{Binding DifficultyBrush}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" Spacing="2">
+                                <TextBlock Text="{Binding DifficultyLabel}"
+                                           FontSize="20"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Background}"/>
+                                <TextBlock Text="{Binding MonsterCountLabel}"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource Background}"
+                                           Opacity="0.85"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding TotalXpLabel}"
+                                       FontSize="22"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"
+                                       Foreground="{DynamicResource Background}"/>
+                        </Grid>
+                    </Border>
+
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <ItemsControl ItemsSource="{Binding Lines}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:EncounterLineViewModel">
+                                        <Border Classes="row" Margin="0,0,0,8">
+                                            <StackPanel Spacing="8">
+                                                <Grid ColumnDefinitions="*,Auto,Auto">
+                                                    <StackPanel Grid.Column="0" Spacing="3" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Name}" Classes="tileName"/>
+                                                        <TextBlock Text="{Binding LineLabel}" Classes="muted" FontSize="12"/>
+                                                        <TextBlock Text="{Binding AttacksSummary}" Classes="fieldLabel" TextTrimming="CharacterEllipsis"/>
+                                                    </StackPanel>
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                        <Button Classes="card"
+                                                                Content="-"
+                                                                Command="{Binding $parent[ItemsControl].((vm:EncounterBuilderViewModel)DataContext).DecrementLineCommand}"
+                                                                AutomationProperties.Name="Remove one"
+                                                                CommandParameter="{Binding}"/>
+                                                        <TextBlock Text="{Binding Count}"
+                                                                   MinWidth="22"
+                                                                   TextAlignment="Center"
+                                                                   VerticalAlignment="Center"
+                                                                   Classes="body"/>
+                                                        <Button Classes="card"
+                                                                Content="+"
+                                                                Command="{Binding $parent[ItemsControl].((vm:EncounterBuilderViewModel)DataContext).IncrementLineCommand}"
+                                                                AutomationProperties.Name="Add one"
+                                                                CommandParameter="{Binding}"/>
+                                                    </StackPanel>
+                                                    <Button Grid.Column="2"
+                                                            Classes="danger"
+                                                            Content="Remove"
+                                                            Margin="10,0,0,0"
+                                                            VerticalAlignment="Center"
+                                                            Command="{Binding $parent[ItemsControl].((vm:EncounterBuilderViewModel)DataContext).RemoveLineCommand}"
+                                                            CommandParameter="{Binding}"/>
+                                                </Grid>
+
+                                                <Button Classes="card"
+                                                        Content="Attacks"
+                                                        HorizontalAlignment="Left"
+                                                        Command="{Binding ToggleAttacksCommand}"/>
+
+                                                <StackPanel Spacing="6" IsVisible="{Binding IsEditingAttacks}">
+                                                    <ItemsControl ItemsSource="{Binding Attacks}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate x:DataType="vm:CombatantAttackViewModel">
+                                                                <Border Classes="sticky" Margin="0,0,0,4" Padding="10,6">
+                                                                    <Grid ColumnDefinitions="*,Auto">
+                                                                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                                                            <TextBlock Text="{Binding Name}" Foreground="{DynamicResource WidgetForeground}" FontWeight="SemiBold"/>
+                                                                            <TextBlock Classes="fieldLabel" Text="{Binding Subtitle}"/>
+                                                                        </StackPanel>
+                                                                        <Button Grid.Column="1"
+                                                                                Classes="del"
+                                                                                Content="&#x00D7;"
+                                                                                VerticalAlignment="Center"
+                                                                                Command="{Binding $parent[ItemsControl].((vm:EncounterLineViewModel)DataContext).RemoveAttackCommand}"
+                                                                                CommandParameter="{Binding}"/>
+                                                                    </Grid>
+                                                                </Border>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                    <TextBox AutomationProperties.Name="Attack name" Text="{Binding NewAttackName}" Watermark="Attack name" CornerRadius="6"/>
+                                                    <Grid ColumnDefinitions="Auto,*">
+                                                        <TextBlock Grid.Column="0" Classes="fieldLabel" Text="To hit" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                        <NumericUpDown AutomationProperties.Name="To hit" Grid.Column="1" Value="{Binding NewAttackToHit}" Increment="1"/>
+                                                    </Grid>
+                                                    <Grid ColumnDefinitions="Auto,*">
+                                                        <TextBlock Grid.Column="0" Classes="fieldLabel" Text="Range ft" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                        <NumericUpDown AutomationProperties.Name="Range ft" Grid.Column="1" Value="{Binding NewAttackRange}" Increment="5" Minimum="0"/>
+                                                    </Grid>
+                                                    <TextBox AutomationProperties.Name="Damage e.g. 1d6+2" Text="{Binding NewAttackDamage}" Watermark="Damage e.g. 1d6+2" CornerRadius="6"/>
+                                                    <TextBox AutomationProperties.Name="Damage type e.g. piercing" Text="{Binding NewAttackDamageType}" Watermark="Damage type e.g. piercing" CornerRadius="6"/>
+                                                    <Button Classes="accent" HorizontalAlignment="Stretch" Content="Add attack" Command="{Binding AddAttackCommand}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Text="Add monsters from the left to start scoring the fight."
+                                       Classes="muted"
+                                       FontSize="13"
+                                       Margin="2,8"
+                                       IsVisible="{Binding !HasLines}"/>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <TextBox AutomationProperties.Name="Notes (optional)" Grid.Row="3"
+                             Margin="0,12,0,0"
+                             Height="70"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             Watermark="Notes (optional)"
+                             Text="{Binding EncounterNotes}"/>
+
+                    <Grid Grid.Row="4" ColumnDefinitions="Auto,*,Auto" Margin="0,12,0,0">
+                        <ComboBox AutomationProperties.Name="Difficulty target" Grid.Column="0"
+                                  MinWidth="140"
+                                  ItemsSource="{Binding DifficultyTargets}"
+                                  SelectedItem="{Binding SelectedTarget}"/>
+                        <Button Grid.Column="2"
+                                Classes="ghost"
+                                Content="Randomize to target"
+                                Command="{Binding RandomizeCommand}"/>
+                    </Grid>
+
+                    <Grid Grid.Row="5" ColumnDefinitions="*,Auto,Auto" Margin="0,12,0,0">
+                        <Button Grid.Column="0"
+                                Classes="primary"
+                                Content="Save Encounter"
+                                HorizontalAlignment="Left"
+                                Command="{Binding SaveEncounterCommand}"/>
+                        <Button Grid.Column="1"
+                                Classes="ghost"
+                                Content="New"
+                                Margin="8,0,0,0"
+                                Command="{Binding NewEncounterCommand}"/>
+                        <Button Grid.Column="2"
+                                Classes="ghost"
+                                Content="Clear"
+                                Margin="8,0,0,0"
+                                Command="{Binding ClearMonstersCommand}"/>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="2" Classes="panel" Margin="10,0,0,0">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*">
+                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Text="PARTY" Classes="sectionLabel" VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                            <Button Classes="ghost" Content="All" Command="{Binding SelectAllPartyCommand}"/>
+                            <Button Classes="ghost" Content="None" Command="{Binding ClearPartyCommand}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Grid.Row="1" Text="{Binding PartySummary}" Classes="muted" FontSize="12" Margin="0,6,0,10"/>
+
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" MaxHeight="280">
+                        <ItemsControl ItemsSource="{Binding Party}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:PartyMemberRowViewModel">
+                                    <Border Classes="row" Margin="0,0,0,8">
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <CheckBox AutomationProperties.Name="{Binding Name}" Grid.Column="0"
+                                                      IsChecked="{Binding IsSelected}"
+                                                      VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding Name}"
+                                                       Classes="tileName"
+                                                       VerticalAlignment="Center"
+                                                       Margin="6,0,0,0"/>
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <Button Classes="card"
+                                                        Content="-"
+                                                        Command="{Binding $parent[ItemsControl].((vm:EncounterBuilderViewModel)DataContext).DecrementPartyLevelCommand}"
+                                                                AutomationProperties.Name="Lower party level"
+                                                        CommandParameter="{Binding}"/>
+                                                <TextBlock Text="{Binding LevelLabel}"
+                                                           MinWidth="44"
+                                                           TextAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           Classes="body"/>
+                                                <Button Classes="card"
+                                                        Content="+"
+                                                        Command="{Binding $parent[ItemsControl].((vm:EncounterBuilderViewModel)DataContext).IncrementPartyLevelCommand}"
+                                                                AutomationProperties.Name="Raise party level"
+                                                        CommandParameter="{Binding}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <Border Grid.Row="3" Classes="sticky" Margin="0,4,0,0">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="XP BUDGET" Classes="sectionLabel"/>
+                            <TextBlock Text="{Binding BudgetLine}" Classes="body" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="4" Classes="divider" Margin="0,16"/>
+
+                    <TextBlock Grid.Row="5" Text="SAVED ENCOUNTERS" Classes="sectionLabel" Margin="0,0,0,10"/>
+
+                    <ScrollViewer Grid.Row="6" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <ItemsControl ItemsSource="{Binding Presets}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:EncounterPresetRowViewModel">
+                                        <Border Classes="row" Margin="0,0,0,8">
+                                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                                <StackPanel Grid.Column="0" Spacing="3" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Name}" Classes="tileName"/>
+                                                    <TextBlock Text="{Binding Summary}" Classes="muted" FontSize="12"/>
+                                                </StackPanel>
+                                                <Button Grid.Column="1"
+                                                        Classes="ghost"
+                                                        Content="Load"
+                                                        VerticalAlignment="Center"
+                                                        Command="{Binding $parent[ItemsControl].((vm:EncounterBuilderViewModel)DataContext).LoadPresetCommand}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Grid.Column="2"
+                                                        Classes="danger"
+                                                        Content="Delete"
+                                                        Margin="8,0,0,0"
+                                                        VerticalAlignment="Center"
+                                                        Command="{Binding $parent[ItemsControl].((vm:EncounterBuilderViewModel)DataContext).DeletePresetCommand}"
+                                                        CommandParameter="{Binding}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Text="No saved encounters yet."
+                                       Classes="muted"
+                                       FontSize="13"
+                                       Margin="2,4"
+                                       IsVisible="{Binding !HasPresets}"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

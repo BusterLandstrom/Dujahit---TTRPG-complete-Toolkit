@@ -1,0 +1,82 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Dujahit.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="700"
+             x:Class="Dujahit.Views.HandoutsView"
+             x:DataType="vm:HandoutsViewModel"
+             Background="Transparent"
+             FontFamily="{DynamicResource MainFont}"
+             Foreground="{DynamicResource Foreground}">
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.section">
+            <Setter Property="Foreground" Value="{DynamicResource Divider}"/>
+            <Setter Property="FontSize" Value="{DynamicResource FontSizeSmall}"/>
+            <Setter Property="LetterSpacing" Value="2"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+        <Style Selector="Button.toolbar">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="10,4"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,*" Margin="16">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+            <StackPanel Grid.Column="0" Spacing="2">
+                <TextBlock Classes="section" Text="Handouts"/>
+                <TextBlock Text="Reveal an image to every player, it pops over whatever screen they are on"
+                           Foreground="{DynamicResource Muted}"
+                           FontSize="{DynamicResource FontSizeSmall}"/>
+            </StackPanel>
+            <Button Grid.Column="1" Classes="toolbar" Content="+ Add handout"
+                    Command="{Binding AddCommand}"/>
+        </Grid>
+
+        <Border Grid.Row="1"
+                Background="{DynamicResource Widget}"
+                CornerRadius="{DynamicResource CornerRadiusStandard}"
+                Padding="12">
+            <ScrollViewer>
+                <ItemsControl ItemsSource="{Binding Handouts}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="vm:HandoutListItem">
+                            <Border Background="{DynamicResource Background}"
+                                    CornerRadius="{DynamicResource CornerRadiusStandard}"
+                                    Padding="10"
+                                    Margin="0,0,0,8">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding Name}"
+                                               VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                        <Button Classes="toolbar" Content="View"
+                                                Command="{Binding $parent[ItemsControl].((vm:HandoutsViewModel)DataContext).ViewCommand}"
+                                                CommandParameter="{Binding}"/>
+                                        <Button Classes="toolbar" Content="Reveal"
+                                                Command="{Binding $parent[ItemsControl].((vm:HandoutsViewModel)DataContext).RevealCommand}"
+                                                CommandParameter="{Binding}"/>
+                                        <Button Classes="toolbar" Content="Hide"
+                                                Command="{Binding $parent[ItemsControl].((vm:HandoutsViewModel)DataContext).HideCommand}"
+                                                CommandParameter="{Binding}"/>
+                                        <Button Classes="toolbar" Content="Delete"
+                                                Foreground="{DynamicResource Danger}"
+                                                BorderBrush="{DynamicResource Danger}"
+                                                Command="{Binding $parent[ItemsControl].((vm:HandoutsViewModel)DataContext).DeleteCommand}"
+                                                CommandParameter="{Binding}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</UserControl>
