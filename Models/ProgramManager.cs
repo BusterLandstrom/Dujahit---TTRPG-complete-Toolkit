@@ -6374,7 +6374,7 @@ namespace Dujahit.Models
     }
     public class VersionManager // This "version management system" is basically created from a SharePoint update system I made at my previous job lol (I was not a dev at that job I just made internal software for the IT team as a side gig lol)
     {
-        public string Version { get; set; } = "0.8";
+        public string Version { get; set; } = "0.9";
         public bool IsBeta { get; set; } = true;
         public bool IsUrgent { get; set; } = false;
         public string? InstallPath { get; set; }
