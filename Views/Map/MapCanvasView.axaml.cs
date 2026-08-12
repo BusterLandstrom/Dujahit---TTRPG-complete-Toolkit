@@ -90,6 +90,45 @@ namespace Dujahit.Views.Map
 
         private MapCanvasViewModel? Vm => DataContext as MapCanvasViewModel;
 
+        private bool _playerEyes;
+
+        private bool HostEyes => (Vm?.IsHost ?? false) && !_playerEyes;
+
+        public void UsePlayerEyes()
+        {
+            _playerEyes = true;
+            if (ToolPanel.Parent is Panel toolHost) toolHost.Children.Remove(ToolPanel);
+            if (ShowToolsButton.Parent is Panel btnHost) btnHost.Children.Remove(ShowToolsButton);
+            DrawCanvas.IsHitTestVisible = false;
+            Focusable = false;
+            RebuildFog();
+            RebuildWalls();
+        }
+
+        public void ReleaseViewModel()
+        {
+            if (Vm == null) return;
+            Vm.ActivePings.CollectionChanged -= OnPingsChanged;
+            Vm.Strokes.CollectionChanged -= OnStrokesChanged;
+            Vm.Tokens.CollectionChanged -= OnTokensChanged;
+            Vm.UploadTokenRequested -= OnUploadTokenRequested;
+            Vm.LibraryRequested -= OnLibraryRequested;
+            Vm.PropUploadRequested -= OnPropUploadRequested;
+            Vm.PropertyChanged -= OnVmPropertyChanged;
+            Vm.FogCellChanged -= OnFogCellChanged;
+            Vm.FogBulkChanged -= RebuildFog;
+            Vm.WallsChanged -= RebuildWalls;
+            Vm.TerrainCellChanged -= OnTerrainCellChanged;
+            Vm.TerrainChanged -= RebuildTerrain;
+            Vm.ObjectCellChanged -= OnObjectCellChanged;
+            Vm.ObjectsChanged -= RebuildObjects;
+            Vm.AoeTemplatesChanged -= RebuildTemplates;
+            Vm.ReachableChanged -= RebuildReachable;
+            Vm.RulerChanged -= RebuildRuler;
+            Vm.PropGhostChanged -= RebuildPropGhost;
+            foreach (var t in Vm.Tokens) t.PropertyChanged -= OnTokenPropertyChanged;
+        }
+
         public MapCanvasView()
         {
             InitializeComponent();
@@ -1063,7 +1102,7 @@ namespace Dujahit.Views.Map
             var cell = Vm.CellSize;
             if (cell <= 0) return;
 
-            var fill = Vm.IsHost
+            var fill = HostEyes
                 ? new SolidColorBrush(Color.FromArgb(140, 8, 8, 14))
                 : new SolidColorBrush(Color.FromArgb(255, 8, 8, 14));
 
@@ -1237,7 +1276,7 @@ namespace Dujahit.Views.Map
             if (Vm == null || !Vm.WallsEnabled) return;
             foreach (var w in Vm.Walls)
             {
-                if (!Vm.IsHost && !w.IsDoor) continue;
+                if (!HostEyes && !w.IsDoor) continue;
                 RenderWall(w);
             }
         }

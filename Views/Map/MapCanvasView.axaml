@@ -64,7 +64,8 @@
             <Canvas x:Name="WorldCanvas" IsHitTestVisible="False"/>
         </Canvas>
 
-        <Border Classes="toolPanel"
+        <Border x:Name="ToolPanel"
+                Classes="toolPanel"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Margin="14"
@@ -484,7 +485,8 @@
             </ScrollViewer>
         </Border>
 
-        <Button HorizontalAlignment="Left"
+        <Button x:Name="ShowToolsButton"
+                HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Margin="14"
                 ZIndex="999"

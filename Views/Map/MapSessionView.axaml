@@ -51,6 +51,15 @@
                         HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center"
                         Padding="12,9"/>
+                <Button Classes="choose"
+                        Content="Player view window"
+                        Command="{Binding OpenPlayerDisplayCommand}"
+                        IsVisible="{Binding CanBroadcast}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Padding="12,9"
+                        AutomationProperties.Name="Open the player view in its own window, drag it to a second screen and press F11"
+                        ToolTip.Tip="Open the player view in its own window, drag it to a second screen and press F11"/>
                 <Button Classes="danger"
                         Content="Close map"
                         Command="{Binding CloseMapCommand}"

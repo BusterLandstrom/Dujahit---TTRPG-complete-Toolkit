@@ -346,7 +346,9 @@ namespace Dujahit.ViewModels
         public bool CanBroadcast => CurrentRole == UserRole.Dm && _com != null;
 
         public event Action? CloseRequested;
+        public event Action? PlayerDisplayRequested;
         public ReactiveCommand<Unit, Unit> CloseMapCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenPlayerDisplayCommand { get; }
         public string BroadcastLabel => IsBroadcasting ? "Stop sharing" : "Go live to players";
         public string ReturnLabel => Initiative.CombatActive ? "Back to the fight, round " + Initiative.Round : "Back to the map";
         public ReactiveCommand<Unit, Unit>? ToggleBroadcastCommand { get; private set; }
@@ -466,6 +468,7 @@ namespace Dujahit.ViewModels
             Initiative.PushCombatant = Canvas.PushCombatant;
             Initiative.InitiativeCleared += OnInitiativeCleared;
             CloseMapCommand = ReactiveCommand.Create(() => CloseRequested?.Invoke());
+            OpenPlayerDisplayCommand = ReactiveCommand.Create(() => PlayerDisplayRequested?.Invoke());
             if (role == UserRole.Dm) Canvas.AoeTemplatePlacedHere += ResolveAreaCastAt;
             if (role == UserRole.Dm)
             {
