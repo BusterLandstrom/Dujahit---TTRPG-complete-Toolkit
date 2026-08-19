@@ -983,6 +983,8 @@ namespace Dujahit.ViewModels
                         QueueSave();
                     }
                 };
+                vm.CheckRolled += OnAbilityCheckRolled;
+                vm.SaveRolled += OnAbilitySaveRolled;
                 Abilities.Add(vm);
             }
             var defs = App.PM?.Rules?.Abilities;
@@ -998,6 +1000,16 @@ namespace Dujahit.ViewModels
                 Add("Wisdom", "WIS", c.AbilityScores.Wisdom, "wis", "ability-wis");
                 Add("Charisma", "CHA", c.AbilityScores.Charisma, "cha", "ability-cha");
             }
+        }
+
+        private void OnAbilityCheckRolled(AbilityScoreViewModel a) => PostAbilityRoll(a, false);
+        private void OnAbilitySaveRolled(AbilityScoreViewModel a) => PostAbilityRoll(a, true);
+
+        private void PostAbilityRoll(AbilityScoreViewModel a, bool save)
+        {
+            var mode = save ? ConditionEffects.SaveMode(Conditions, ExhaustionLevel) : ConditionEffects.CheckMode(Conditions, ExhaustionLevel);
+            var (_, line) = DiceManager.CheckRoll(Name, a.Name + (save ? " save" : " check"), save ? a.SaveTotal : a.Modifier, ExhaustionLevel, mode);
+            RollToChat?.Invoke(line, false);
         }
 
         private void RechargeItems(string rest)

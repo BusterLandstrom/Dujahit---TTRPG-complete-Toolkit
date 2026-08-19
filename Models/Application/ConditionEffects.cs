@@ -43,6 +43,19 @@ namespace Dujahit.Models.Application
             return RollMode.Normal;
         }
 
+        // Tired drags the roll down a notch rather than stacking, so an advantage you had lands back on normal and everything else bottoms out
+        private static RollMode Swung(string mode, bool tired)
+        {
+            if (mode == "advantage") return tired ? RollMode.Normal : RollMode.Advantage;
+            return tired || mode == "disadvantage" ? RollMode.Disadvantage : RollMode.Normal;
+        }
+
+        public static RollMode CheckMode(IEnumerable<string> activeConditions, int exhaustionLevel)
+            => Swung(Rules.AbilityCheckModeFrom(activeConditions), Rules.Exhaustion?.AbilityChecksAtDisadvantage(exhaustionLevel) ?? false);
+
+        public static RollMode SaveMode(IEnumerable<string> activeConditions, int exhaustionLevel)
+            => Swung(Rules.SaveRollModeFrom(activeConditions), Rules.Exhaustion?.SavesAtDisadvantage(exhaustionLevel) ?? false);
+
         // The conditions the target is under that swing the attacker's roll, prone or stunned hand advantage, an invisible target hands disadvantage
         public static RollMode DefenderMode(IEnumerable<string> targetConditions) => DefenderMode(targetConditions, -1);
 

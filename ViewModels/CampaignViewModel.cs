@@ -1338,8 +1338,7 @@ namespace Dujahit.ViewModels
 
             // Player gets the grid straight from the activation message, the dm has no args here so it reads the choice back off its own loaded maps
             var meta = _mapHub.Maps.FirstOrDefault(m => m.Id == mapId);
-            _mapSession.Canvas.GridKind = gridKind ?? meta?.GridKind ?? GridKind.Squares;
-            _mapSession.Canvas.MapScale = scale ?? meta?.Scale ?? 1.0;
+            _mapSession.Canvas.LoadGrid(gridKind ?? meta?.GridKind ?? GridKind.Squares, scale ?? meta?.Scale ?? 1.0);
             _mapSession.Canvas.SetMapSize(
                 mapWidth > 0 ? mapWidth : meta?.PixelWidth ?? 0,
                 mapHeight > 0 ? mapHeight : meta?.PixelHeight ?? 0);
@@ -1407,8 +1406,7 @@ namespace Dujahit.ViewModels
             _sharedSession.Canvas.IsDungeonMaster = false;
             _sharedSession.Canvas.TokensEnabled = false;
             _sharedSession.Canvas.ShowGrid = false;
-            _sharedSession.Canvas.GridKind = gridKind;
-            _sharedSession.Canvas.MapScale = scale;
+            _sharedSession.Canvas.LoadGrid(gridKind, scale);
             _sharedSession.Canvas.Mode = CanvasToolMode.Ping;
 
             var ownCharacter = App.PM.CurrentCharacterService.Current;

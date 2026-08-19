@@ -3,12 +3,17 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform.Storage;
+using Dujahit.Models;
 using Dujahit.ViewModels;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Dujahit.Views
 {
@@ -67,6 +72,44 @@ namespace Dujahit.Views
             ItemTemplate = template
         };
 
+        private StackPanel DropPanel(Func<IEnumerable<IStorageItem>, Task<int>> import)
+        {
+            var panel = new StackPanel { Spacing = 4, Background = Brushes.Transparent };
+            DragDrop.SetAllowDrop(panel, true);
+
+            panel.AddHandler(DragDrop.DragOverEvent, (_, e) =>
+            {
+                e.DragEffects = _canvas.IsHost && e.Data.Contains(DataFormats.Files) ? DragDropEffects.Copy : DragDropEffects.None;
+                e.Handled = true;
+            });
+
+            panel.AddHandler(DragDrop.DropEvent, async (_, e) =>
+            {
+                try
+                {
+                    e.Handled = true;
+                    if (!_canvas.IsHost) return;
+                    var dropped = e.Data.GetFiles();
+                    if (dropped == null) return;
+                    if (await import(dropped) > 0) Close();
+                }
+                catch (Exception ex) { ErrorLog.Log("[Library] dropped files failed", ex); }
+            });
+
+            return panel;
+        }
+
+        private async Task PickFolderAsync(Func<IEnumerable<IStorageItem>, Task<int>> import)
+        {
+            try
+            {
+                var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions { Title = "Pick a folder of images" });
+                if (folders.Count == 0) return;
+                if (await import(folders) > 0) Close();
+            }
+            catch (Exception ex) { ErrorLog.Log("[Library] folder pick failed", ex); }
+        }
+
         private Button AddButton(string text, Action onClick)
         {
             var b = new Button { Content = text, HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Center };
@@ -77,10 +120,13 @@ namespace Dujahit.Views
 
         private Control ObjectsTab()
         {
-            var panel = new StackPanel { Spacing = 4 };
-            panel.Children.Add(Hint("Pick one and the map arms it, then click the map to drop it. The cross forgets it for good."));
+            Func<IEnumerable<IStorageItem>, Task<int>> import = files => _canvas.ImportPropFilesAsync(files);
+
+            var panel = DropPanel(import);
+            panel.Children.Add(Hint("Pick one and the map arms it, then click the map to drop it. The cross forgets it for good. Images dropped in here are kept as objects."));
             panel.Children.Add(new TextBox { Watermark = "Name it before you pick", [!TextBox.TextProperty] = new Binding(nameof(MapCanvasViewModel.NewPropName)) { Source = _canvas, Mode = BindingMode.TwoWay } });
             panel.Children.Add(AddButton("Upload a map object", () => { Close(); _canvas.UploadPropCommand.Execute().Subscribe(); }));
+            panel.Children.Add(AddButton("Take a whole folder", () => _ = PickFolderAsync(import)));
             if (_canvas.PropLibrary.Count == 0)
                 panel.Children.Add(Empty("Nothing kept yet. Name one and upload it here, or pick an image from the map objects tool."));
             else
@@ -94,9 +140,12 @@ namespace Dujahit.Views
 
         private Control TokensTab()
         {
-            var panel = new StackPanel { Spacing = 4 };
-            panel.Children.Add(Hint("Pick one and the map arms it as the token you are placing. Bind a monster on the tool panel to give it a statblock."));
+            Func<IEnumerable<IStorageItem>, Task<int>> import = files => _canvas.ImportTokenFilesAsync(files);
+
+            var panel = DropPanel(import);
+            panel.Children.Add(Hint("Pick one and the map arms it as the token you are placing. Bind a monster on the tool panel to give it a statblock. Drop images on this tab or straight onto the map and they land in here."));
             panel.Children.Add(AddButton("Upload a token", () => { Close(); _canvas.UploadTokenCommand.Execute().Subscribe(); }));
+            panel.Children.Add(AddButton("Take a whole folder", () => _ = PickFolderAsync(import)));
             if (_canvas.Library.Count == 0)
                 panel.Children.Add(Empty("No tokens yet. Upload an image or make a colour token from the tokens tool."));
             else

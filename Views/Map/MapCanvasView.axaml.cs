@@ -86,6 +86,16 @@ namespace Dujahit.Views.Map
         private double _offsetX;
         private double _offsetY;
 
+        private double _userZoom = 1.0;
+        private bool _panning;
+        private bool _spaceHeld;
+        private Point _panStart;
+        private static readonly Cursor _panCursor = new(StandardCursorType.SizeAll);
+
+        private const double MinZoom = 1.0;
+        private const double MaxZoom = 16.0;
+        private const double ZoomStep = 1.1;
+
         private Point _lastWorldPos;
 
         private MapCanvasViewModel? Vm => DataContext as MapCanvasViewModel;
@@ -99,8 +109,8 @@ namespace Dujahit.Views.Map
             _playerEyes = true;
             if (ToolPanel.Parent is Panel toolHost) toolHost.Children.Remove(ToolPanel);
             if (ShowToolsButton.Parent is Panel btnHost) btnHost.Children.Remove(ShowToolsButton);
-            DrawCanvas.IsHitTestVisible = false;
-            Focusable = false;
+            CameraBar.IsVisible = true;
+            DragDrop.SetAllowDrop(DrawCanvas, false);
             RebuildFog();
             RebuildWalls();
         }
@@ -136,8 +146,14 @@ namespace Dujahit.Views.Map
             DrawCanvas.PointerPressed += OnPointerPressed;
             DrawCanvas.PointerReleased += OnPointerReleased;
             DrawCanvas.PointerMoved += OnPointerMoved;
+            DrawCanvas.PointerWheelChanged += OnPointerWheel;
+
+            DragDrop.SetAllowDrop(DrawCanvas, true);
+            DrawCanvas.AddHandler(DragDrop.DragOverEvent, OnDragOver);
+            DrawCanvas.AddHandler(DragDrop.DropEvent, OnDrop);
 
             AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
+            AddHandler(KeyUpEvent, OnKeyUp, RoutingStrategies.Tunnel);
 
             Focusable = true;
             PointerPressed += (_, _) => Focus();
@@ -165,6 +181,7 @@ namespace Dujahit.Views.Map
             _objectVisuals.Clear();
             _wallLines.Clear();
             _aoeControls.Clear();
+            ResetView();
 
             foreach (var s in Vm.Strokes) RenderStroke(s);
             foreach (var t in Vm.Tokens) RenderToken(t);
@@ -348,6 +365,8 @@ namespace Dujahit.Views.Map
             switch (e.PropertyName)
             {
                 case nameof(MapCanvasViewModel.BackgroundImage):
+                    ResetView();
+                    goto case nameof(MapCanvasViewModel.MapScale);
                 case nameof(MapCanvasViewModel.MapScale):
                 case nameof(MapCanvasViewModel.GridKind):
                 case nameof(MapCanvasViewModel.ShowGrid):
@@ -370,24 +389,82 @@ namespace Dujahit.Views.Map
             var ch = DrawCanvas.Bounds.Height;
             var bmp = Vm?.BackgroundImage;
 
+            double iw = 0, ih = 0, fit = 1.0;
+            var hasArt = false;
+
             if (bmp != null && bmp.PixelSize.Width > 0 && bmp.PixelSize.Height > 0 && cw > 0 && ch > 0)
             {
-                double iw = bmp.PixelSize.Width;
-                double ih = bmp.PixelSize.Height;
-                _displayScale = Math.Min(cw / iw, ch / ih);
-                _offsetX = (cw - iw * _displayScale) / 2.0;
-                _offsetY = (ch - ih * _displayScale) / 2.0;
+                iw = bmp.PixelSize.Width;
+                ih = bmp.PixelSize.Height;
+                fit = Math.Min(cw / iw, ch / ih);
+                hasArt = true;
             }
-            else
+            else if (Vm != null)
             {
-                _displayScale = 1.0;
-                _offsetX = 0;
-                _offsetY = 0;
+                iw = Vm.MapPixelWidth;
+                ih = Vm.MapPixelHeight;
             }
+
+            _displayScale = fit * _userZoom;
+
+            var spillX = iw * _displayScale - cw;
+            var spillY = ih * _displayScale - ch;
+
+            _offsetX = spillX > 0 ? Math.Clamp(_offsetX, -spillX, 0) : hasArt ? -spillX / 2.0 : 0;
+            _offsetY = spillY > 0 ? Math.Clamp(_offsetY, -spillY, 0) : hasArt ? -spillY / 2.0 : 0;
 
             WorldCanvas.RenderTransformOrigin = RelativePoint.TopLeft;
             WorldCanvas.RenderTransform = new MatrixTransform(
                 new Matrix(_displayScale, 0, 0, _displayScale, _offsetX, _offsetY));
+        }
+
+        private void OnPointerWheel(object? sender, PointerWheelEventArgs e)
+        {
+            if (Vm == null) return;
+            var step = e.Delta.Y > 0 ? ZoomStep : 1.0 / ZoomStep;
+            ZoomAround(e.GetPosition(DrawCanvas), _userZoom * step);
+            e.Handled = true;
+        }
+
+        private void ZoomAround(Point view, double targetZoom)
+        {
+            targetZoom = Math.Clamp(targetZoom, MinZoom, MaxZoom);
+            if (Math.Abs(targetZoom - _userZoom) < 0.0001) return;
+
+            var world = ToWorld(view);
+            _userZoom = targetZoom;
+            UpdateWorldTransform();
+            _offsetX = view.X - world.X * _displayScale;
+            _offsetY = view.Y - world.Y * _displayScale;
+
+            ApplyLayout();
+            RebuildRuler();
+            RebuildPropGhost();
+        }
+
+        private void ZoomToCenter(double targetZoom) =>
+            ZoomAround(new Point(DrawCanvas.Bounds.Width / 2.0, DrawCanvas.Bounds.Height / 2.0), targetZoom);
+
+        private void OnFitClicked(object? sender, RoutedEventArgs e) => ZoomToCenter(MinZoom);
+
+        private void OnActualSizeClicked(object? sender, RoutedEventArgs e)
+        {
+            var bmp = Vm?.BackgroundImage;
+            var cw = DrawCanvas.Bounds.Width;
+            var ch = DrawCanvas.Bounds.Height;
+            if (bmp == null || bmp.PixelSize.Width <= 0 || bmp.PixelSize.Height <= 0 || cw <= 0 || ch <= 0)
+            {
+                ZoomToCenter(1.0);
+                return;
+            }
+            var fit = Math.Min(cw / bmp.PixelSize.Width, ch / bmp.PixelSize.Height);
+            ZoomToCenter(fit > 0 ? 1.0 / fit : 1.0);
+        }
+
+        private void ResetView()
+        {
+            _userZoom = 1.0;
+            _offsetX = _offsetY = 0;
         }
 
         private Point ToWorld(Point dip)
@@ -662,11 +739,16 @@ namespace Dujahit.Views.Map
             var props = e.GetCurrentPoint(DrawCanvas).Properties;
             _lastWorldPos = pos;
 
-            if (props.IsMiddleButtonPressed)
+            if (props.IsMiddleButtonPressed || (_spaceHeld && props.IsLeftButtonPressed))
             {
-                _ = Vm.Ping(pos.X, pos.Y);
+                _panning = true;
+                _panStart = e.GetPosition(DrawCanvas);
+                e.Pointer.Capture(DrawCanvas);
+                Cursor = _panCursor;
                 return;
             }
+
+            if (_playerEyes) return;
 
             if (PressedOnToken(pos, props)) return;
             if (PressedWithTool(pos, props)) return;
@@ -833,6 +915,18 @@ namespace Dujahit.Views.Map
         {
             if (Vm == null) return;
 
+            if (_panning)
+            {
+                var here = e.GetPosition(DrawCanvas);
+                _offsetX += here.X - _panStart.X;
+                _offsetY += here.Y - _panStart.Y;
+                _panStart = here;
+                UpdateWorldTransform();
+                return;
+            }
+
+            if (_playerEyes) return;   // Or the tv drags my prop ghost about.
+
             var pos = ToWorld(e.GetPosition(DrawCanvas));
             _lastWorldPos = pos;
             Vm.TrackPropGhost(pos.X, pos.Y);
@@ -898,6 +992,16 @@ namespace Dujahit.Views.Map
         private void OnPointerReleased(object? sender, PointerReleasedEventArgs e)
         {
             if (Vm == null) return;
+
+            if (_panning)
+            {
+                _panning = false;
+                e.Pointer.Capture(null);
+                Cursor = Cursor.Default;
+                return;
+            }
+
+            if (_playerEyes) return;
 
             if (_isFogging)
             {
@@ -1611,6 +1715,28 @@ namespace Dujahit.Views.Map
 
             if (TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is TextBox) return;
 
+            if (_playerEyes)
+            {
+                switch (e.Key)
+                {
+                    case Key.Space:
+                        _spaceHeld = true;
+                        e.Handled = true;
+                        break;
+                    case Key.OemPlus:
+                    case Key.Add:
+                        ZoomToCenter(_userZoom * ZoomStep);
+                        e.Handled = true;
+                        break;
+                    case Key.OemMinus:
+                    case Key.Subtract:
+                        ZoomToCenter(_userZoom / ZoomStep);
+                        e.Handled = true;
+                        break;
+                }
+                return;
+            }
+
             if (e.Key == Key.Z && e.KeyModifiers.HasFlag(KeyModifiers.Control))
             {
                 Vm.UndoCommand.Execute().Subscribe();
@@ -1618,8 +1744,19 @@ namespace Dujahit.Views.Map
                 return;
             }
 
+            if (e.Key == Key.Y && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+            {
+                Vm.RedoCommand.Execute().Subscribe();
+                e.Handled = true;
+                return;
+            }
+
             switch (e.Key)
             {
+                case Key.Space:
+                    _spaceHeld = true;
+                    e.Handled = true;
+                    break;
                 case Key.I:
                     Vm.UndoCommand.Execute().Subscribe();
                     e.Handled = true;
@@ -1638,11 +1775,19 @@ namespace Dujahit.Views.Map
                     break;
                 case Key.OemPlus:
                 case Key.Add:
-                    Vm.AdjustScale(+0.1);
+                    ZoomToCenter(_userZoom * ZoomStep);
                     e.Handled = true;
                     break;
                 case Key.OemMinus:
                 case Key.Subtract:
+                    ZoomToCenter(_userZoom / ZoomStep);
+                    e.Handled = true;
+                    break;
+                case Key.OemCloseBrackets:
+                    Vm.AdjustScale(+0.1);
+                    e.Handled = true;
+                    break;
+                case Key.OemOpenBrackets:
                     Vm.AdjustScale(-0.1);
                     e.Handled = true;
                     break;
@@ -1687,6 +1832,17 @@ namespace Dujahit.Views.Map
             }
         }
 
+        private void OnKeyUp(object? sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Space) return;
+            _spaceHeld = false;
+            if (_panning)
+            {
+                _panning = false;
+                Cursor = Cursor.Default;
+            }
+        }
+
 
         private async void OnLibraryRequested()
         {
@@ -1711,8 +1867,8 @@ namespace Dujahit.Views.Map
 
                 var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
                 {
-                    Title = "Upload Token Image",
-                    AllowMultiple = false,
+                    Title = "Upload Token Images",
+                    AllowMultiple = true,
                     FileTypeFilter = new[]
                     {
                         new FilePickerFileType("Images")
@@ -1723,26 +1879,7 @@ namespace Dujahit.Views.Map
                 });
 
                 if (files.Count == 0) return;
-
-                try
-                {
-                    await using var stream = await files[0].OpenReadAsync();
-                    using var ms = new System.IO.MemoryStream();
-                    await stream.CopyToAsync(ms);
-                    var clean = TokenImageGuard.Sanitize(ms.ToArray());
-                    if (clean == null)
-                    {
-                        NavItem.NavError?.Invoke("That picture is too big to share, save it smaller and try again.");
-                        return;
-                    }
-                    using var cleanMs = new System.IO.MemoryStream(clean);
-                    _ = Vm.AddTokenBitmap(new Bitmap(cleanMs));
-                }
-                catch (Exception ex)
-                {
-                    ErrorLog.Log($"[MapCanvasView] Failed to load token image", ex);
-                    NavItem.NavError?.Invoke("Couldn't read that image, try a png.");
-                }
+                await Vm.ImportTokenFilesAsync(files);
             }
             catch (Exception ex) { ErrorLog.Log("Unhandled in OnUploadTokenRequested", ex); }
         }
@@ -1758,8 +1895,8 @@ namespace Dujahit.Views.Map
 
                 var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
                 {
-                    Title = "Pick a map object image",
-                    AllowMultiple = false,
+                    Title = "Pick map object images",
+                    AllowMultiple = true,
                     FileTypeFilter = new[]
                     {
                         new FilePickerFileType("Images")
@@ -1770,22 +1907,37 @@ namespace Dujahit.Views.Map
                 });
 
                 if (files.Count == 0) return;
-
-                try
-                {
-                    await using var stream = await files[0].OpenReadAsync();
-                    using var ms = new System.IO.MemoryStream();
-                    await stream.CopyToAsync(ms);
-                    if (!await Vm.ArmAndRememberPropAsync(ms.ToArray()))
-                        NavItem.NavError?.Invoke("That picture is too big to share, save it smaller and try again.");
-                }
-                catch (Exception ex)
-                {
-                    ErrorLog.Log("[MapCanvasView] map object image load failed", ex);
-                    NavItem.NavError?.Invoke("Couldn't read that image, try a png.");
-                }
+                await Vm.ImportPropFilesAsync(files);
             }
             catch (Exception ex) { ErrorLog.Log("Unhandled in OnPropUploadRequested", ex); }
+        }
+
+        private void OnDragOver(object? sender, DragEventArgs e)
+        {
+            e.DragEffects = (Vm?.IsHost ?? false) && e.Data.Contains(DataFormats.Files) ? DragDropEffects.Copy : DragDropEffects.None;
+            e.Handled = true;
+        }
+
+        private async void OnDrop(object? sender, DragEventArgs e)
+        {
+            try
+            {
+                if (Vm == null || !Vm.IsHost) return;
+                e.Handled = true;
+
+                var dropped = e.Data.GetFiles();
+                if (dropped == null) return;
+
+                var pos = ToWorld(e.GetPosition(DrawCanvas));
+                if (Vm.Mode == CanvasToolMode.MapObject)
+                {
+                    if (await Vm.ImportPropFilesAsync(dropped) > 0) await Vm.PlacePropAt(pos.X, pos.Y);
+                    return;
+                }
+
+                if (await Vm.ImportTokenFilesAsync(dropped) > 0) await Vm.PlaceTokenAt(pos.X, pos.Y);
+            }
+            catch (Exception ex) { ErrorLog.Log("Unhandled in OnDrop", ex); }
         }
 
         private void ShowTokenContextMenu(TokenViewModel token)

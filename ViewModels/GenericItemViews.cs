@@ -387,14 +387,22 @@ namespace Dujahit.ViewModels
 
         public int ProficiencyBonus { get; set; } = 2;
 
+        public int SaveTotal => Modifier + (App.PM?.Rules ?? new GameRules()).RankBonus(GameRules.RankIdFor(SaveProficient), ProficiencyBonus) + SaveBonus;
+
         public string SaveBonusDisplay
         {
             get
             {
-                var b = Modifier + (App.PM?.Rules ?? new GameRules()).RankBonus(GameRules.RankIdFor(SaveProficient), ProficiencyBonus) + SaveBonus;
+                var b = SaveTotal;
                 return b >= 0 ? $"+{b}" : b.ToString();
             }
         }
+
+        public event Action<AbilityScoreViewModel>? CheckRolled;
+        public event Action<AbilityScoreViewModel>? SaveRolled;
+
+        public ReactiveCommand<Unit, Unit> RollCheckCommand { get; }
+        public ReactiveCommand<Unit, Unit> RollSaveCommand { get; }
 
         public AbilityScoreViewModel(string name, string shortName, int score = 10, string id = "")
         {
@@ -402,6 +410,9 @@ namespace Dujahit.ViewModels
             ShortName = shortName;
             Id = id;
             _score = score;
+
+            RollCheckCommand = ReactiveCommand.Create(() => CheckRolled?.Invoke(this));
+            RollSaveCommand = ReactiveCommand.Create(() => SaveRolled?.Invoke(this));
         }
     }
 

@@ -359,7 +359,17 @@ namespace Dujahit.Views
             if (Vm == null) return;
             var screen = e.GetPosition(GraphCanvas);
             var props = e.GetCurrentPoint(GraphCanvas).Properties;
-            if (!props.IsLeftButtonPressed) return;
+            if (!props.IsLeftButtonPressed && !props.IsMiddleButtonPressed) return;
+
+            if (props.IsMiddleButtonPressed)
+            {
+                _panning = true;
+                _panStartScreen = screen;
+                _panStartOffX = _offsetX;
+                _panStartOffY = _offsetY;
+                e.Handled = true;
+                return;
+            }
 
             var world = ToWorld(screen);
             var node = HitTestNode(world);

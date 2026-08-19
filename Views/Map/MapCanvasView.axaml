@@ -100,7 +100,7 @@
                             IsVisible="{Binding CanUploadTokens}">
                         <PathIcon Data="{x:Static gv:GlobalVariables.IconTaskList}" Width="18" Height="18"/>
                     </Button>
-                    <Button Classes="tool" AutomationProperties.Name="Ping" ToolTip.Tip="Ping"
+                    <Button Classes="tool" AutomationProperties.Name="Ping" ToolTip.Tip="Ping, or press P"
                             Classes.active="{Binding IsPingMode}"
                             Command="{Binding SetPingModeCommand}">
                         <PathIcon Data="{x:Static gv:GlobalVariables.IconPing}" Width="18" Height="18"/>
@@ -149,10 +149,49 @@
                     <Button Classes="tool" AutomationProperties.Name="Undo" ToolTip.Tip="Undo your own last draw or wall, Ctrl+Z"
                             IsEnabled="{Binding CanUndo}"
                             Command="{Binding UndoCommand}" Content="&#x21B6;" FontSize="18"/>
-                    <Button Classes="tool" AutomationProperties.Name="Redo" ToolTip.Tip="Put back what you just undid"
+                    <Button Classes="tool" AutomationProperties.Name="Redo" ToolTip.Tip="Put back what you just undid, Ctrl+Y"
                             IsEnabled="{Binding CanRedo}"
                             Command="{Binding RedoCommand}" Content="&#x21B7;" FontSize="18"/>
                 </WrapPanel>
+                <Border Classes="divider"/>
+
+                <StackPanel Spacing="6">
+                    <TextBlock Text="VIEW" Classes="sectionLabel"/>
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Button Classes="ghost" Content="Fit"
+                                AutomationProperties.Name="Fit the map to the window" ToolTip.Tip="Fit the map to the window"
+                                Click="OnFitClicked"/>
+                        <Button Classes="ghost" Content="1:1"
+                                AutomationProperties.Name="Show the map at its own size" ToolTip.Tip="Show the map at its own size"
+                                Click="OnActualSizeClicked"/>
+                    </StackPanel>
+                    <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
+                               Text="Scroll or + and - to zoom, middle drag or space drag to pan. Brackets resize the selected token."/>
+                </StackPanel>
+
+                <Border Classes="divider" IsVisible="{Binding IsHost}"/>
+
+                <StackPanel Spacing="6" IsVisible="{Binding IsHost}">
+                    <TextBlock Text="GRID" Classes="sectionLabel"/>
+                    <ComboBox AutomationProperties.Name="Grid shape"
+                              ItemsSource="{Binding GridKinds}"
+                              SelectedItem="{Binding GridKind}"
+                              HorizontalAlignment="Stretch"/>
+                    <NumericUpDown AutomationProperties.Name="Cell size in pixels"
+                                   Value="{Binding CellPixels}"
+                                   Watermark="Cell size (px)"
+                                   FormatString="0"
+                                   Increment="1"
+                                   Minimum="6"
+                                   Maximum="1024"
+                                   HorizontalAlignment="Stretch"/>
+                    <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{Binding GridSummary}"/>
+                    <CheckBox AutomationProperties.Name="Show the grid" Content="Show the grid" IsChecked="{Binding ShowGrid}"/>
+                    <CheckBox AutomationProperties.Name="Snap to it" Content="Snap tokens and objects to it"
+                              ToolTip.Tip="Off means anything can sit between squares"
+                              IsChecked="{Binding SnapToGrid}"/>
+                </StackPanel>
+
                 <Border Classes="divider"/>
 
                 <StackPanel Spacing="10" IsVisible="{Binding IsTokenMode}">
@@ -186,7 +225,7 @@
                         <TextBlock Text="NEW TOKEN" Classes="sectionLabel"/>
                         <TextBox AutomationProperties.Name="Name" Text="{Binding NewTokenName}" Watermark="Name" HorizontalAlignment="Stretch"/>
                         <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap"
-                                   Text="The name and the monster below apply to whichever you make, an uploaded picture or a colour. Name it before you upload or it lands as Token 4."/>
+                                   Text="The name and the monster below apply to whichever you make, an uploaded picture or a colour. Name it before you upload or it lands as Token 4, and picking several at once names them after the files instead."/>
                         <Button Classes="ghost" Content="Upload an image"
                                 HorizontalAlignment="Stretch"
                                 Command="{Binding UploadTokenCommand}"/>
@@ -472,7 +511,7 @@
                         <Button Classes="tool" AutomationProperties.Name="Rotate left" ToolTip.Tip="Rotate left" Command="{Binding RotateLeftCommand}">
                             <PathIcon Data="{x:Static gv:GlobalVariables.IconRotateLeft}" Width="18" Height="18"/>
                         </Button>
-                        <Button Classes="tool" AutomationProperties.Name="Rotate right" ToolTip.Tip="Rotate right" Command="{Binding RotateRightCommand}">
+                        <Button Classes="tool" AutomationProperties.Name="Rotate right" ToolTip.Tip="Rotate right, or press R" Command="{Binding RotateRightCommand}">
                             <PathIcon Data="{x:Static gv:GlobalVariables.IconRotateRight}" Width="18" Height="18"/>
                         </Button>
                     </StackPanel>
@@ -495,5 +534,22 @@
                 AutomationProperties.Name="Show the map tools" ToolTip.Tip="Show the map tools"
                 IsVisible="{Binding !ToolsVisible}"
                 Command="{Binding ToggleToolsCommand}"/>
+        <Border x:Name="CameraBar"
+                Classes="toolPanel"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="14"
+                Padding="8"
+                IsVisible="False"
+                ZIndex="998">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button Classes="ghost" Content="Fit"
+                        AutomationProperties.Name="Fit the map to the window" ToolTip.Tip="Fit the map to the window"
+                        Click="OnFitClicked"/>
+                <Button Classes="ghost" Content="1:1"
+                        AutomationProperties.Name="Show the map at its own size" ToolTip.Tip="Show the map at its own size"
+                        Click="OnActualSizeClicked"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

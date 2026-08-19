@@ -176,7 +176,8 @@ namespace Dujahit.Views.Map.Dialogs
 
         private void OnViewportPressed(object? sender, PointerPressedEventArgs e)
         {
-            if (!e.GetCurrentPoint(PreviewViewport).Properties.IsLeftButtonPressed) return;
+            var props = e.GetCurrentPoint(PreviewViewport).Properties;
+            if (!props.IsLeftButtonPressed && !props.IsMiddleButtonPressed) return;
             _panning = true;
             _panStart = e.GetPosition(PreviewViewport);
             e.Pointer.Capture(PreviewViewport);

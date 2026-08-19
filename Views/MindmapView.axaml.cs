@@ -454,8 +454,20 @@ namespace Dujahit.Views
         private void OnCanvasPressed(object? sender, PointerPressedEventArgs e)
         {
             if (_vm == null) return;
-            if (!e.GetCurrentPoint(GraphCanvas).Properties.IsLeftButtonPressed) return;
+            var props = e.GetCurrentPoint(GraphCanvas).Properties;
+            if (!props.IsLeftButtonPressed && !props.IsMiddleButtonPressed) return;
             var screen = e.GetPosition(GraphCanvas);
+
+            if (props.IsMiddleButtonPressed)
+            {
+                _panning = true;
+                _panStartScreen = screen;
+                _panStartOffX = _offsetX;
+                _panStartOffY = _offsetY;
+                e.Pointer.Capture(GraphCanvas);
+                return;
+            }
+
             var link = HitTestLink(ToWorld(screen));
             if (link != null)
             {

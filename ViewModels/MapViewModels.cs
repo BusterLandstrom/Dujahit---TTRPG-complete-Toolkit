@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform.Storage;
 using Dujahit.Models;
 using Dujahit.Models.Application;
 using Dujahit.Models.Communication;
@@ -1676,6 +1677,7 @@ namespace Dujahit.ViewModels
     {
         public string MapId { get; }
         private readonly CommunicationController? _com;
+        private readonly IDisposable? _gridSub;
 
         public ObservableCollection<StrokeViewModel> Strokes { get; } = new();
         public ObservableCollection<TokenViewModel> Tokens { get; } = new();
@@ -1864,11 +1866,65 @@ namespace Dujahit.ViewModels
             {
                 this.RaiseAndSetIfChanged(ref _mapScale, value);
                 this.RaisePropertyChanged(nameof(CellSize));
+                this.RaisePropertyChanged(nameof(CellPixels));
+                this.RaisePropertyChanged(nameof(GridSummary));
                 foreach (var t in Tokens) t.CellSize = CellSize;
             }
         }
 
         public double CellSize => GridOverlay.CellFor(MapScale);
+
+        public decimal CellPixels
+        {
+            get => (decimal)CellSize;
+            set
+            {
+                var px = (double)value;
+                if (px <= 0) return;
+                MapScale = px / GridOverlay.BaseCellPx;
+            }
+        }
+
+        public string GridSummary
+        {
+            get
+            {
+                if (MapPixelWidth <= 0 || MapPixelHeight <= 0) return "No map size yet.";
+                var cols = MapPixelWidth / CellSize;
+                var rows = MapPixelHeight / CellSize;
+                var line = cols.ToString("0.#", CultureInfo.InvariantCulture) + " x " + rows.ToString("0.#", CultureInfo.InvariantCulture) + " squares";
+                if (cols < 4 || rows < 4) line += ", that cell size is almost certainly wrong";
+                return line;
+            }
+        }
+
+        private (GridKind Kind, double Scale) _loadedGrid = (GridKind.Squares, 1.0);
+
+        public void LoadGrid(GridKind kind, double scale)
+        {
+            GridKind = kind;
+            MapScale = scale;
+            _loadedGrid = (kind, scale);
+        }
+
+        private async Task PersistGridAsync()
+        {
+            if (!IsHost || App.PM == null) return;
+            if (GridKind == _loadedGrid.Kind && Math.Abs(MapScale - _loadedGrid.Scale) < 0.0001) return;
+            try
+            {
+                await App.PM.SetMapGridAsync(MapId, MapScale, GridKind);
+                _loadedGrid = (GridKind, MapScale);
+                if (_com != null && IsBroadcasting)
+                    await _com.ActivateMapAsync(MapId, GridKind.ToString(), MapScale,
+                        (int)Math.Round(MapPixelWidth), (int)Math.Round(MapPixelHeight));
+            }
+            catch (Exception ex)
+            {
+                ErrorLog.Log("[Canvas] grid save failed", ex);
+                NavItem.NavError?.Invoke("Couldn't save the grid, the map will come back on the old one.");
+            }
+        }
 
         public Point SnapPoint(double x, double y, double footprintPx) =>
             SnapToGrid ? GridOverlay.SnapCenter(x, y, footprintPx, CellSize) : new Point(x, y);
@@ -1985,6 +2041,7 @@ namespace Dujahit.ViewModels
             this.RaisePropertyChanged(nameof(MapPixelHeight));
             this.RaisePropertyChanged(nameof(FogCols));
             this.RaisePropertyChanged(nameof(FogRows));
+            this.RaisePropertyChanged(nameof(GridSummary));
         }
 
         public bool IsInsideMap(double centerX, double centerY, double footprintPx)
@@ -2202,6 +2259,13 @@ namespace Dujahit.ViewModels
             MapId = mapId;
             _com = com;
 
+            _gridSub = this.WhenAnyValue(x => x.MapScale, x => x.GridKind, (_, _) => Unit.Default)
+                .Skip(1)
+                .Throttle(TimeSpan.FromMilliseconds(400))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .SelectMany(_ => Observable.FromAsync(PersistGridAsync))
+                .Subscribe();
+
             Strokes.CollectionChanged += (_, _) => this.RaisePropertyChanged(nameof(CanUndo));
             WallsChanged += RemeasureRuler;
             ObjectsChanged += RemeasureRuler;
@@ -2312,13 +2376,16 @@ namespace Dujahit.ViewModels
             catch (Exception ex) { ErrorLog.Log($"[Canvas] stroke send failed", ex); }
         }
 
-        public async Task AddTokenBitmap(Bitmap bmp)
+        public async Task AddTokenBitmap(Bitmap bmp) => await AddTokenBitmap(bmp, null);
+
+        public async Task AddTokenBitmap(Bitmap bmp, string? fileName)
         {
             var id = Guid.NewGuid().ToString("N");
             TokenLibrary.Add(bmp);
             _imageById[id] = bmp;
 
-            var name = string.IsNullOrWhiteSpace(NewTokenName) ? "Token " + (Library.Count + 1) : NewTokenName.Trim();
+            var name = !string.IsNullOrWhiteSpace(fileName) ? fileName
+                : string.IsNullOrWhiteSpace(NewTokenName) ? "Token " + (Library.Count + 1) : NewTokenName.Trim();
             var asset = new CampaignTokenAsset
             {
                 Id = Guid.NewGuid().ToString("N"),
@@ -2346,6 +2413,86 @@ namespace Dujahit.ViewModels
             NewTokenName = "";
             NewTokenInitiative = null;
             SelectLibraryEntry(entry);
+        }
+
+        public async Task<int> ImportTokenFilesAsync(IEnumerable<IStorageItem> picked)
+        {
+            var files = await ExpandToFilesAsync(picked);
+            if (files.Count == 0) return 0;
+
+            var landed = 0;
+            var skipped = new List<string>();
+            var useFileNames = files.Count > 1;
+
+            foreach (var f in files)
+            {
+                var raw = await ReadPickedFileAsync(f);
+                if (raw == null)
+                {
+                    skipped.Add(f.Name);
+                    continue;
+                }
+
+                var clean = await Task.Run(() => TokenImageGuard.Sanitize(raw));
+                if (clean == null)
+                {
+                    skipped.Add(f.Name);
+                    continue;
+                }
+
+                using var ms = new MemoryStream(clean);
+                await AddTokenBitmap(new Bitmap(ms), useFileNames ? Path.GetFileNameWithoutExtension(f.Name) : null);
+                landed++;
+            }
+
+            ReportSkippedFiles(skipped, files.Count);
+            return landed;
+        }
+
+        private static async Task<List<IStorageFile>> ExpandToFilesAsync(IEnumerable<IStorageItem> picked)
+        {
+            var files = new List<IStorageFile>();
+            foreach (var item in picked)
+            {
+                if (item is IStorageFile file) { files.Add(file); continue; }
+                if (item is not IStorageFolder folder) continue;
+
+                try
+                {
+                    await foreach (var child in folder.GetItemsAsync())
+                        if (child is IStorageFile inside) files.Add(inside);
+                }
+                catch (Exception ex) { ErrorLog.Log("[Canvas] dropped folder could not be listed", ex); }
+            }
+
+            if (files.Count == 0) NavItem.NavError?.Invoke("Nothing in that drop was a file I could read.");
+            return files;
+        }
+
+        private static async Task<byte[]?> ReadPickedFileAsync(IStorageFile file)
+        {
+            try
+            {
+                await using var stream = await file.OpenReadAsync();
+                using var ms = new MemoryStream();
+                await stream.CopyToAsync(ms);
+                return ms.ToArray();
+            }
+            catch (Exception ex)
+            {
+                ErrorLog.Log("[Canvas] picked file could not be read", ex);
+                return null;
+            }
+        }
+
+        private static void ReportSkippedFiles(List<string> skipped, int total)
+        {
+            if (skipped.Count == 0) return;
+            var named = string.Join(", ", skipped.Take(3));
+            if (skipped.Count > 3) named += " and " + (skipped.Count - 3) + " more";
+
+            if (skipped.Count == total) NavItem.NavError?.Invoke("Nothing went in, too big or not a picture, " + named);
+            else NavItem.NavError?.Invoke("Kept " + (total - skipped.Count) + " of " + total + ", the rest were too big or not pictures, " + named);
         }
 
         public async Task CreateColorTokenAsync()
@@ -2572,7 +2719,7 @@ namespace Dujahit.ViewModels
 
         public async Task PersistTokenAsync(TokenViewModel token)
         {
-            if (DynamicVisionEnabled) _ = RevealVisionAroundAsync(token.X + CellSize / 2, token.Y + CellSize / 2);
+            if (DynamicVisionEnabled) _ = RevealVisionAroundAsync(token.X, token.Y);
             if (!IsHost || string.IsNullOrEmpty(token.ImagePath)) return;
             var row = new MapToken
             {
@@ -2938,12 +3085,15 @@ namespace Dujahit.ViewModels
             set => this.RaiseAndSetIfChanged(ref _newPropName, value);
         }
 
-        public async Task<bool> ArmAndRememberPropAsync(byte[]? raw)
+        public async Task<bool> ArmAndRememberPropAsync(byte[]? raw) => await ArmAndRememberPropAsync(raw, null);
+
+        public async Task<bool> ArmAndRememberPropAsync(byte[]? raw, string? fileName)
         {
             if (!ArmPropFromBytes(raw)) return false;
             if (!IsHost || _propBytes == null) return true;
 
-            var name = string.IsNullOrWhiteSpace(NewPropName) ? "Object " + (PropLibrary.Count + 1) : NewPropName.Trim();
+            var name = !string.IsNullOrWhiteSpace(fileName) ? fileName
+                : string.IsNullOrWhiteSpace(NewPropName) ? "Object " + (PropLibrary.Count + 1) : NewPropName.Trim();
             var asset = new CampaignTokenAsset
             {
                 Id = Guid.NewGuid().ToString("N"),
@@ -2972,6 +3122,26 @@ namespace Dujahit.ViewModels
             }
             catch (Exception ex) { ErrorLog.Log("[Canvas] map object library save failed", ex); }
             return true;
+        }
+
+        public async Task<int> ImportPropFilesAsync(IEnumerable<IStorageItem> picked)
+        {
+            var files = await ExpandToFilesAsync(picked);
+            if (files.Count == 0) return 0;
+
+            var landed = 0;
+            var skipped = new List<string>();
+            var useFileNames = files.Count > 1;
+
+            foreach (var f in files)
+            {
+                var raw = await ReadPickedFileAsync(f);
+                if (raw != null && await ArmAndRememberPropAsync(raw, useFileNames ? Path.GetFileNameWithoutExtension(f.Name) : null)) landed++;
+                else skipped.Add(f.Name);
+            }
+
+            ReportSkippedFiles(skipped, files.Count);
+            return landed;
         }
 
         public async Task SelectPropEntry(TokenLibraryEntryViewModel? entry)
@@ -4733,6 +4903,7 @@ namespace Dujahit.ViewModels
 
         public void Detach()
         {
+            _gridSub?.Dispose();
             if (_com == null) return;
             _com.OnStrokeReceived -= HandleStrokeReceived;
             _com.OnTokenAdded -= HandleTokenAdded;
@@ -6748,36 +6919,18 @@ namespace Dujahit.ViewModels
         }
         private int AbilityMod(string sht) => App.PM?.AbilityMod(AbilityScore(sht)) ?? (int)Math.Floor((AbilityScore(sht) - 10) / 2.0);
 
-        private int PostCheck(string label, int mod) => PostCheck(label, mod, false, false);
+        private int PostCheck(string label, int mod) => PostCheck(label, mod, RollMode.Normal);
 
-        private int PostCheck(string label, int mod, bool advantage, bool disadvantage)
+        private int PostCheck(string label, int mod, RollMode mode)
         {
-            var d = DiceManager.RollCore(App.PM?.Rules?.AttackDie ?? 20, advantage, disadvantage);
-            mod -= App.PM?.Rules?.Exhaustion?.D20Penalty(OwnCombatant?.ExhaustionLevel ?? 0) ?? 0;
-            var total = d + mod;
-            var modText = mod > 0 ? " +" + mod : mod < 0 ? " " + mod : "";
-            var swing = advantage == disadvantage ? "" : advantage ? ", advantage" : ", disadvantage";
-            _rollToChat?.Invoke($"{Name} {label}: {total}   (d20 {d}{modText}{swing})", false);
+            var (total, line) = DiceManager.CheckRoll(Name, label, mod, OwnCombatant?.ExhaustionLevel ?? 0, mode);
+            _rollToChat?.Invoke(line, false);
             return total;
         }
 
-        private (bool Adv, bool Dis) CheckSwing()
-        {
-            var rules = App.PM?.Rules;
-            var conditions = OwnCombatant?.Conditions ?? (IEnumerable<string>)Array.Empty<string>();
-            var mode = rules?.AbilityCheckModeFrom(conditions) ?? "";
-            var tired = rules?.Exhaustion?.AbilityChecksAtDisadvantage(OwnCombatant?.ExhaustionLevel ?? 0) ?? false;
-            return (mode == "advantage", mode == "disadvantage" || tired);
-        }
+        private RollMode CheckSwing() => ConditionEffects.CheckMode(OwnCombatant?.Conditions ?? (IEnumerable<string>)Array.Empty<string>(), OwnCombatant?.ExhaustionLevel ?? 0);
 
-        private (bool Adv, bool Dis) SaveSwing()
-        {
-            var rules = App.PM?.Rules;
-            var conditions = OwnCombatant?.Conditions ?? (IEnumerable<string>)Array.Empty<string>();
-            var mode = rules?.SaveRollModeFrom(conditions) ?? "";
-            var tired = rules?.Exhaustion?.SavesAtDisadvantage(OwnCombatant?.ExhaustionLevel ?? 0) ?? false;
-            return (mode == "advantage", mode == "disadvantage" || tired);
-        }
+        private RollMode SaveSwing() => ConditionEffects.SaveMode(OwnCombatant?.Conditions ?? (IEnumerable<string>)Array.Empty<string>(), OwnCombatant?.ExhaustionLevel ?? 0);
         public ReactiveCommand<int, Unit> SpendSlotCommand { get; }
         public ReactiveCommand<int, Unit> RestoreSlotCommand { get; }
         public ReactiveCommand<Unit, Unit> LongRestCommand { get; }
@@ -6839,21 +6992,21 @@ namespace Dujahit.ViewModels
                 var per = App.PM?.Rules?.Skills?.FirstOrDefault(x => string.Equals(x.Name, percName, StringComparison.OrdinalIgnoreCase));
                 var bonus = (App.PM?.Rules ?? new GameRules()).RankBonus(GameRules.RankIdFor(Character.ProficientSkills.Contains(percName), Character.ExpertiseSkills.Contains(percName)), ProficiencyBonus);
                 var percSwing = CheckSwing();
-                PostCheck(percName + " check", AbilityMod(per?.Ability ?? "WIS") + bonus, percSwing.Adv, percSwing.Dis);
+                PostCheck(percName + " check", AbilityMod(per?.Ability ?? "WIS") + bonus, percSwing);
             });
             RollSaveCommand = ReactiveCommand.Create(() =>
             {
                 if (SelectedSave is not QuickRollOption s) return;
                 var prof = (App.PM?.Rules ?? new GameRules()).RankBonus(GameRules.RankIdFor(Character.ProficientSaves.Contains(s.Ability.ToLowerInvariant())), ProficiencyBonus);
                 var swing = SaveSwing();
-                PostCheck(s.Label + " save", AbilityMod(s.Ability) + prof, swing.Adv, swing.Dis);
+                PostCheck(s.Label + " save", AbilityMod(s.Ability) + prof, swing);
             });
             RollSkillCommand = ReactiveCommand.Create(() =>
             {
                 if (SelectedSkill is not QuickRollOption s) return;
                 var bonus = (App.PM?.Rules ?? new GameRules()).RankBonus(GameRules.RankIdFor(Character.ProficientSkills.Contains(s.Label), Character.ExpertiseSkills.Contains(s.Label)), ProficiencyBonus);
                 var swing = CheckSwing();
-                PostCheck(s.Label + " check", AbilityMod(s.Ability) + bonus, swing.Adv, swing.Dis);
+                PostCheck(s.Label + " check", AbilityMod(s.Ability) + bonus, swing);
             });
 
             SpendSlotCommand = ReactiveCommand.Create<int>(level => { OwnCombatant?.SpendSlot(level); });

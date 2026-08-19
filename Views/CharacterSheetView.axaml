@@ -72,6 +72,19 @@
             <Setter Property="Foreground" Value="{DynamicResource Background}"/>
         </Style>
 
+        <Style Selector="Button.rollable">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="2"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        </Style>
+        <Style Selector="Button.rollable:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource Widget}"/>
+        </Style>
+
         <Style Selector="Button.danger">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{DynamicResource Danger}"/>
@@ -121,14 +134,11 @@
 
     <Grid RowDefinitions="Auto,*" Margin="20">
 
-        <Border Grid.Row="0" Classes="card" Margin="0,0,0,16">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" MinWidth="220"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+        <ScrollViewer Grid.Row="0" MaxHeight="320" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16">
+        <Border Classes="card">
+            <WrapPanel>
 
-                <StackPanel Grid.Column="0" Spacing="6">
+                    <StackPanel Spacing="6" MinWidth="220" Margin="0,0,16,10" VerticalAlignment="Center">
 
                     <Panel>
                         <TextBlock Classes="inlineName"
@@ -166,15 +176,9 @@
                             <TextBlock Text="{Binding ProficiencyBonusDisplay}" Foreground="{DynamicResource AccentColor}"/>
                         </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                    </StackPanel>
 
-                <ScrollViewer Grid.Column="1"
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Disabled"
-                              VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-
-                    <StackPanel VerticalAlignment="Center" Spacing="6">
+                    <StackPanel VerticalAlignment="Center" Spacing="6" Margin="0,0,10,10">
                         <Border Width="64" Height="64" CornerRadius="32" ClipToBounds="True"
                                 Background="{DynamicResource Background}">
                             <Image Source="{Binding TokenPreview}" Stretch="UniformToFill"/>
@@ -187,18 +191,18 @@
                                 Click="OnUploadCharacterToken"/>
                     </StackPanel>
 
-                    <Border Classes="card" Background="{DynamicResource Background}" Width="80">
+                    <Border Classes="card" Background="{DynamicResource Background}" MinWidth="80" Margin="0,0,10,10">
                         <StackPanel>
                             <TextBlock Classes="label" HorizontalAlignment="Center" Text="AC"/>
                             <TextBlock Classes="value" Text="{Binding ArmorClass}"/>
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="card" Background="{DynamicResource Background}" Width="96">
+                    <Border Classes="card" Background="{DynamicResource Background}" MinWidth="96" Margin="0,0,10,10">
                         <StackPanel>
                             <TextBlock Classes="label" HorizontalAlignment="Center" Text="Speed"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="2">
-                                <NumericUpDown AutomationProperties.Name="Speed" Value="{Binding Speed}" Minimum="0" Width="60" ShowButtonSpinner="False"/>
+                                <NumericUpDown AutomationProperties.Name="Speed" Value="{Binding Speed}" Minimum="0" MinWidth="60" ShowButtonSpinner="False"/>
                                 <TextBlock Text="ft" VerticalAlignment="Center" Foreground="{DynamicResource Muted}"/>
                             </StackPanel>
                             <TextBlock Text="{Binding DashDistance, StringFormat='Dash {0} ft'}"
@@ -216,20 +220,20 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="card" Background="{DynamicResource Background}" Width="80">
+                    <Border Classes="card" Background="{DynamicResource Background}" MinWidth="80" Margin="0,0,10,10">
                         <StackPanel>
                             <TextBlock Classes="label" HorizontalAlignment="Center" Text="Init"/>
                             <TextBlock Classes="value" Text="{Binding InitiativeDisplay}"/>
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="card" Background="{DynamicResource Background}" Width="160">
+                    <Border Classes="card" Background="{DynamicResource Background}" MinWidth="160" Margin="0,0,10,10">
                         <StackPanel>
                             <TextBlock Classes="label" HorizontalAlignment="Center" Text="Hit Points"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
-                                <NumericUpDown AutomationProperties.Name="Current hit points" Value="{Binding CurrentHp}" Minimum="0" Width="64" ShowButtonSpinner="False"/>
+                                <NumericUpDown AutomationProperties.Name="Current hit points" Value="{Binding CurrentHp}" Minimum="0" MinWidth="64" ShowButtonSpinner="False"/>
                                 <TextBlock Text="/" VerticalAlignment="Center" Foreground="{DynamicResource Muted}"/>
-                                <NumericUpDown AutomationProperties.Name="Max hit points" Value="{Binding MaxHp}" Minimum="0" Width="64" ShowButtonSpinner="False"/>
+                                <NumericUpDown AutomationProperties.Name="Max hit points" Value="{Binding MaxHp}" Minimum="0" MinWidth="64" ShowButtonSpinner="False"/>
                             </StackPanel>
                             <TextBlock Text="{Binding MaxHpBonusLabel, StringFormat='{}{0} max hp from feats'}"
                                        IsVisible="{Binding HasMaxHpBonus}"
@@ -244,12 +248,12 @@
                                        TextWrapping="Wrap"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4" Margin="0,4,0,0">
                                 <TextBlock Text="Temp:" VerticalAlignment="Center" Classes="label"/>
-                                <NumericUpDown AutomationProperties.Name="Temporary hit points" Value="{Binding TempHp}" Minimum="0" Width="56" ShowButtonSpinner="False"/>
+                                <NumericUpDown AutomationProperties.Name="Temporary hit points" Value="{Binding TempHp}" Minimum="0" MinWidth="56" ShowButtonSpinner="False"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="card" Background="{DynamicResource Background}" Width="170" IsVisible="{Binding ShowDeathCard}">
+                    <Border Classes="card" Background="{DynamicResource Background}" MinWidth="170" Margin="0,0,10,10" IsVisible="{Binding ShowDeathCard}">
                         <StackPanel>
                             <StackPanel.Styles>
                                 <Style Selector="ToggleButton.pip">
@@ -309,7 +313,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="card" Background="{DynamicResource Background}" Width="100">
+                    <Border Classes="card" Background="{DynamicResource Background}" MinWidth="100" Margin="0,0,10,10">
                         <StackPanel>
                             <TextBlock Classes="label" HorizontalAlignment="Center" Text="Inspiration"/>
                             <ToggleButton AutomationProperties.Name="Inspiration" IsChecked="{Binding Inspiration}"
@@ -332,7 +336,7 @@
                         </StackPanel>
                     </Border>
 
-                    <Border Classes="card" Background="{DynamicResource Background}" Width="160">
+                    <Border Classes="card" Background="{DynamicResource Background}" MinWidth="160" Margin="0,0,10,10">
                         <StackPanel>
                             <TextBlock Classes="label" HorizontalAlignment="Center" Text="Concentration"/>
                             <ToggleButton IsChecked="{Binding Concentration}"
@@ -351,20 +355,19 @@
                         </StackPanel>
                     </Border>
 
-                    <WrapPanel Width="252" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding HitDiceLabel}" Width="252" Margin="0,0,0,4"
+                    <WrapPanel MinWidth="252" MaxWidth="252" VerticalAlignment="Center" Margin="0,0,0,10">
+                        <TextBlock Text="{Binding HitDiceLabel}" Width="252" Margin="0,0,0,4" TextWrapping="Wrap"
                                    AutomationProperties.Name="Hit dice left"
                                    Foreground="{DynamicResource Muted}" FontSize="12"/>
-                        <Button Classes="action" Content="Short Rest" Command="{Binding ShortRestCommand}" Width="120" Margin="0,0,6,6"/>
-                        <Button Classes="action" Content="Long Rest"  Command="{Binding LongRestCommand}"  Width="120" Margin="0,0,0,6"/>
-                        <Button Classes="action" Content="Edit Base"  Command="{Binding EditBaseCommand}"  Width="120" Margin="0,0,6,6"/>
-                        <Button Classes="action" Content="Export"     Command="{Binding ExportCommand}"   Width="120" Margin="0,0,0,6"/>
-                        <Button Classes="action" Content="Set as My Character" Command="{Binding SetPrimaryCommand}" Width="120" IsVisible="{Binding CanBePrimary}"/>
+                        <Button Classes="action" Content="Short Rest" Command="{Binding ShortRestCommand}" MinWidth="120" Margin="0,0,6,6"/>
+                        <Button Classes="action" Content="Long Rest"  Command="{Binding LongRestCommand}"  MinWidth="120" Margin="0,0,0,6"/>
+                        <Button Classes="action" Content="Edit Base"  Command="{Binding EditBaseCommand}"  MinWidth="120" Margin="0,0,6,6"/>
+                        <Button Classes="action" Content="Export"     Command="{Binding ExportCommand}"   MinWidth="120" Margin="0,0,0,6"/>
+                        <Button Classes="action" Content="Set as My Character" Command="{Binding SetPrimaryCommand}" MinWidth="120" IsVisible="{Binding CanBePrimary}"/>
                     </WrapPanel>
-                </StackPanel>
-                </ScrollViewer>
-            </Grid>
+            </WrapPanel>
         </Border>
+        </ScrollViewer>
 
         <TabControl Grid.Row="1">
 
@@ -423,34 +426,50 @@
                                                 CornerRadius="{DynamicResource CornerRadiusStandard}"
                                                 Margin="4" Padding="10">
                                             <StackPanel>
-                                                <TextBlock Text="{Binding ShortName}"
-                                                           Foreground="{DynamicResource Muted}"
-                                                           HorizontalAlignment="Center"
-                                                           FontSize="12"/>
-                                                <TextBlock Text="{Binding ModifierDisplay}"
-                                                           Foreground="{DynamicResource AccentColor}"
-                                                           FontSize="24"
-                                                           HorizontalAlignment="Center"/>
-                                                <NumericUpDown AutomationProperties.Name="{Binding ModifierDisplay}" Value="{Binding Score}"
-                                                               Minimum="1" Maximum="30"
-                                                               ShowButtonSpinner="False"
-                                                               IsReadOnly="True"
-                                                               IsHitTestVisible="False"
-                                                               HorizontalContentAlignment="Center"
-                                                               Width="60"
-                                                               HorizontalAlignment="Center"
-                                                               Margin="0,4,0,0"/>
+                                                <Button Classes="rollable"
+                                                        Command="{Binding RollCheckCommand}"
+                                                        AutomationProperties.Name="{Binding Name}"
+                                                        ToolTip.Tip="Roll an ability check"
+                                                        ToolTip.ShowDelay="300">
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding ShortName}"
+                                                                   Foreground="{DynamicResource Muted}"
+                                                                   HorizontalAlignment="Center"
+                                                                   FontSize="12"/>
+                                                        <TextBlock Text="{Binding ModifierDisplay}"
+                                                                   Foreground="{DynamicResource AccentColor}"
+                                                                   FontSize="24"
+                                                                   HorizontalAlignment="Center"/>
+                                                        <NumericUpDown AutomationProperties.Name="{Binding ModifierDisplay}" Value="{Binding Score}"
+                                                                       Minimum="1" Maximum="30"
+                                                                       ShowButtonSpinner="False"
+                                                                       IsReadOnly="True"
+                                                                       IsHitTestVisible="False"
+                                                                       HorizontalContentAlignment="Center"
+                                                                       MinWidth="60"
+                                                                       HorizontalAlignment="Center"
+                                                                       Margin="0,4,0,0"/>
+                                                    </StackPanel>
+                                                </Button>
                                                 <StackPanel Orientation="Horizontal"
                                                             HorizontalAlignment="Center"
                                                             Margin="0,6,0,0" Spacing="4">
                                                     <CheckBox AutomationProperties.Name="Save" IsChecked="{Binding SaveProficient}" IsEnabled="{Binding CanEditSave}"/>
-                                                    <TextBlock Text="Save"
-                                                               VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource Muted}"
-                                                               FontSize="11"/>
-                                                    <TextBlock Text="{Binding SaveBonusDisplay}"
-                                                               VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource WidgetForeground}"/>
+                                                    <Button Classes="rollable"
+                                                            Command="{Binding RollSaveCommand}"
+                                                            AutomationProperties.Name="Roll saving throw"
+                                                            ToolTip.Tip="Roll a saving throw"
+                                                            ToolTip.ShowDelay="300">
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <TextBlock Text="Save"
+                                                                       VerticalAlignment="Center"
+                                                                       Foreground="{DynamicResource Muted}"
+                                                                       FontSize="11"/>
+                                                            <TextBlock Text="{Binding SaveBonusDisplay}"
+                                                                       VerticalAlignment="Center"
+                                                                       Foreground="{DynamicResource WidgetForeground}"/>
+                                                        </StackPanel>
+                                                    </Button>
                                                 </StackPanel>
                                             </StackPanel>
                                         </Border>

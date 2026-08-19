@@ -488,7 +488,7 @@ namespace Dujahit.Models
             await using var conn = await _dbManager.OpenAsync();
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
-                SELECT Id, CampaignId, Name, Width, Height, Scale, MapPath, CreatedAt, PlayerVisible
+                SELECT Id, CampaignId, Name, Width, Height, Scale, MapPath, CreatedAt, PlayerVisible, GridKind
                 FROM Maps
                 WHERE CampaignId = $cid
                 ORDER BY CreatedAt ASC;";
@@ -507,7 +507,8 @@ namespace Dujahit.Models
                     Scale = r.GetDouble(5),
                     MapPath = r.GetString(6),
                     CreatedAt = DateTime.Parse(r.GetString(7)),
-                    PlayerVisible = !r.IsDBNull(8) && r.GetInt32(8) != 0
+                    PlayerVisible = !r.IsDBNull(8) && r.GetInt32(8) != 0,
+                    GridKind = !r.IsDBNull(9) && Enum.TryParse<GridKind>(r.GetString(9), out var gk) ? gk : GridKind.Squares
                 });
             }
             return result;
@@ -518,15 +519,16 @@ namespace Dujahit.Models
             await using var conn = await _dbManager.OpenAsync();
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
-                INSERT INTO Maps (Id, CampaignId, Name, Width, Height, Scale, MapPath, CreatedAt, PlayerVisible)
-                VALUES ($id, $cid, $name, $w, $h, $scale, $path, $created, $pv)
+                INSERT INTO Maps (Id, CampaignId, Name, Width, Height, Scale, MapPath, CreatedAt, PlayerVisible, GridKind)
+                VALUES ($id, $cid, $name, $w, $h, $scale, $path, $created, $pv, $grid)
                 ON CONFLICT(Id) DO UPDATE SET
                     Name = excluded.Name,
                     Width = excluded.Width,
                     Height = excluded.Height,
                     Scale = excluded.Scale,
                     MapPath = excluded.MapPath,
-                    PlayerVisible = excluded.PlayerVisible;";
+                    PlayerVisible = excluded.PlayerVisible,
+                    GridKind = excluded.GridKind;";
             cmd.Parameters.AddWithValue("$id", map.Id);
             cmd.Parameters.AddWithValue("$cid", map.CampaignId);
             cmd.Parameters.AddWithValue("$name", map.Name);
@@ -536,6 +538,7 @@ namespace Dujahit.Models
             cmd.Parameters.AddWithValue("$path", map.MapPath);
             cmd.Parameters.AddWithValue("$created", map.CreatedAt.ToString("o"));
             cmd.Parameters.AddWithValue("$pv", map.PlayerVisible ? 1 : 0);
+            cmd.Parameters.AddWithValue("$grid", map.GridKind.ToString());
             await cmd.ExecuteNonQueryAsync();
         }
 
@@ -554,6 +557,17 @@ namespace Dujahit.Models
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = "UPDATE Maps SET PlayerVisible = $pv WHERE Id = $id;";
             cmd.Parameters.AddWithValue("$pv", visible ? 1 : 0);
+            cmd.Parameters.AddWithValue("$id", mapId);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        public async Task SetMapGridAsync(string mapId, double scale, GridKind gridKind)
+        {
+            await using var conn = await _dbManager.OpenAsync();
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = "UPDATE Maps SET Scale = $scale, GridKind = $grid WHERE Id = $id;";
+            cmd.Parameters.AddWithValue("$scale", scale);
+            cmd.Parameters.AddWithValue("$grid", gridKind.ToString());
             cmd.Parameters.AddWithValue("$id", mapId);
             await cmd.ExecuteNonQueryAsync();
         }

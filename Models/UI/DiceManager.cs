@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dujahit.Models.Application;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,6 +41,19 @@ namespace Dujahit.Models.UI
             var second = RollCore(fallbackSides);
             var wantHigher = advantage ^ (App.PM?.Rules?.RollsLow ?? false);
             return wantHigher ? Math.Max(first, second) : Math.Min(first, second);
+        }
+
+        // A dice class handing back a written chat line is a bit off, hmm, yeah swag I guess, but the sheet and the map panel both need the exact same wording and one copy beats two drifting apart
+        public static (int Total, string Line) CheckRoll(string who, string label, int mod, int exhaustionLevel, RollMode mode)
+        {
+            var advantage = mode == RollMode.Advantage;
+            var disadvantage = mode == RollMode.Disadvantage;
+            var d = RollCore(App.PM?.Rules?.AttackDie ?? 20, advantage, disadvantage);
+            mod -= App.PM?.Rules?.Exhaustion?.D20Penalty(exhaustionLevel) ?? 0;
+            var total = d + mod;
+            var modText = mod > 0 ? " +" + mod : mod < 0 ? " " + mod : "";
+            var swing = advantage == disadvantage ? "" : advantage ? ", advantage" : ", disadvantage";
+            return (total, $"{who} {label}: {total}   (d20 {d}{modText}{swing})");
         }
 
         public static int RollSingle(int sides)
