@@ -185,7 +185,7 @@ namespace Dujahit.Models.Database
             await using var conn = await _db.OpenAsync(ct);
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = """
-                SELECT Id, CampaignId, Name, Width, Height, Scale, MapPath, CreatedAt, GridKind
+                SELECT Id, CampaignId, Name, Width, Height, Scale, MapPath, CreatedAt, GridKind, GridOffsetX, GridOffsetY
                 FROM Maps WHERE CampaignId = $cid
                 """;
             cmd.Parameters.AddWithValue("$cid", campaignId);
@@ -202,7 +202,9 @@ namespace Dujahit.Models.Database
                     Scale = r.GetDouble(5),
                     MapPath = r.GetString(6),
                     CreatedAt = DateTime.Parse(r.GetString(7)),
-                    GridKind = Enum.TryParse<GridKind>(r.GetString(8), out var gk) ? gk : GridKind.Squares
+                    GridKind = Enum.TryParse<GridKind>(r.GetString(8), out var gk) ? gk : GridKind.Squares,
+                    GridOffsetX = r.GetDouble(9),
+                    GridOffsetY = r.GetDouble(10)
                 });
             }
             return list;
@@ -213,15 +215,17 @@ namespace Dujahit.Models.Database
             await using var conn = await _db.OpenAsync(ct);
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = """
-                INSERT INTO Maps (Id, CampaignId, Name, Width, Height, Scale, MapPath, CreatedAt, GridKind)
-                VALUES ($id, $cid, $name, $w, $h, $s, $path, $created, $grid)
+                INSERT INTO Maps (Id, CampaignId, Name, Width, Height, Scale, MapPath, CreatedAt, GridKind, WallsEnabled, GridOffsetX, GridOffsetY)
+                VALUES ($id, $cid, $name, $w, $h, $s, $path, $created, $grid, 1, $ox, $oy)
                 ON CONFLICT(Id) DO UPDATE SET
                     Name = excluded.Name,
                     Width = excluded.Width,
                     Height = excluded.Height,
                     Scale = excluded.Scale,
                     MapPath = excluded.MapPath,
-                    GridKind = excluded.GridKind
+                    GridKind = excluded.GridKind,
+                    GridOffsetX = excluded.GridOffsetX,
+                    GridOffsetY = excluded.GridOffsetY
                 """;
             cmd.Parameters.AddWithValue("$id", m.Id);
             cmd.Parameters.AddWithValue("$cid", m.CampaignId);
@@ -232,6 +236,8 @@ namespace Dujahit.Models.Database
             cmd.Parameters.AddWithValue("$path", m.MapPath);
             cmd.Parameters.AddWithValue("$created", m.CreatedAt.ToString("o"));
             cmd.Parameters.AddWithValue("$grid", m.GridKind.ToString());
+            cmd.Parameters.AddWithValue("$ox", m.GridOffsetX);
+            cmd.Parameters.AddWithValue("$oy", m.GridOffsetY);
             await cmd.ExecuteNonQueryAsync(ct);
         }
 
@@ -430,7 +436,7 @@ namespace Dujahit.Models.Database
             var state = new MapFogState { MapId = mapId };
             await using var conn = await _db.OpenAsync(ct);
             await using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT CampaignId, Enabled, Cols, Rows, HiddenCells FROM MapFog WHERE MapId = $mid LIMIT 1";
+            cmd.CommandText = "SELECT CampaignId, Enabled, Cols, Rows, HiddenCells, DynamicVision, ClosesBehind, SeenCells FROM MapFog WHERE MapId = $mid LIMIT 1";
             cmd.Parameters.AddWithValue("$mid", mapId);
             await using var r = await cmd.ExecuteReaderAsync(ct);
             if (!await r.ReadAsync(ct)) return state;
@@ -438,38 +444,55 @@ namespace Dujahit.Models.Database
             state.Enabled = r.GetInt64(1) != 0;
             state.Cols = (int)r.GetInt64(2);
             state.Rows = (int)r.GetInt64(3);
-            var csv = r.IsDBNull(4) ? "" : r.GetString(4);
+            state.DynamicVision = !r.IsDBNull(5) && r.GetInt64(5) != 0;
+            state.ClosesBehind = !r.IsDBNull(6) && r.GetInt64(6) != 0;
+            state.Hidden = ReadCellCsv(r.IsDBNull(4) ? "" : r.GetString(4));
+            state.Seen = ReadCellCsv(r.IsDBNull(7) ? "" : r.GetString(7));
+            return state;
+        }
+
+        private static HashSet<(int Col, int Row)> ReadCellCsv(string csv)
+        {
+            var cells = new HashSet<(int Col, int Row)>();
             foreach (var pair in csv.Split(';', StringSplitOptions.RemoveEmptyEntries))
             {
                 var bits = pair.Split(',');
                 if (bits.Length == 2 && int.TryParse(bits[0], out var c) && int.TryParse(bits[1], out var rr))
-                    state.Hidden.Add((c, rr));
+                    cells.Add((c, rr));
             }
-            return state;
+            return cells;
         }
+
+        private static string WriteCellCsv(IEnumerable<(int Col, int Row)> cells) =>
+            string.Join(';', cells.Select(c => c.Col + "," + c.Row));
 
         public async Task SaveFogAsync(MapFogState state, CancellationToken ct = default)
         {
-            var csv = string.Join(';', state.Hidden.Select(c => c.Col + "," + c.Row));
             await using var conn = await _db.OpenAsync(ct);
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = """
-                INSERT INTO MapFog (MapId, CampaignId, Enabled, Cols, Rows, HiddenCells, UpdatedAt)
-                VALUES ($mid, $cid, $en, $cols, $rows, $cells, $now)
+                INSERT INTO MapFog (MapId, CampaignId, Enabled, DynamicVision, ClosesBehind, Cols, Rows, HiddenCells, SeenCells, UpdatedAt)
+                VALUES ($mid, $cid, $en, $dyn, $close, $cols, $rows, $cells, $seen, $now)
                 ON CONFLICT(MapId) DO UPDATE SET
                     CampaignId = excluded.CampaignId,
                     Enabled = excluded.Enabled,
+                    DynamicVision = excluded.DynamicVision,
+                    ClosesBehind = excluded.ClosesBehind,
                     Cols = excluded.Cols,
                     Rows = excluded.Rows,
                     HiddenCells = excluded.HiddenCells,
+                    SeenCells = excluded.SeenCells,
                     UpdatedAt = excluded.UpdatedAt
                 """;
             cmd.Parameters.AddWithValue("$mid", state.MapId);
             cmd.Parameters.AddWithValue("$cid", state.CampaignId);
             cmd.Parameters.AddWithValue("$en", state.Enabled ? 1 : 0);
+            cmd.Parameters.AddWithValue("$dyn", state.DynamicVision ? 1 : 0);
+            cmd.Parameters.AddWithValue("$close", state.ClosesBehind ? 1 : 0);
             cmd.Parameters.AddWithValue("$cols", state.Cols);
             cmd.Parameters.AddWithValue("$rows", state.Rows);
-            cmd.Parameters.AddWithValue("$cells", csv);
+            cmd.Parameters.AddWithValue("$cells", WriteCellCsv(state.Hidden));
+            cmd.Parameters.AddWithValue("$seen", WriteCellCsv(state.Seen));
             cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
             await cmd.ExecuteNonQueryAsync(ct);
         }
@@ -561,7 +584,7 @@ namespace Dujahit.Models.Database
             cmd.CommandText = "SELECT WallsEnabled, WallsJson FROM Maps WHERE Id = $mid LIMIT 1";
             cmd.Parameters.AddWithValue("$mid", mapId);
             await using var r = await cmd.ExecuteReaderAsync(ct);
-            if (!await r.ReadAsync(ct)) return (false, new List<WallSegment>());
+            if (!await r.ReadAsync(ct)) return (true, new List<WallSegment>());
             var enabled = r.GetInt64(0) != 0;
             var json = r.IsDBNull(1) ? "[]" : r.GetString(1);
             List<WallSegment> walls;

@@ -1,4 +1,6 @@
-﻿namespace Dujahit.ViewModels
+﻿using Dujahit.Models.Database;
+
+namespace Dujahit.ViewModels
 {
     public class PlayerOptionViewModel : ViewModelBase
     {
@@ -19,7 +21,7 @@
         public int ArmorClass { get; set; }
         public string OnlineStatus => IsOnline ? "● Online" : "○ Offline";
 
-        public Dujahit.Models.Database.MonsterOption? Monster { get; set; }
+        public MonsterOption? Monster { get; set; }
 
         public string DisplayLabel => Monster != null
             ? $"{CharacterName} ({Race}) - {PlayerName}"

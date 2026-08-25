@@ -1078,9 +1078,9 @@ namespace Dujahit.Models.Communication
     public record SoundChunkMessage(string Id, string CampaignId, string Name, string Kind, string FileName, int Index, int Total, string Base64);
     public record PlaySoundMessage(string Id, string Kind, bool Loop, int Volume);
     public record FogCellPoint(int Col, int Row);
-    public record FogPaintMessage(string MapId, List<FogCellPoint> Cells, bool Hidden);
-    public record FogStateMessage(string MapId, bool Enabled, int Cols, int Rows, List<FogCellPoint> Hidden);
-    public record MapActivatedMessage(string MapId, string GridKind, double Scale, int Width = 0, int Height = 0);
+    public record FogPaintMessage(string MapId, List<FogCellPoint> Cells, bool Hidden, bool Seen = false);
+    public record FogStateMessage(string MapId, bool Enabled, int Cols, int Rows, List<FogCellPoint> Hidden, List<FogCellPoint>? Seen = null);
+    public record MapActivatedMessage(string MapId, string GridKind, double Scale, int Width = 0, int Height = 0, double GridOffsetX = 0, double GridOffsetY = 0);
     public record PlayerMapSummary(string MapId, string Name, string GridKind, double Scale);
     public record HandoutRevealedMessage(string HandoutId, string Name, string TargetUserId = "");
     public record CombatantSnapshot(string Id, string Name, int Initiative, int CurrentHp, int MaxHp, bool IsPlayerCharacter, bool RevealExactHp, string? TokenId, int MaxActions = 1, int ActionsRemaining = 1, int MaxBonusActions = 1, int BonusActionsRemaining = 1, string? SpellSlots = null, bool Concentration = false, int DeathSaveSuccesses = 0, int DeathSaveFailures = 0, string? AttacksJson = null, bool IsFriendly = false, string? ExtrasJson = null);

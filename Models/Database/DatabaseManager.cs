@@ -4,11 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Dujahit.Tests")]
+[assembly: InternalsVisibleTo("Dujahit.Tests")]
 
 namespace Dujahit.Models.Database
 {
@@ -683,7 +684,9 @@ namespace Dujahit.Models.Database
             await EnsureColumnAsync(conn, ct, "EncounterCombatants", "IsFriendly", "INTEGER NOT NULL DEFAULT 0");
             await EnsureColumnAsync(conn, ct, "EncounterCombatants", "ExtrasJson", "TEXT");
             await EnsureColumnAsync(conn, ct, "Maps", "PlayerVisible", "INTEGER NOT NULL DEFAULT 0");
-            await EnsureColumnAsync(conn, ct, "Maps", "WallsEnabled", "INTEGER NOT NULL DEFAULT 0");
+            await EnsureColumnAsync(conn, ct, "Maps", "WallsEnabled", "INTEGER NOT NULL DEFAULT 1");
+            await EnsureColumnAsync(conn, ct, "Maps", "GridOffsetX", "REAL NOT NULL DEFAULT 0");
+            await EnsureColumnAsync(conn, ct, "Maps", "GridOffsetY", "REAL NOT NULL DEFAULT 0");
             await EnsureColumnAsync(conn, ct, "Maps", "WallsJson", "TEXT NOT NULL DEFAULT '[]'");
             await EnsureColumnAsync(conn, ct, "Maps", "DifficultTerrainJson", "TEXT NOT NULL DEFAULT '[]'");
             await EnsureColumnAsync(conn, ct, "Maps", "MapObjectsJson", "TEXT NOT NULL DEFAULT '[]'");
@@ -704,6 +707,9 @@ namespace Dujahit.Models.Database
             await EnsureColumnAsync(conn, ct, "MapTokens", "Blocks", "INTEGER NOT NULL DEFAULT 1");
             await EnsureColumnAsync(conn, ct, "MapTokens", "BlocksSight", "INTEGER NOT NULL DEFAULT 0");
             await EnsureColumnAsync(conn, ct, "NotePages", "CrdtState", "BLOB");
+            await EnsureColumnAsync(conn, ct, "MapFog", "DynamicVision", "INTEGER NOT NULL DEFAULT 0");
+            await EnsureColumnAsync(conn, ct, "MapFog", "ClosesBehind", "INTEGER NOT NULL DEFAULT 0");
+            await EnsureColumnAsync(conn, ct, "MapFog", "SeenCells", "TEXT NOT NULL DEFAULT ''");
         }
 
         private static async Task EnsureColumnAsync(SqliteConnection conn, CancellationToken ct, string table, string column, string definition)
@@ -1112,9 +1118,11 @@ namespace Dujahit.Models.Database
                 Height INTEGER NOT NULL,
                 Scale REAL NOT NULL,
                 GridKind TEXT NOT NULL DEFAULT 'Squares',
+                GridOffsetX REAL NOT NULL DEFAULT 0,
+                GridOffsetY REAL NOT NULL DEFAULT 0,
                 MapPath TEXT NOT NULL,
                 PlayerVisible INTEGER NOT NULL DEFAULT 0,
-                WallsEnabled INTEGER NOT NULL DEFAULT 0,
+                WallsEnabled INTEGER NOT NULL DEFAULT 1,
                 WallsJson TEXT NOT NULL DEFAULT '[]',
                 CreatedAt TEXT NOT NULL,
                 FOREIGN KEY (CampaignId) REFERENCES Campaigns(Id) ON DELETE CASCADE
@@ -1314,9 +1322,12 @@ namespace Dujahit.Models.Database
                 MapId TEXT PRIMARY KEY,
                 CampaignId TEXT NOT NULL,
                 Enabled INTEGER NOT NULL DEFAULT 0,
+                DynamicVision INTEGER NOT NULL DEFAULT 0,
+                ClosesBehind INTEGER NOT NULL DEFAULT 0,
                 Cols INTEGER NOT NULL DEFAULT 0,
                 Rows INTEGER NOT NULL DEFAULT 0,
                 HiddenCells TEXT NOT NULL DEFAULT '',
+                SeenCells TEXT NOT NULL DEFAULT '',
                 UpdatedAt TEXT NOT NULL,
                 FOREIGN KEY (MapId)      REFERENCES Maps(Id)      ON DELETE CASCADE,
                 FOREIGN KEY (CampaignId) REFERENCES Campaigns(Id) ON DELETE CASCADE

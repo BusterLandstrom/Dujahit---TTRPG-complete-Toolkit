@@ -307,10 +307,10 @@ namespace Dujahit.Models.Communication
             await _mapHub.InvokeAsync("UndoStroke", _currentCampaignId, strokeId);
         }
 
-        public async Task ActivateMapAsync(string mapId, string gridKind, double scale, int width = 0, int height = 0)
+        public async Task ActivateMapAsync(string mapId, string gridKind, double scale, int width = 0, int height = 0, double gridOffsetX = 0, double gridOffsetY = 0)
         {
             if (_mapHub == null || !IsConnected) return;
-            await _mapHub.InvokeAsync("ActivateMap", _currentCampaignId, new MapActivatedMessage(mapId, gridKind, scale, width, height));
+            await _mapHub.InvokeAsync("ActivateMap", _currentCampaignId, new MapActivatedMessage(mapId, gridKind, scale, width, height, gridOffsetX, gridOffsetY));
         }
 
         public async Task DeactivateMapAsync()

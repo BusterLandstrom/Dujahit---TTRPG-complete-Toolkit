@@ -618,7 +618,8 @@ namespace Dujahit.ViewModels
                 var gridKind = Enum.TryParse<GridKind>(msg.GridKind, out var gk)
                     ? gk
                     : GridKind.Squares;
-                await OpenMapSessionAsync(mapId, isBroadcasting: true, imagePath: localPath, gridKind: gridKind, scale: msg.Scale, mapWidth: msg.Width, mapHeight: msg.Height);
+                await OpenMapSessionAsync(mapId, isBroadcasting: true, imagePath: localPath, gridKind: gridKind, scale: msg.Scale, mapWidth: msg.Width, mapHeight: msg.Height,
+                    gridOffsetX: msg.GridOffsetX, gridOffsetY: msg.GridOffsetY);
             };
             App.PM.ComController.OnMapActivated += _onMapActivated;
 
@@ -1300,7 +1301,7 @@ namespace Dujahit.ViewModels
                 _ = OpenMyCharacter();
         }
 
-        public Task OpenMapSessionAsync(string mapId, bool isBroadcasting, string? imagePath = null, GridKind? gridKind = null, double? scale = null, int mapWidth = 0, int mapHeight = 0)
+        public Task OpenMapSessionAsync(string mapId, bool isBroadcasting, string? imagePath = null, GridKind? gridKind = null, double? scale = null, int mapWidth = 0, int mapHeight = 0, double? gridOffsetX = null, double? gridOffsetY = null)
         {
             var ownCharacter = App.PM.CurrentCharacterService.Current;
             _mapSession?.Canvas.Detach();
@@ -1338,7 +1339,8 @@ namespace Dujahit.ViewModels
 
             // Player gets the grid straight from the activation message, the dm has no args here so it reads the choice back off its own loaded maps
             var meta = _mapHub.Maps.FirstOrDefault(m => m.Id == mapId);
-            _mapSession.Canvas.LoadGrid(gridKind ?? meta?.GridKind ?? GridKind.Squares, scale ?? meta?.Scale ?? 1.0);
+            _mapSession.Canvas.LoadGrid(gridKind ?? meta?.GridKind ?? GridKind.Squares, scale ?? meta?.Scale ?? 1.0,
+                gridOffsetX ?? meta?.GridOffsetX ?? 0, gridOffsetY ?? meta?.GridOffsetY ?? 0);
             _mapSession.Canvas.SetMapSize(
                 mapWidth > 0 ? mapWidth : meta?.PixelWidth ?? 0,
                 mapHeight > 0 ? mapHeight : meta?.PixelHeight ?? 0);

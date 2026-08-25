@@ -566,7 +566,7 @@ namespace Dujahit.Models.Database
         {
             await using var conn = await _db.OpenAsync(ct);
             await using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT Enabled, Cols, Rows, HiddenCells FROM MapFog WHERE MapId = $mid AND CampaignId = $cid LIMIT 1";
+            cmd.CommandText = "SELECT Enabled, Cols, Rows, HiddenCells, SeenCells FROM MapFog WHERE MapId = $mid AND CampaignId = $cid LIMIT 1";
             cmd.Parameters.AddWithValue("$mid", mapId);
             cmd.Parameters.AddWithValue("$cid", campaignId);
             await using var r = await cmd.ExecuteReaderAsync(ct);
@@ -575,15 +575,21 @@ namespace Dujahit.Models.Database
             var enabled = r.GetInt64(0) != 0;
             var cols = (int)r.GetInt64(1);
             var rows = (int)r.GetInt64(2);
-            var hidden = new List<FogCellPoint>();
-            var csv = r.IsDBNull(3) ? "" : r.GetString(3);
+            var hidden = FogPointsFromCsv(r.IsDBNull(3) ? "" : r.GetString(3));
+            var seen = FogPointsFromCsv(r.IsDBNull(4) ? "" : r.GetString(4));
+            return new FogStateMessage(mapId, enabled, cols, rows, hidden, seen);
+        }
+
+        private static List<FogCellPoint> FogPointsFromCsv(string csv)
+        {
+            var cells = new List<FogCellPoint>();
             foreach (var pair in csv.Split(';', StringSplitOptions.RemoveEmptyEntries))
             {
                 var bits = pair.Split(',');
                 if (bits.Length == 2 && int.TryParse(bits[0], out var c) && int.TryParse(bits[1], out var rr))
-                    hidden.Add(new FogCellPoint(c, rr));
+                    cells.Add(new FogCellPoint(c, rr));
             }
-            return new FogStateMessage(mapId, enabled, cols, rows, hidden);
+            return cells;
         }
 
         public async Task<WallStateMessage?> FetchMapWallsMessageAsync(string campaignId, string mapId, CancellationToken ct = default)

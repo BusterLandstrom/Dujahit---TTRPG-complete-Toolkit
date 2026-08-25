@@ -49,6 +49,10 @@ namespace Dujahit.Views.Map
         private static readonly IBrush _terrainStroke = new SolidColorBrush(Color.FromArgb(150, 170, 110, 50));
         private static readonly IBrush _objectFill = new SolidColorBrush(Color.FromArgb(110, 70, 90, 120));
         private static readonly IBrush _objectStroke = new SolidColorBrush(Color.FromArgb(180, 110, 140, 180));
+        private static readonly IBrush _fogHostUnseen = new SolidColorBrush(Color.FromArgb(140, 8, 8, 14));
+        private static readonly IBrush _fogHostSeen = new SolidColorBrush(Color.FromArgb(70, 8, 8, 14));
+        private static readonly IBrush _fogPlayerUnseen = new SolidColorBrush(Color.FromArgb(255, 8, 8, 14));
+        private static readonly IBrush _fogPlayerSeen = new SolidColorBrush(Color.FromArgb(185, 8, 8, 14));
         private static readonly IBrush _objectSightStroke = new SolidColorBrush(Color.FromArgb(210, 210, 160, 90));
 
         private readonly Dictionary<WallViewModel, Line> _wallLines = new();
@@ -136,6 +140,7 @@ namespace Dujahit.Views.Map
             Vm.ReachableChanged -= RebuildReachable;
             Vm.RulerChanged -= RebuildRuler;
             Vm.PropGhostChanged -= RebuildPropGhost;
+            Vm.GridShifted -= OnGridShifted;
             foreach (var t in Vm.Tokens) t.PropertyChanged -= OnTokenPropertyChanged;
         }
 
@@ -208,6 +213,7 @@ namespace Dujahit.Views.Map
             Vm.ReachableChanged += RebuildReachable;
             Vm.RulerChanged += RebuildRuler;
             Vm.PropGhostChanged += RebuildPropGhost;
+            Vm.GridShifted += OnGridShifted;
             RebuildFog();
             RebuildWalls();
             RebuildTerrain();
@@ -215,6 +221,16 @@ namespace Dujahit.Views.Map
             RebuildTemplates();
             RebuildReachable();
             RebuildRuler();
+        }
+
+        private void OnGridShifted()
+        {
+            RebuildGrid();
+            RebuildFog();
+            RebuildTerrain();
+            RebuildObjects();
+            RebuildTemplates();
+            RebuildReachable();
         }
 
         private void RebuildPropGhost()
@@ -413,9 +429,16 @@ namespace Dujahit.Views.Map
             _offsetX = spillX > 0 ? Math.Clamp(_offsetX, -spillX, 0) : hasArt ? -spillX / 2.0 : 0;
             _offsetY = spillY > 0 ? Math.Clamp(_offsetY, -spillY, 0) : hasArt ? -spillY / 2.0 : 0;
 
+            var camera = new Matrix(_displayScale, 0, 0, _displayScale, _offsetX, _offsetY);
+
             WorldCanvas.RenderTransformOrigin = RelativePoint.TopLeft;
-            WorldCanvas.RenderTransform = new MatrixTransform(
-                new Matrix(_displayScale, 0, 0, _displayScale, _offsetX, _offsetY));
+            WorldCanvas.RenderTransform = new MatrixTransform(camera);
+
+            // Fucked up here, the art was laid out by the grid on its own Uniform stretch and never saw the camera at all, so zoom and pan slid every other layer off it.
+            MapArt.Width = iw;
+            MapArt.Height = ih;
+            MapArt.RenderTransformOrigin = RelativePoint.TopLeft;
+            MapArt.RenderTransform = new MatrixTransform(camera);
         }
 
         private void OnPointerWheel(object? sender, PointerWheelEventArgs e)
@@ -1180,7 +1203,7 @@ namespace Dujahit.Views.Map
 
             var brush = new SolidColorBrush(Color.Parse("#55FFFFFF"));
             var thickness = _displayScale > 0 ? 1.0 / _displayScale : 1.0;
-            foreach (var shape in GridOverlay.Build(Vm.GridKind, gw, gh, Vm.CellSize, brush, thickness))
+            foreach (var shape in GridOverlay.Build(Vm.GridKind, gw, gh, Vm.CellSize, brush, thickness, Vm.GridOffsetX, Vm.GridOffsetY))
             {
                 shape.ZIndex = -1;
                 WorldCanvas.Children.Add(shape);
@@ -1199,16 +1222,25 @@ namespace Dujahit.Views.Map
                 AddFogRect(col, row);
         }
 
+        private IBrush FogBrushFor(int col, int row)
+        {
+            var seen = Vm?.IsFogCellSeen(col, row) ?? false;
+            if (HostEyes) return seen ? _fogHostSeen : _fogHostUnseen;
+            return seen ? _fogPlayerSeen : _fogPlayerUnseen;
+        }
+
         private void AddFogRect(int col, int row)
         {
             if (Vm == null) return;
-            if (_fogRects.ContainsKey((col, row))) return;
             var cell = Vm.CellSize;
             if (cell <= 0) return;
 
-            var fill = HostEyes
-                ? new SolidColorBrush(Color.FromArgb(140, 8, 8, 14))
-                : new SolidColorBrush(Color.FromArgb(255, 8, 8, 14));
+            var fill = FogBrushFor(col, row);
+            if (_fogRects.TryGetValue((col, row), out var existing))
+            {
+                existing.Fill = fill;
+                return;
+            }
 
             var rect = new Rectangle
             {
@@ -1218,8 +1250,8 @@ namespace Dujahit.Views.Map
                 IsHitTestVisible = false,
                 ZIndex = 900
             };
-            Canvas.SetLeft(rect, col * cell);
-            Canvas.SetTop(rect, row * cell);
+            Canvas.SetLeft(rect, GridOverlay.CellEdge(col, Vm.GridOffsetX, cell));
+            Canvas.SetTop(rect, GridOverlay.CellEdge(row, Vm.GridOffsetY, cell));
             WorldCanvas.Children.Add(rect);
             _fogRects[(col, row)] = rect;
         }
@@ -1243,8 +1275,8 @@ namespace Dujahit.Views.Map
             if (Vm == null) return;
             var cell = Vm.CellSize;
             if (cell <= 0) return;
-            int col = (int)Math.Floor(worldPos.X / cell);
-            int row = (int)Math.Floor(worldPos.Y / cell);
+            int col = GridOverlay.CellIndex(worldPos.X, Vm.GridOffsetX, cell);
+            int row = GridOverlay.CellIndex(worldPos.Y, Vm.GridOffsetY, cell);
             if (col < 0 || row < 0 || col >= Vm.FogCols || row >= Vm.FogRows) return;
             Vm.PaintFogCell(col, row, Vm.FogHide);
         }
@@ -1273,8 +1305,8 @@ namespace Dujahit.Views.Map
                 StrokeThickness = 1,
                 IsHitTestVisible = false
             };
-            Canvas.SetLeft(rect, col * cell);
-            Canvas.SetTop(rect, row * cell);
+            Canvas.SetLeft(rect, GridOverlay.CellEdge(col, Vm.GridOffsetX, cell));
+            Canvas.SetTop(rect, GridOverlay.CellEdge(row, Vm.GridOffsetY, cell));
             WorldCanvas.Children.Insert(0, rect);
             _terrainRects[(col, row)] = rect;
         }
@@ -1297,8 +1329,8 @@ namespace Dujahit.Views.Map
             if (Vm == null) return;
             var cell = Vm.CellSize;
             if (cell <= 0) return;
-            int col = (int)Math.Floor(worldPos.X / cell);
-            int row = (int)Math.Floor(worldPos.Y / cell);
+            int col = GridOverlay.CellIndex(worldPos.X, Vm.GridOffsetX, cell);
+            int row = GridOverlay.CellIndex(worldPos.Y, Vm.GridOffsetY, cell);
             if (col < 0 || row < 0 || col >= Vm.FogCols || row >= Vm.FogRows) return;
             Vm.PaintDifficultCell(col, row, !_terrainErase);
         }
@@ -1341,8 +1373,8 @@ namespace Dujahit.Views.Map
                     VerticalAlignment = VerticalAlignment.Center
                 }
             };
-            Canvas.SetLeft(box, col * cell);
-            Canvas.SetTop(box, row * cell);
+            Canvas.SetLeft(box, GridOverlay.CellEdge(col, Vm.GridOffsetX, cell));
+            Canvas.SetTop(box, GridOverlay.CellEdge(row, Vm.GridOffsetY, cell));
             WorldCanvas.Children.Insert(0, box);
             _objectVisuals[(col, row)] = box;
         }
@@ -1365,8 +1397,8 @@ namespace Dujahit.Views.Map
             if (Vm == null) return;
             var cell = Vm.CellSize;
             if (cell <= 0) return;
-            int col = (int)Math.Floor(worldPos.X / cell);
-            int row = (int)Math.Floor(worldPos.Y / cell);
+            int col = GridOverlay.CellIndex(worldPos.X, Vm.GridOffsetX, cell);
+            int row = GridOverlay.CellIndex(worldPos.Y, Vm.GridOffsetY, cell);
             if (col < 0 || row < 0 || col >= Vm.FogCols || row >= Vm.FogRows) return;
             Vm.PaintObjectCell(col, row, !_objectErase);
         }
@@ -1588,23 +1620,23 @@ namespace Dujahit.Views.Map
                 minX = xs.Min(); maxX = xs.Max(); minY = ys.Min(); maxY = ys.Max();
             }
 
-            int col0 = (int)Math.Floor(minX / cell);
-            int row0 = (int)Math.Floor(minY / cell);
-            int col1 = (int)Math.Floor(maxX / cell);
-            int row1 = (int)Math.Floor(maxY / cell);
+            int col0 = GridOverlay.CellIndex(minX, Vm.GridOffsetX, cell);
+            int row0 = GridOverlay.CellIndex(minY, Vm.GridOffsetY, cell);
+            int col1 = GridOverlay.CellIndex(maxX, Vm.GridOffsetX, cell);
+            int row1 = GridOverlay.CellIndex(maxY, Vm.GridOffsetY, cell);
 
             for (int col = col0; col <= col1; col++)
             {
                 for (int row = row0; row <= row1; row++)
                 {
-                    double cx = (col + 0.5) * cell;
-                    double cy = (row + 0.5) * cell;
+                    double cx = GridOverlay.CellEdge(col, Vm.GridOffsetX, cell) + cell / 2.0;
+                    double cy = GridOverlay.CellEdge(row, Vm.GridOffsetY, cell) + cell / 2.0;
                     if (!PointInAoe(shape, cx, cy, ox, oy, ux, uy, perpx, perpy, sizePx, widthPx)) continue;
                     if (!CellVisible(ox, oy, cx, cy)) continue;
 
                     var rect = new Rectangle { Width = cell, Height = cell, Fill = fill, IsHitTestVisible = false, ZIndex = 870 };
-                    Canvas.SetLeft(rect, col * cell);
-                    Canvas.SetTop(rect, row * cell);
+                    Canvas.SetLeft(rect, GridOverlay.CellEdge(col, Vm.GridOffsetX, cell));
+                    Canvas.SetTop(rect, GridOverlay.CellEdge(row, Vm.GridOffsetY, cell));
                     cells.Add(rect);
                 }
             }

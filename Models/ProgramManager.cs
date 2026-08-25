@@ -488,7 +488,7 @@ namespace Dujahit.Models
             await using var conn = await _dbManager.OpenAsync();
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
-                SELECT Id, CampaignId, Name, Width, Height, Scale, MapPath, CreatedAt, PlayerVisible, GridKind
+                SELECT Id, CampaignId, Name, Width, Height, Scale, MapPath, CreatedAt, PlayerVisible, GridKind, GridOffsetX, GridOffsetY
                 FROM Maps
                 WHERE CampaignId = $cid
                 ORDER BY CreatedAt ASC;";
@@ -508,7 +508,9 @@ namespace Dujahit.Models
                     MapPath = r.GetString(6),
                     CreatedAt = DateTime.Parse(r.GetString(7)),
                     PlayerVisible = !r.IsDBNull(8) && r.GetInt32(8) != 0,
-                    GridKind = !r.IsDBNull(9) && Enum.TryParse<GridKind>(r.GetString(9), out var gk) ? gk : GridKind.Squares
+                    GridKind = !r.IsDBNull(9) && Enum.TryParse<GridKind>(r.GetString(9), out var gk) ? gk : GridKind.Squares,
+                    GridOffsetX = r.IsDBNull(10) ? 0 : r.GetDouble(10),
+                    GridOffsetY = r.IsDBNull(11) ? 0 : r.GetDouble(11)
                 });
             }
             return result;
@@ -519,8 +521,8 @@ namespace Dujahit.Models
             await using var conn = await _dbManager.OpenAsync();
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
-                INSERT INTO Maps (Id, CampaignId, Name, Width, Height, Scale, MapPath, CreatedAt, PlayerVisible, GridKind)
-                VALUES ($id, $cid, $name, $w, $h, $scale, $path, $created, $pv, $grid)
+                INSERT INTO Maps (Id, CampaignId, Name, Width, Height, Scale, MapPath, CreatedAt, PlayerVisible, GridKind, WallsEnabled, GridOffsetX, GridOffsetY)
+                VALUES ($id, $cid, $name, $w, $h, $scale, $path, $created, $pv, $grid, 1, $ox, $oy)
                 ON CONFLICT(Id) DO UPDATE SET
                     Name = excluded.Name,
                     Width = excluded.Width,
@@ -528,7 +530,9 @@ namespace Dujahit.Models
                     Scale = excluded.Scale,
                     MapPath = excluded.MapPath,
                     PlayerVisible = excluded.PlayerVisible,
-                    GridKind = excluded.GridKind;";
+                    GridKind = excluded.GridKind,
+                    GridOffsetX = excluded.GridOffsetX,
+                    GridOffsetY = excluded.GridOffsetY;";
             cmd.Parameters.AddWithValue("$id", map.Id);
             cmd.Parameters.AddWithValue("$cid", map.CampaignId);
             cmd.Parameters.AddWithValue("$name", map.Name);
@@ -539,6 +543,8 @@ namespace Dujahit.Models
             cmd.Parameters.AddWithValue("$created", map.CreatedAt.ToString("o"));
             cmd.Parameters.AddWithValue("$pv", map.PlayerVisible ? 1 : 0);
             cmd.Parameters.AddWithValue("$grid", map.GridKind.ToString());
+            cmd.Parameters.AddWithValue("$ox", map.GridOffsetX);
+            cmd.Parameters.AddWithValue("$oy", map.GridOffsetY);
             await cmd.ExecuteNonQueryAsync();
         }
 
@@ -561,13 +567,15 @@ namespace Dujahit.Models
             await cmd.ExecuteNonQueryAsync();
         }
 
-        public async Task SetMapGridAsync(string mapId, double scale, GridKind gridKind)
+        public async Task SetMapGridAsync(string mapId, double scale, GridKind gridKind, double offsetX = 0, double offsetY = 0)
         {
             await using var conn = await _dbManager.OpenAsync();
             await using var cmd = conn.CreateCommand();
-            cmd.CommandText = "UPDATE Maps SET Scale = $scale, GridKind = $grid WHERE Id = $id;";
+            cmd.CommandText = "UPDATE Maps SET Scale = $scale, GridKind = $grid, GridOffsetX = $ox, GridOffsetY = $oy WHERE Id = $id;";
             cmd.Parameters.AddWithValue("$scale", scale);
             cmd.Parameters.AddWithValue("$grid", gridKind.ToString());
+            cmd.Parameters.AddWithValue("$ox", offsetX);
+            cmd.Parameters.AddWithValue("$oy", offsetY);
             cmd.Parameters.AddWithValue("$id", mapId);
             await cmd.ExecuteNonQueryAsync();
         }
@@ -2200,7 +2208,7 @@ namespace Dujahit.Models
 
                 await using (var fog = conn.CreateCommand())
                 {
-                    fog.CommandText = "SELECT Enabled, Cols, Rows, HiddenCells FROM MapFog WHERE MapId = $mid LIMIT 1;";
+                    fog.CommandText = "SELECT Enabled, Cols, Rows, HiddenCells, DynamicVision, ClosesBehind, SeenCells FROM MapFog WHERE MapId = $mid LIMIT 1;";
                     fog.Parameters.AddWithValue("$mid", m.Id);
                     await using var fr = await fog.ExecuteReaderAsync();
                     if (await fr.ReadAsync())
@@ -2209,6 +2217,9 @@ namespace Dujahit.Models
                         m.FogCols = fr.IsDBNull(1) ? 0 : fr.GetInt32(1);
                         m.FogRows = fr.IsDBNull(2) ? 0 : fr.GetInt32(2);
                         m.FogHiddenCells = fr.IsDBNull(3) ? "" : fr.GetString(3);
+                        m.FogDynamicVision = !fr.IsDBNull(4) && fr.GetInt32(4) != 0;
+                        m.FogClosesBehind = !fr.IsDBNull(5) && fr.GetInt32(5) != 0;
+                        m.FogSeenCells = fr.IsDBNull(6) ? "" : fr.GetString(6);
                     }
                 }
 
@@ -2543,16 +2554,19 @@ namespace Dujahit.Models
                     await cmd.ExecuteNonQueryAsync();
                 }
 
-                if (m.FogEnabled || m.FogCols > 0 || !string.IsNullOrEmpty(m.FogHiddenCells))
+                if (m.FogEnabled || m.FogDynamicVision || m.FogCols > 0 || !string.IsNullOrEmpty(m.FogHiddenCells))
                 {
                     await using var fog = conn.CreateCommand();
-                    fog.CommandText = "INSERT INTO MapFog (MapId, CampaignId, Enabled, Cols, Rows, HiddenCells, UpdatedAt) VALUES ($mid, $cid, $en, $cols, $rows, $cells, $now);";
+                    fog.CommandText = "INSERT INTO MapFog (MapId, CampaignId, Enabled, DynamicVision, ClosesBehind, Cols, Rows, HiddenCells, SeenCells, UpdatedAt) VALUES ($mid, $cid, $en, $dyn, $close, $cols, $rows, $cells, $seen, $now);";
                     fog.Parameters.AddWithValue("$mid", newMapId);
                     fog.Parameters.AddWithValue("$cid", newCampaignId);
                     fog.Parameters.AddWithValue("$en", m.FogEnabled ? 1 : 0);
+                    fog.Parameters.AddWithValue("$dyn", m.FogDynamicVision ? 1 : 0);
+                    fog.Parameters.AddWithValue("$close", m.FogClosesBehind ? 1 : 0);
                     fog.Parameters.AddWithValue("$cols", m.FogCols);
                     fog.Parameters.AddWithValue("$rows", m.FogRows);
                     fog.Parameters.AddWithValue("$cells", m.FogHiddenCells ?? "");
+                    fog.Parameters.AddWithValue("$seen", m.FogSeenCells ?? "");
                     fog.Parameters.AddWithValue("$now", now);
                     await fog.ExecuteNonQueryAsync();
                 }
@@ -6388,7 +6402,7 @@ namespace Dujahit.Models
     }
     public class VersionManager // This "version management system" is basically created from a SharePoint update system I made at my previous job lol (I was not a dev at that job I just made internal software for the IT team as a side gig lol)
     {
-        public string Version { get; set; } = "0.9";
+        public string Version { get; set; } = "1.0";
         public bool IsBeta { get; set; } = true;
         public bool IsUrgent { get; set; } = false;
         public string? InstallPath { get; set; }

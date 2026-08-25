@@ -54,8 +54,11 @@
             </Style>
         </Grid.Styles>
 
-        <Image Source="{Binding BackgroundImage}"
-           Stretch="Uniform"
+        <Image x:Name="MapArt"
+           Source="{Binding BackgroundImage}"
+           Stretch="Fill"
+           HorizontalAlignment="Left"
+           VerticalAlignment="Top"
            IsHitTestVisible="False"/>
 
         <Canvas x:Name="DrawCanvas"
@@ -142,6 +145,12 @@
                             AutomationProperties.Name="Measure" ToolTip.Tip="Measure between two squares"
                             Classes.active="{Binding IsRulerMode}"
                             Command="{Binding SetRulerModeCommand}"/>
+                    <Button Classes="tool" AutomationProperties.Name="Grid settings" ToolTip.Tip="Grid settings"
+                            Classes.active="{Binding IsGridMode}"
+                            Command="{Binding SetGridModeCommand}"
+                            IsVisible="{Binding IsHost}">
+                        <PathIcon Data="{x:Static gv:GlobalVariables.IconGear}" Width="18" Height="18"/>
+                    </Button>
                 </WrapPanel>
 
                 <Border Classes="divider"/>
@@ -169,9 +178,9 @@
                                Text="Scroll or + and - to zoom, middle drag or space drag to pan. Brackets resize the selected token."/>
                 </StackPanel>
 
-                <Border Classes="divider" IsVisible="{Binding IsHost}"/>
+                <Border Classes="divider" IsVisible="{Binding IsGridMode}"/>
 
-                <StackPanel Spacing="6" IsVisible="{Binding IsHost}">
+                <StackPanel Spacing="6" IsVisible="{Binding IsGridMode}">
                     <TextBlock Text="GRID" Classes="sectionLabel"/>
                     <ComboBox AutomationProperties.Name="Grid shape"
                               ItemsSource="{Binding GridKinds}"
@@ -185,6 +194,28 @@
                                    Minimum="6"
                                    Maximum="1024"
                                    HorizontalAlignment="Stretch"/>
+                    <Grid ColumnDefinitions="*,*">
+                        <NumericUpDown Grid.Column="0" Margin="0,0,3,0"
+                                       AutomationProperties.Name="Grid nudge across"
+                                       Value="{Binding GridNudgeX}"
+                                       Watermark="Nudge x"
+                                       ToolTip.Tip="Shift the lines sideways to sit on a grid the art already has"
+                                       FormatString="0"
+                                       Increment="1"
+                                       Minimum="-1024"
+                                       Maximum="1024"
+                                       HorizontalAlignment="Stretch"/>
+                        <NumericUpDown Grid.Column="1" Margin="3,0,0,0"
+                                       AutomationProperties.Name="Grid nudge down"
+                                       Value="{Binding GridNudgeY}"
+                                       Watermark="Nudge y"
+                                       ToolTip.Tip="Shift the lines down to sit on a grid the art already has"
+                                       FormatString="0"
+                                       Increment="1"
+                                       Minimum="-1024"
+                                       Maximum="1024"
+                                       HorizontalAlignment="Stretch"/>
+                    </Grid>
                     <TextBlock Classes="muted" FontSize="12" TextWrapping="Wrap" Text="{Binding GridSummary}"/>
                     <CheckBox AutomationProperties.Name="Show the grid" Content="Show the grid" IsChecked="{Binding ShowGrid}"/>
                     <CheckBox AutomationProperties.Name="Snap to it" Content="Snap tokens and objects to it"
@@ -278,9 +309,15 @@
                     <CheckBox AutomationProperties.Name="FOG OF WAR" Content="Enable fog"
                               IsChecked="{Binding FogEnabled, Mode=OneWay}"
                               Command="{Binding ToggleFogEnabledCommand}"/>
-                    <CheckBox AutomationProperties.Name="Dynamic vision" Content="Vision reveals fog as tokens move"
-                              ToolTip.Tip="A token uncovers fog within its vision that walls do not block"
-                              IsChecked="{Binding DynamicVisionEnabled}"/>
+                    <CheckBox AutomationProperties.Name="Dynamic vision" Content="Vision reveals fog as your side moves"
+                              ToolTip.Tip="Monsters and scenery have no eyes, and nothing sees through a wall"
+                              IsChecked="{Binding DynamicVisionEnabled, Mode=OneWay}"
+                              Command="{Binding ToggleDynamicVisionCommand}"/>
+                    <CheckBox AutomationProperties.Name="Fog closes behind" Content="Fog closes behind your side"
+                              ToolTip.Tip="Somewhere your side has already been goes dim rather than black, and the hide brush still gets the last word"
+                              IsEnabled="{Binding DynamicVisionEnabled}"
+                              IsChecked="{Binding FogClosesBehind, Mode=OneWay}"
+                              Command="{Binding ToggleFogClosesCommand}"/>
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <Button Classes="tool" AutomationProperties.Name="Hide brush" ToolTip.Tip="Hide brush"
                                 Classes.active="{Binding FogHide}"

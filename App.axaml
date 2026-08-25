@@ -500,6 +500,10 @@
             <Setter Property="Background" Value="Transparent"/>
         </Style>
 
+        <Style Selector="NumericUpDown">
+            <Setter Property="ShowButtonSpinner" Value="False"/>
+        </Style>
+
         <Style Selector="TextBox.titleBox">
             <Setter Property="FontSize" Value="26"/>
             <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>

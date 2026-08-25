@@ -15,39 +15,51 @@ namespace Dujahit.Models.UI
 
         public static double CellFor(double mapScale) => BaseCellPx * (mapScale <= 0 ? 1.0 : mapScale);
 
-        public static Point SnapCenter(double x, double y, double footprintPx, double cell)
+        public static int CellIndex(double world, double offset, double cell) =>
+            cell <= 0 ? 0 : (int)Math.Floor((world - offset) / cell);
+
+        public static double CellEdge(int index, double offset, double cell) => offset + index * cell;
+
+        public static double FirstLine(double offset, double cell)
+        {
+            if (cell <= 0) return offset;
+            var steps = Math.Ceiling(-offset / cell);
+            return offset + steps * cell;
+        }
+
+        public static Point SnapCenter(double x, double y, double footprintPx, double cell, double offsetX = 0, double offsetY = 0)
         {
             if (cell <= 0) return new Point(x, y);
             var half = footprintPx / 2.0;
-            var left = Math.Round((x - half) / cell) * cell;
-            var top = Math.Round((y - half) / cell) * cell;
+            var left = Math.Round((x - half - offsetX) / cell) * cell + offsetX;
+            var top = Math.Round((y - half - offsetY) / cell) * cell + offsetY;
             return new Point(left + half, top + half);
         }
 
-        public static IEnumerable<Shape> Build(GridKind kind, double width, double height, double cell, IBrush brush, double thickness) =>
+        public static IEnumerable<Shape> Build(GridKind kind, double width, double height, double cell, IBrush brush, double thickness, double offsetX = 0, double offsetY = 0) =>
             kind == GridKind.Hexes
-                ? BuildHexes(width, height, cell, brush, thickness)
-                : BuildSquares(width, height, cell, brush, thickness);
+                ? BuildHexes(width, height, cell, brush, thickness, offsetX, offsetY)
+                : BuildSquares(width, height, cell, brush, thickness, offsetX, offsetY);
 
-        private static IEnumerable<Shape> BuildSquares(double width, double height, double cell, IBrush brush, double thickness)
+        private static IEnumerable<Shape> BuildSquares(double width, double height, double cell, IBrush brush, double thickness, double offsetX, double offsetY)
         {
-            for (double x = 0; x <= width; x += cell)
+            for (double x = FirstLine(offsetX, cell); x <= width; x += cell)
                 yield return VLine(x, height, brush, thickness);
-            for (double y = 0; y <= height; y += cell)
+            for (double y = FirstLine(offsetY, cell); y <= height; y += cell)
                 yield return HLine(y, width, brush, thickness);
         }
 
-        private static IEnumerable<Shape> BuildHexes(double width, double height, double cell, IBrush brush, double thickness)
+        private static IEnumerable<Shape> BuildHexes(double width, double height, double cell, IBrush brush, double thickness, double offsetX, double offsetY)
         {
             var r = cell / 2.0;
             var hStep = r * 1.5;
             var vStep = Math.Sqrt(3) * r;
 
             int col = 0;
-            for (double cx = r; cx - r <= width; cx += hStep, col++)
+            for (double cx = r + offsetX; cx - r <= width; cx += hStep, col++)
             {
                 var yOffset = (col % 2 == 0) ? 0 : vStep / 2.0;
-                for (double cy = r + yOffset; cy - r <= height; cy += vStep)
+                for (double cy = r + offsetY + yOffset; cy - r <= height; cy += vStep)
                     yield return Hexagon(cx, cy, r, brush, thickness);
             }
         }

@@ -535,6 +535,8 @@ namespace Dujahit.Models
         public int Height { get; set; }
         public double Scale { get; set; } = 1.0;
         public GridKind GridKind { get; set; } = GridKind.Squares;
+        public double GridOffsetX { get; set; }
+        public double GridOffsetY { get; set; }
         public string MapPath { get; set; } = "";
         public bool PlayerVisible { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -553,10 +555,13 @@ namespace Dujahit.Models
     {
         public string MapId { get; set; } = "";
         public string CampaignId { get; set; } = "";
-        public bool Enabled { get; set; }
+        public bool Enabled { get; set; } = true;
+        public bool DynamicVision { get; set; }
+        public bool ClosesBehind { get; set; }
         public int Cols { get; set; }
         public int Rows { get; set; }
         public HashSet<(int Col, int Row)> Hidden { get; set; } = new();
+        public HashSet<(int Col, int Row)> Seen { get; set; } = new();
     }
 
     public class MapDrawing
@@ -864,9 +869,12 @@ namespace Dujahit.Models
         public string DifficultTerrainJson { get; set; } = "[]";
         public string MapObjectsJson { get; set; } = "[]";
         public bool FogEnabled { get; set; }
+        public bool FogDynamicVision { get; set; }
+        public bool FogClosesBehind { get; set; }
         public int FogCols { get; set; }
         public int FogRows { get; set; }
         public string FogHiddenCells { get; set; } = "";
+        public string FogSeenCells { get; set; } = "";
         public List<ExportedMapToken> Tokens { get; set; } = new();
         public List<string> Drawings { get; set; } = new();
         public string? ImageBase64 { get; set; }

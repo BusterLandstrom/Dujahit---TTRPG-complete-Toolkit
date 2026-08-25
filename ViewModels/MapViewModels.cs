@@ -75,6 +75,8 @@ namespace Dujahit.ViewModels
                     Thumbnail = LoadThumbnail(row.MapPath),
                     GridKind = row.GridKind,
                     Scale = row.Scale,
+                    GridOffsetX = row.GridOffsetX,
+                    GridOffsetY = row.GridOffsetY,
                     PixelWidth = row.Width,
                     PixelHeight = row.Height,
                     PlayerVisible = row.PlayerVisible
@@ -108,7 +110,7 @@ namespace Dujahit.ViewModels
         {
             foreach (var m in Maps) m.IsActive = false;
             map.IsActive = true;
-            await App.PM.ComController.ActivateMapAsync(map.Id, map.GridKind.ToString(), map.Scale, map.PixelWidth, map.PixelHeight);
+            await App.PM.ComController.ActivateMapAsync(map.Id, map.GridKind.ToString(), map.Scale, map.PixelWidth, map.PixelHeight, map.GridOffsetX, map.GridOffsetY);
             OpenSessionRequested?.Invoke(map.Id, true, map.ImagePath);
         }
 
@@ -279,6 +281,8 @@ namespace Dujahit.ViewModels
         public GridKind GridKind { get; set; } = GridKind.Squares;
         public string GridLabel => GridKind == GridKind.Hexes ? "Overland" : "Battle";
         public double Scale { get; set; } = 1.0;
+        public double GridOffsetX { get; set; }
+        public double GridOffsetY { get; set; }
         public int PixelWidth { get; set; }
         public int PixelHeight { get; set; }
 
@@ -1540,7 +1544,7 @@ namespace Dujahit.ViewModels
         }
     }
 
-    public enum CanvasToolMode { Draw, Token, Ping, Fog, Wall, Door, Template, Terrain, MapObject, Ruler }
+    public enum CanvasToolMode { Draw, Token, Ping, Fog, Wall, Door, Template, Terrain, MapObject, Ruler, Grid }
 
     public enum SightLine { Clear, Cover, Blocked }
 
@@ -1804,6 +1808,7 @@ namespace Dujahit.ViewModels
                 this.RaisePropertyChanged(nameof(IsTerrainMode));
                 this.RaisePropertyChanged(nameof(IsMapObjectMode));
                 this.RaisePropertyChanged(nameof(IsRulerMode));
+                this.RaisePropertyChanged(nameof(IsGridMode));
                 this.RaisePropertyChanged(nameof(ShowColorTools));
             }
         }
@@ -1818,6 +1823,7 @@ namespace Dujahit.ViewModels
         public bool IsTerrainMode => Mode == CanvasToolMode.Terrain;
         public bool IsMapObjectMode => Mode == CanvasToolMode.MapObject;
         public bool IsRulerMode => Mode == CanvasToolMode.Ruler;
+        public bool IsGridMode => Mode == CanvasToolMode.Grid;
 
         public bool ShowColorTools => Mode == CanvasToolMode.Draw || Mode == CanvasToolMode.Ping;
 
@@ -1872,6 +1878,48 @@ namespace Dujahit.ViewModels
             }
         }
 
+        private double _gridOffsetX;
+        public double GridOffsetX
+        {
+            get => _gridOffsetX;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _gridOffsetX, value);
+                this.RaisePropertyChanged(nameof(GridNudgeX));
+                this.RaisePropertyChanged(nameof(FogCols));
+                this.RaisePropertyChanged(nameof(FogRows));
+                GridShifted?.Invoke();
+            }
+        }
+
+        private double _gridOffsetY;
+        public double GridOffsetY
+        {
+            get => _gridOffsetY;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _gridOffsetY, value);
+                this.RaisePropertyChanged(nameof(GridNudgeY));
+                this.RaisePropertyChanged(nameof(FogCols));
+                this.RaisePropertyChanged(nameof(FogRows));
+                GridShifted?.Invoke();
+            }
+        }
+
+        public event Action? GridShifted;
+
+        public decimal GridNudgeX
+        {
+            get => (decimal)GridOffsetX;
+            set => GridOffsetX = (double)value;
+        }
+
+        public decimal GridNudgeY
+        {
+            get => (decimal)GridOffsetY;
+            set => GridOffsetY = (double)value;
+        }
+
         public double CellSize => GridOverlay.CellFor(MapScale);
 
         public decimal CellPixels
@@ -1898,26 +1946,29 @@ namespace Dujahit.ViewModels
             }
         }
 
-        private (GridKind Kind, double Scale) _loadedGrid = (GridKind.Squares, 1.0);
+        private (GridKind Kind, double Scale, double OffsetX, double OffsetY) _loadedGrid = (GridKind.Squares, 1.0, 0, 0);
 
-        public void LoadGrid(GridKind kind, double scale)
+        public void LoadGrid(GridKind kind, double scale, double offsetX = 0, double offsetY = 0)
         {
             GridKind = kind;
             MapScale = scale;
-            _loadedGrid = (kind, scale);
+            GridOffsetX = offsetX;
+            GridOffsetY = offsetY;
+            _loadedGrid = (kind, scale, offsetX, offsetY);
         }
 
         private async Task PersistGridAsync()
         {
             if (!IsHost || App.PM == null) return;
-            if (GridKind == _loadedGrid.Kind && Math.Abs(MapScale - _loadedGrid.Scale) < 0.0001) return;
+            if (GridKind == _loadedGrid.Kind && Math.Abs(MapScale - _loadedGrid.Scale) < 0.0001
+                && Math.Abs(GridOffsetX - _loadedGrid.OffsetX) < 0.0001 && Math.Abs(GridOffsetY - _loadedGrid.OffsetY) < 0.0001) return;
             try
             {
-                await App.PM.SetMapGridAsync(MapId, MapScale, GridKind);
-                _loadedGrid = (GridKind, MapScale);
+                await App.PM.SetMapGridAsync(MapId, MapScale, GridKind, GridOffsetX, GridOffsetY);
+                _loadedGrid = (GridKind, MapScale, GridOffsetX, GridOffsetY);
                 if (_com != null && IsBroadcasting)
                     await _com.ActivateMapAsync(MapId, GridKind.ToString(), MapScale,
-                        (int)Math.Round(MapPixelWidth), (int)Math.Round(MapPixelHeight));
+                        (int)Math.Round(MapPixelWidth), (int)Math.Round(MapPixelHeight), GridOffsetX, GridOffsetY);
             }
             catch (Exception ex)
             {
@@ -1927,7 +1978,7 @@ namespace Dujahit.ViewModels
         }
 
         public Point SnapPoint(double x, double y, double footprintPx) =>
-            SnapToGrid ? GridOverlay.SnapCenter(x, y, footprintPx, CellSize) : new Point(x, y);
+            SnapToGrid ? GridOverlay.SnapCenter(x, y, footprintPx, CellSize, GridOffsetX, GridOffsetY) : new Point(x, y);
 
         public Point SnapPointFor(TokenViewModel token, double x, double y, double footprintPx) =>
             token.IsProp && !NewPropSnap ? new Point(x, y) : SnapPoint(x, y, footprintPx);
@@ -1979,7 +2030,7 @@ namespace Dujahit.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isDungeonMaster, value);
         }
 
-        private bool _fogEnabled;
+        private bool _fogEnabled = true;
         public bool FogEnabled
         {
             get => _fogEnabled;
@@ -1996,6 +2047,13 @@ namespace Dujahit.ViewModels
             get => _dynamicVisionEnabled;
             set => this.RaiseAndSetIfChanged(ref _dynamicVisionEnabled, value);
         }
+
+        private bool _fogClosesBehind;
+        public bool FogClosesBehind
+        {
+            get => _fogClosesBehind;
+            set => this.RaiseAndSetIfChanged(ref _fogClosesBehind, value);
+        }
         public double VisionRadiusFeet { get; set; } = 60;
 
         private bool _fogHide = true;
@@ -2008,8 +2066,11 @@ namespace Dujahit.ViewModels
         private readonly HashSet<(int Col, int Row)> _fogHidden = new();
         public IReadOnlyCollection<(int Col, int Row)> FogHiddenCells => _fogHidden;
 
-        public int FogCols => CellSize > 0 ? (int)Math.Ceiling(MapPixelWidth / CellSize) : 0;
-        public int FogRows => CellSize > 0 ? (int)Math.Ceiling(MapPixelHeight / CellSize) : 0;
+        private readonly HashSet<(int Col, int Row)> _fogSeen = new();
+        public bool IsFogCellSeen(int col, int row) => _fogSeen.Contains((col, row));
+
+        public int FogCols => CellSize > 0 ? (int)Math.Ceiling((MapPixelWidth - GridOffsetX) / CellSize) : 0;
+        public int FogRows => CellSize > 0 ? (int)Math.Ceiling((MapPixelHeight - GridOffsetY) / CellSize) : 0;
 
         private double _mapWidthOverride;
         private double _mapHeightOverride;
@@ -2109,6 +2170,7 @@ namespace Dujahit.ViewModels
 
         private readonly List<FogCellPoint> _pendingFogPaint = new();
         private bool _pendingFogHide;
+        private bool _pendingFogSeen;
 
         public event Action<int, int, bool>? FogCellChanged;
         public event Action? FogBulkChanged;
@@ -2157,7 +2219,10 @@ namespace Dujahit.ViewModels
         public ReactiveCommand<string, Unit> SetNewTokenColorCommand { get; }
         public ReactiveCommand<Unit, Unit> ToggleToolsCommand { get; }
         public ReactiveCommand<Unit, Unit> SetFogModeCommand { get; }
+        public ReactiveCommand<Unit, Unit> SetGridModeCommand { get; }
         public ReactiveCommand<Unit, Unit> ToggleFogEnabledCommand { get; }
+        public ReactiveCommand<Unit, Unit> ToggleDynamicVisionCommand { get; }
+        public ReactiveCommand<Unit, Unit> ToggleFogClosesCommand { get; }
         public ReactiveCommand<Unit, Unit> FogHideBrushCommand { get; }
         public ReactiveCommand<Unit, Unit> FogRevealBrushCommand { get; }
         public ReactiveCommand<Unit, Unit> HideAllFogCommand { get; }
@@ -2259,7 +2324,7 @@ namespace Dujahit.ViewModels
             MapId = mapId;
             _com = com;
 
-            _gridSub = this.WhenAnyValue(x => x.MapScale, x => x.GridKind, (_, _) => Unit.Default)
+            _gridSub = this.WhenAnyValue(x => x.MapScale, x => x.GridKind, x => x.GridOffsetX, x => x.GridOffsetY, (_, _, _, _) => Unit.Default)
                 .Skip(1)
                 .Throttle(TimeSpan.FromMilliseconds(400))
                 .ObserveOn(RxApp.MainThreadScheduler)
@@ -2288,7 +2353,10 @@ namespace Dujahit.ViewModels
             SetNewTokenColorCommand = ReactiveCommand.Create<string>(c => { NewTokenColor = c; });
             ToggleToolsCommand = ReactiveCommand.Create(() => { ToolsVisible = !ToolsVisible; });
             SetFogModeCommand = ReactiveCommand.Create(() => { Mode = CanvasToolMode.Fog; });
+            SetGridModeCommand = ReactiveCommand.Create(() => { Mode = CanvasToolMode.Grid; });
             ToggleFogEnabledCommand = ReactiveCommand.CreateFromTask(ToggleFogEnabledAsync);
+            ToggleDynamicVisionCommand = ReactiveCommand.CreateFromTask(ToggleDynamicVisionAsync);
+            ToggleFogClosesCommand = ReactiveCommand.CreateFromTask(ToggleFogClosesAsync);
             FogHideBrushCommand = ReactiveCommand.Create(() => { FogHide = true; Mode = CanvasToolMode.Fog; });
             FogRevealBrushCommand = ReactiveCommand.Create(() => { FogHide = false; Mode = CanvasToolMode.Fog; });
             HideAllFogCommand = ReactiveCommand.CreateFromTask(HideAllFogAsync);
@@ -2710,6 +2778,9 @@ namespace Dujahit.ViewModels
                     if (Strokes.Any(x => x.Id == s.StrokeId)) continue;
                     Strokes.Add(new StrokeViewModel(s.StrokeId, s.Points.Select(p => new Avalonia.Point(p.X, p.Y)).ToList(), s.Color, s.Thickness, s.OwnerId));
                 }
+
+                // Both this and the fog load get fired off with _ = at map open so either one can win, they both sweep and the loser just finds nothing left to lift.
+                await SweepVisionAsync();
             }
             catch (Exception ex)
             {
@@ -2719,7 +2790,7 @@ namespace Dujahit.ViewModels
 
         public async Task PersistTokenAsync(TokenViewModel token)
         {
-            if (DynamicVisionEnabled) _ = RevealVisionAroundAsync(token.X, token.Y);
+            if (DynamicVisionEnabled && TokenHasEyes(token)) _ = RevealVisionAroundAsync(token.X, token.Y);
             if (!IsHost || string.IsNullOrEmpty(token.ImagePath)) return;
             var row = new MapToken
             {
@@ -3374,7 +3445,7 @@ namespace Dujahit.ViewModels
         {
             if (_reachableSet == null || !ReferenceEquals(_reachableToken, token)) return true;
             var cell = CellSize > 0 ? CellSize : GridOverlay.BaseCellPx;
-            return _reachableSet.Contains(((int)Math.Floor(worldX / cell), (int)Math.Floor(worldY / cell)));
+            return _reachableSet.Contains((GridOverlay.CellIndex(worldX, GridOffsetX, cell), GridOverlay.CellIndex(worldY, GridOffsetY, cell)));
         }
 
         public bool MoveNeedsDash(TokenViewModel token, double worldX, double worldY)
@@ -3383,7 +3454,7 @@ namespace Dujahit.ViewModels
             if (combatant == null || !combatant.Dashed || combatant.DashPaid) return false;
             if (_reachableCost == null || !ReferenceEquals(_reachableToken, token)) return false;
             var cell = CellSize > 0 ? CellSize : GridOverlay.BaseCellPx;
-            var key = ((int)Math.Floor(worldX / cell), (int)Math.Floor(worldY / cell));
+            var key = (GridOverlay.CellIndex(worldX, GridOffsetX, cell), GridOverlay.CellIndex(worldY, GridOffsetY, cell));
             if (!_reachableCost.TryGetValue(key, out var squares)) return false;
             var feetPer = App.PM?.Rules?.FeetPerSquare ?? 5.0;
             return token.FeetMoved + squares * feetPer > combatant.EffectiveSpeedFeet + 0.01;
@@ -3427,7 +3498,8 @@ namespace Dujahit.ViewModels
         public void RulerClick(double worldX, double worldY)
         {
             var cell = CellSize > 0 ? CellSize : GridOverlay.BaseCellPx;
-            var centred = new Point(Math.Floor(worldX / cell) * cell + cell / 2.0, Math.Floor(worldY / cell) * cell + cell / 2.0);
+            var centred = new Point(GridOverlay.CellEdge(GridOverlay.CellIndex(worldX, GridOffsetX, cell), GridOffsetX, cell) + cell / 2.0,
+                GridOverlay.CellEdge(GridOverlay.CellIndex(worldY, GridOffsetY, cell), GridOffsetY, cell) + cell / 2.0);
             if (RulerStart == null || RulerEnd != null)
             {
                 RulerStart = centred;
@@ -3498,10 +3570,10 @@ namespace Dujahit.ViewModels
             var rules = App.PM?.Rules;
             var feetPer = rules?.FeetPerSquare ?? 5.0;
             var cell = CellSize > 0 ? CellSize : GridOverlay.BaseCellPx;
-            Point Center((int C, int R) k) => new(k.C * cell + cell / 2.0, k.R * cell + cell / 2.0);
+            Point Center((int C, int R) k) => new(GridOverlay.CellEdge(k.C, GridOffsetX, cell) + cell / 2.0, GridOverlay.CellEdge(k.R, GridOffsetY, cell) + cell / 2.0);
 
-            var from = ((int)Math.Floor(a.X / cell), (int)Math.Floor(a.Y / cell));
-            var to = ((int)Math.Floor(b.X / cell), (int)Math.Floor(b.Y / cell));
+            var from = (GridOverlay.CellIndex(a.X, GridOffsetX, cell), GridOverlay.CellIndex(a.Y, GridOffsetY, cell));
+            var to = (GridOverlay.CellIndex(b.X, GridOffsetX, cell), GridOverlay.CellIndex(b.Y, GridOffsetY, cell));
             var straight = rules?.PathCostSquares(to.Item1 - from.Item1, to.Item2 - from.Item2)
                            ?? Math.Max(Math.Abs(to.Item1 - from.Item1), Math.Abs(to.Item2 - from.Item2));
 
@@ -3625,7 +3697,7 @@ namespace Dujahit.ViewModels
             var remainingFeet = Math.Max(0, speed - token.FeetMoved);
             var maxCells = remainingFeet / feetPer;
             var cell = CellSize > 0 ? CellSize : GridOverlay.BaseCellPx;
-            var start = ((int)Math.Floor(startX / cell), (int)Math.Floor(startY / cell));
+            var start = (GridOverlay.CellIndex(startX, GridOffsetX, cell), GridOverlay.CellIndex(startY, GridOffsetY, cell));
             result.Add(start);
             if (maxCells <= 0) return result;
 
@@ -3846,8 +3918,8 @@ namespace Dujahit.ViewModels
             var cell = CellSize > 0 ? CellSize : GridOverlay.BaseCellPx;
             if (cell <= 0) return false;
 
-            var from = ((int)Math.Floor(a.X / cell), (int)Math.Floor(a.Y / cell));
-            var to = ((int)Math.Floor(b.X / cell), (int)Math.Floor(b.Y / cell));
+            var from = (GridOverlay.CellIndex(a.X, GridOffsetX, cell), GridOverlay.CellIndex(a.Y, GridOffsetY, cell));
+            var to = (GridOverlay.CellIndex(b.X, GridOffsetX, cell), GridOverlay.CellIndex(b.Y, GridOffsetY, cell));
 
             var dx = b.X - a.X;
             var dy = b.Y - a.Y;
@@ -3860,7 +3932,7 @@ namespace Dujahit.ViewModels
                 var t = i / (double)steps;
                 var px = a.X + dx * t;
                 var py = a.Y + dy * t;
-                var key = ((int)Math.Floor(px / cell), (int)Math.Floor(py / cell));
+                var key = (GridOverlay.CellIndex(px, GridOffsetX, cell), GridOverlay.CellIndex(py, GridOffsetY, cell));
                 if (key == from || key == to) continue;
                 if (ObjectBlocksSight(key.Item1, key.Item2)) return true;
                 foreach (var p in sightProps)
@@ -4017,8 +4089,10 @@ namespace Dujahit.ViewModels
             if (!IsHost) return;
             var key = (col, row);
             bool changed = hide ? _fogHidden.Add(key) : _fogHidden.Remove(key);
-            if (!changed) return;
+            bool forgotten = _fogSeen.Remove(key);
+            if (!changed && !forgotten) return;
             _pendingFogHide = hide;
+            _pendingFogSeen = false;
             _pendingFogPaint.Add(new FogCellPoint(col, row));
             FogCellChanged?.Invoke(col, row, hide);
         }
@@ -4028,36 +4102,108 @@ namespace Dujahit.ViewModels
             if (!IsHost || _pendingFogPaint.Count == 0) return;
             var cells = _pendingFogPaint.ToList();
             var hide = _pendingFogHide;
+            var seen = _pendingFogSeen;
             _pendingFogPaint.Clear();
             if (_com != null && IsBroadcasting)
-                await _com.SendFogPaintAsync(new FogPaintMessage(MapId, cells, hide));
+                await _com.SendFogPaintAsync(new FogPaintMessage(MapId, cells, hide, seen));
             await PersistFogAsync();
         }
+
+        private bool TokenHasEyes(TokenViewModel t) => !t.IsProp && TokenOnPlayerSide(t);
 
         public async Task RevealVisionAroundAsync(double px, double py)
         {
             if (!IsHost || !FogEnabled || !DynamicVisionEnabled) return;
-            var cs = CellSize;
-            if (cs <= 0) return;
+            if (FogClosesBehind) { await SweepVisionAsync(); return; }
+            if (LiftFogAround(px, py)) await FlushVisionPaintAsync(false);
+        }
+
+        private Task FlushVisionPaintAsync(bool hide)
+        {
+            _pendingFogHide = hide;
+            _pendingFogSeen = true;
+            return FlushFogPaintAsync();
+        }
+
+        private async Task SweepVisionAsync()
+        {
+            if (!IsHost || !FogEnabled || !DynamicVisionEnabled) return;
+            if (CloseFogBehind()) await FlushVisionPaintAsync(true);
+            var any = false;
+            foreach (var t in Tokens)
+            {
+                if (!TokenHasEyes(t)) continue;
+                if (LiftFogAround(t.X, t.Y)) any = true;
+            }
+            if (any) await FlushVisionPaintAsync(false);
+        }
+
+        private double VisionRadiusPx(double cellSize)
+        {
             var feetPerSquare = App.PM?.Rules?.FeetPerSquare ?? 5.0;
-            var radiusPx = feetPerSquare > 0 ? VisionRadiusFeet / feetPerSquare * cs : cs * 12;
+            return feetPerSquare > 0 ? VisionRadiusFeet / feetPerSquare * cellSize : cellSize * 12;
+        }
+
+        private bool LiftFogAround(double px, double py)
+        {
+            var cs = CellSize;
+            if (cs <= 0) return false;
+            var radiusPx = VisionRadiusPx(cs);
             var radiusSq = radiusPx * radiusPx;
             var origin = new Point(px, py);
             var any = false;
             foreach (var key in _fogHidden.ToList())
             {
-                var cx = key.Col * cs + cs / 2;
-                var cy = key.Row * cs + cs / 2;
+                var cx = GridOverlay.CellEdge(key.Col, GridOffsetX, cs) + cs / 2;
+                var cy = GridOverlay.CellEdge(key.Row, GridOffsetY, cs) + cs / 2;
                 var dx = cx - px;
                 var dy = cy - py;
                 if (dx * dx + dy * dy > radiusSq) continue;
                 if (SightBlocked(origin, new Point(cx, cy))) continue;
                 _fogHidden.Remove(key);
+                _fogSeen.Add(key);
                 _pendingFogPaint.Add(new FogCellPoint(key.Col, key.Row));
                 FogCellChanged?.Invoke(key.Col, key.Row, false);
                 any = true;
             }
-            if (any) { _pendingFogHide = false; await FlushFogPaintAsync(); }
+            return any;
+        }
+
+        private bool CloseFogBehind()
+        {
+            if (!FogClosesBehind) return false;
+            var cs = CellSize;
+            if (cs <= 0) return false;
+            var any = false;
+            foreach (var key in _fogSeen.ToList())
+            {
+                if (_fogHidden.Contains(key)) continue;
+                if (CellVisibleToEyes(key, cs)) continue;
+                _fogHidden.Add(key);
+                _pendingFogPaint.Add(new FogCellPoint(key.Col, key.Row));
+                FogCellChanged?.Invoke(key.Col, key.Row, true);
+                any = true;
+            }
+            return any;
+        }
+
+        private bool CellVisibleToEyes((int Col, int Row) key, double cellSize)
+        {
+            var cx = GridOverlay.CellEdge(key.Col, GridOffsetX, cellSize) + cellSize / 2;
+            var cy = GridOverlay.CellEdge(key.Row, GridOffsetY, cellSize) + cellSize / 2;
+            var target = new Point(cx, cy);
+            var radiusPx = VisionRadiusPx(cellSize);
+            var radiusSq = radiusPx * radiusPx;
+            foreach (var t in Tokens)
+            {
+                if (!TokenHasEyes(t)) continue;
+                var dx = cx - t.X;
+                var dy = cy - t.Y;
+                if (dx * dx + dy * dy > radiusSq) continue;
+                if (SightBlocked(new Point(t.X, t.Y), target)) continue;
+                return true;
+            }
+            return false;
         }
 
         public bool SightBlockedByWall(Point a, Point b)
@@ -4079,10 +4225,27 @@ namespace Dujahit.ViewModels
             await BroadcastFogStateAsync();
         }
 
+        private async Task ToggleDynamicVisionAsync()
+        {
+            if (!IsHost) return;
+            DynamicVisionEnabled = !DynamicVisionEnabled;
+            await SweepVisionAsync();
+            await PersistFogAsync();
+        }
+
+        private async Task ToggleFogClosesAsync()
+        {
+            if (!IsHost) return;
+            FogClosesBehind = !FogClosesBehind;
+            await SweepVisionAsync();
+            await PersistFogAsync();
+        }
+
         private async Task HideAllFogAsync()
         {
             if (!IsHost) return;
             _fogHidden.Clear();
+            _fogSeen.Clear();
             var cols = FogCols;
             var rows = FogRows;
             for (int r = 0; r < rows; r++)
@@ -4096,6 +4259,7 @@ namespace Dujahit.ViewModels
         {
             if (!IsHost) return;
             _fogHidden.Clear();
+            _fogSeen.Clear();
             FogBulkChanged?.Invoke();
             await BroadcastFogStateAsync();
         }
@@ -4110,7 +4274,8 @@ namespace Dujahit.ViewModels
 
         private FogStateMessage BuildFogSnapshot() =>
             new FogStateMessage(MapId, FogEnabled, FogCols, FogRows,
-                _fogHidden.Select(c => new FogCellPoint(c.Col, c.Row)).ToList());
+                _fogHidden.Select(c => new FogCellPoint(c.Col, c.Row)).ToList(),
+                _fogSeen.Select(c => new FogCellPoint(c.Col, c.Row)).ToList());
 
         private async Task PersistFogAsync()
         {
@@ -4122,9 +4287,12 @@ namespace Dujahit.ViewModels
                     MapId = MapId,
                     CampaignId = App.PM.GetCampaignId(),
                     Enabled = FogEnabled,
+                    DynamicVision = DynamicVisionEnabled,
+                    ClosesBehind = FogClosesBehind,
                     Cols = FogCols,
                     Rows = FogRows,
-                    Hidden = new HashSet<(int, int)>(_fogHidden)
+                    Hidden = new HashSet<(int, int)>(_fogHidden),
+                    Seen = new HashSet<(int, int)>(_fogSeen)
                 });
             }
             catch (Exception ex)
@@ -4153,22 +4321,29 @@ namespace Dujahit.ViewModels
                 if (IsHost)
                 {
                     var state = await App.PM.GameDataRepo.LoadFogAsync(MapId);
-                    ApplyFogState(state.Enabled, state.Hidden);
+                    ApplyFogState(state.Enabled, state.Hidden, state.Seen);
+                    _dynamicVisionEnabled = state.DynamicVision;
+                    this.RaisePropertyChanged(nameof(DynamicVisionEnabled));
+                    _fogClosesBehind = state.ClosesBehind;
+                    this.RaisePropertyChanged(nameof(FogClosesBehind));
+                    await SweepVisionAsync();
                 }
                 else if (_com != null)
                 {
                     var snap = await _com.FetchFogAsync(MapId);
                     if (snap != null)
-                        ApplyFogState(snap.Enabled, snap.Hidden.Select(c => (c.Col, c.Row)));
+                        ApplyFogState(snap.Enabled, snap.Hidden.Select(c => (c.Col, c.Row)), snap.Seen?.Select(c => (c.Col, c.Row)));
                 }
             }
             catch (Exception ex) { ErrorLog.Log($"[Canvas] fog init failed", ex); }
         }
 
-        private void ApplyFogState(bool enabled, IEnumerable<(int Col, int Row)> hidden)
+        private void ApplyFogState(bool enabled, IEnumerable<(int Col, int Row)> hidden, IEnumerable<(int Col, int Row)>? seen)
         {
             _fogHidden.Clear();
             foreach (var c in hidden) _fogHidden.Add(c);
+            _fogSeen.Clear();
+            if (seen != null) foreach (var c in seen) _fogSeen.Add(c);
             _fogEnabled = enabled;
             this.RaisePropertyChanged(nameof(FogEnabled));
             FogBulkChanged?.Invoke();
@@ -4181,14 +4356,15 @@ namespace Dujahit.ViewModels
             {
                 var key = (cell.Col, cell.Row);
                 bool changed = msg.Hidden ? _fogHidden.Add(key) : _fogHidden.Remove(key);
-                if (changed) FogCellChanged?.Invoke(cell.Col, cell.Row, msg.Hidden);
+                bool remembered = msg.Seen ? _fogSeen.Add(key) : _fogSeen.Remove(key);
+                if (changed || remembered) FogCellChanged?.Invoke(cell.Col, cell.Row, msg.Hidden);
             }
         }
 
         private void HandleFogUpdated(FogStateMessage msg)
         {
             if (msg.MapId != MapId) return;
-            ApplyFogState(msg.Enabled, msg.Hidden.Select(c => (c.Col, c.Row)));
+            ApplyFogState(msg.Enabled, msg.Hidden.Select(c => (c.Col, c.Row)), msg.Seen?.Select(c => (c.Col, c.Row)));
         }
 
         private readonly HashSet<(int Col, int Row)> _difficultCells = new();
@@ -4426,7 +4602,7 @@ namespace Dujahit.ViewModels
         private readonly List<WallViewModel> _walls = new();
         public IReadOnlyList<WallViewModel> Walls => _walls;
 
-        private bool _wallsEnabled;
+        private bool _wallsEnabled = true;
         public bool WallsEnabled
         {
             get => _wallsEnabled;
